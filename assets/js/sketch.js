@@ -7,7 +7,7 @@ let bg;
 
 // load in background and flowers at full resolution
 function preload() {
-  bg = loadImage("../assets/img/gvsu-bg.jpg");
+  bg = loadImage("/assets/img/gvsu-bg.jpg");
 }
 function setup() {
   createCanvas(windowWidth, windowHeight);
