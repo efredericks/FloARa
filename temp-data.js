@@ -9,8 +9,16 @@ function setupRandomData(w, h) {
     let flower_data = [];
 
     for (let i = 0; i < 200; i++) {
-        let d = randomDate(new Date(2025, 0, 1), new Date()).toString();
-        let p = { id: i, timestamp: d, location: { x: int(random(w)), y: int(random(h)) }, QR_id: int(random(0, 50)), color: random(255) };
+        // map color to age for visual distinction
+        let new_d = new Date();
+        let old_d = new Date(2025, 0, 1);
+        let d = randomDate(old_d, new_d);
+
+        let doff = new_d - old_d;
+        let col = map(new_d - d, 0, doff, 0, 255);
+
+        let p = { id: i, timestamp: d, location: { x: int(random(w)), y: int(random(h)) }, QR_id: int(random(0, 50)), color: col };
+
         flower_data.push(p);
     }
     return flower_data;
