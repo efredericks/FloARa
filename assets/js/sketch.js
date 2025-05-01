@@ -6,7 +6,6 @@ p5.disableFriendlyErrors = true; // disables FES
 let bg, mask, overlay;
 let flowers;
 let redraw;
-let half_width, half_height;
 
 let wind_fs;
 
@@ -23,16 +22,12 @@ function preload() {
   mask = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.mask.png");
   overlay = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.overlay.png");
 
-  temp_milkweed = loadImage("assets/img/milkweed/Milkweed_0000_5_sm.png");
+  temp_milkweed = loadImage("assets/img/milkweed/Milkweed_0000_5_sm.cropped.png");
 }
 function setup() {
   createCanvas(windowWidth, windowHeight);
   pixelDensity(1);
   textAlign(CENTER);
-  imageMode(CENTER);
-
-  half_width = width / 2;
-  half_height = height / 2;
 
   // loadData();
 
@@ -70,29 +65,30 @@ function drawEverything() {
     // landscape image - maintain aspect ratio wrt width
     let w_aspect = bg.width / width;
     let h = bg.height / w_aspect;
-    image(bg, half_width, half_height, width, h, 0, 0, bg.width, bg.height);
+    image(bg, 0, 0, width, h, 0, 0, bg.width, bg.height);
 
     // debug
     if (debug) {
       tint(255, 127);
-      image(mask, half_width, half_height, width, h, 0, 0, bg.width, bg.height);
+      image(mask, 0, 0, width, h, 0, 0, bg.width, bg.height);
       noTint();
     }
 
     for (let f of flowers) {
       let h_aspect = bg.height / h;
-      let x = f.location.x / w_aspect;
-      let y = f.location.y / h_aspect
+      let x = (f.location.x / w_aspect);
+      let y = (f.location.y / h_aspect);
 
       // perspective for 'farther away'
       let sc = map(y, height, height * 0.2, 1.0, 0.001);
       let _w = temp_milkweed.width * sc;
       let _h = temp_milkweed.height * sc;
 
-      image(temp_milkweed, x, y - _h, _w, _h, 0, 0, temp_milkweed.width, temp_milkweed.height);
+      // magic numbers help with offset within image
+      image(temp_milkweed, x-_w*.5, y - _h * .5, _w, _h, 0, 0, temp_milkweed.width, temp_milkweed.height);
     }
 
-    image(overlay, half_width, half_height, width, h, 0, 0, bg.width, bg.height);
+    image(overlay, 0, 0, width, h, 0, 0, bg.width, bg.height);
   }
 
   redraw = false;
@@ -110,9 +106,16 @@ function resizeImages() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  temp_milkweed_gfx = createGraphics(width, height);
 
-  half_width = width / 2;
-  half_height = height / 2;
+  for (let f of flowers) {
+    let w_aspect = bg.width / width;
+    let h = bg.height / w_aspect;
+    let h_aspect = bg.height / h;
+    temp_milkweed_gfx.image(temp_milkweed, f.location.x / w_aspect, f.location.y / h_aspect);
+  }
+
+
 
   resizeImages();
   drawEverything();
