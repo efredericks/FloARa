@@ -7,8 +7,13 @@ let bg, mask, overlay;
 let flowers;
 let redraw;
 
+let wind_fs;
+
+let temp_milkweed;
+
 // temp variables
 let debug = false;
+let wind_on = true;
 
 // load in background and flowers at full resolution
 function preload() {
@@ -16,21 +21,29 @@ function preload() {
   bg = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.png");;
   mask = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.mask.png");
   overlay = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.overlay.png");
+
+  temp_milkweed = loadImage("assets/img/milkweed/Milkweed_0000_5_sm.png");
 }
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  pixelDensity(1);
   textAlign(CENTER);
 
   // loadData();
-  flowers = setupRandomData(bg.width, bg.height);
+
+  flowers = setupRandomData(bg.width, bg.height, mask);
+  // wind_fs = temp_milkweed_gfx.createFilterShader(wind_src);
 
   drawEverything();
 
   redraw = false;
   debug = false;
+
+  frameRate(24);
 }
 function draw() {
   if (redraw) drawEverything();
+
 }
 
 // draw everything with respect to the canvas size
@@ -62,12 +75,8 @@ function drawEverything() {
     }
 
     for (let f of flowers) {
-      fill(f.color);
-
       let h_aspect = bg.height / h;
-
-
-      circle(f.location.x / w_aspect, f.location.y / h_aspect, 20 / w_aspect);
+      image(temp_milkweed, f.location.x / w_aspect, f.location.y / h_aspect);
     }
 
     image(overlay, 0, 0, width, h, 0, 0, bg.width, bg.height);
@@ -88,13 +97,44 @@ function resizeImages() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  temp_milkweed_gfx = createGraphics(width, height);
+
+  for (let f of flowers) {
+    let w_aspect = bg.width / width;
+    let h = bg.height / w_aspect;
+    let h_aspect = bg.height / h;
+    temp_milkweed_gfx.image(temp_milkweed, f.location.x / w_aspect, f.location.y / h_aspect);
+  }
+
+
+
   resizeImages();
   drawEverything();
 }
 
 function keyPressed() {
+  // toggle debug
   if (key == " ") {
     debug = !debug;
     redraw = true;
   }
+
+  // toggle wind shader
+  if (key == "w") {
+    wind_on = !wind_on;
+  }
+}
+
+// get pixel ID for pixels array
+function getPixelID(x, y, g = null) {
+  let idx;
+  if (g == null) {
+    const d = pixelDensity();
+    idx = 4 * d * (int(y) * d * width + int(x));
+
+  } else {
+    const d = g.pixelDensity();
+    idx = 4 * d * (int(y) * d * g.width + int(x));
+  }
+  return idx;
 }
