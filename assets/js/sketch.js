@@ -4,7 +4,7 @@ p5.disableFriendlyErrors = true; // disables FES
 
 // global vars
 let bg, mask, overlay;
-let flowers;
+let flowers = [];
 let redraw;
 
 let wind_fs;
@@ -31,7 +31,7 @@ function setup() {
 
   // loadData();
 
-  flowers = setupRandomData(bg.width, bg.height, mask);
+  flowers = setupRandomData(bg.width, bg.height, mask, 2500);
   // wind_fs = temp_milkweed_gfx.createFilterShader(wind_src);
 
   drawEverything();
@@ -43,6 +43,11 @@ function setup() {
 }
 function draw() {
   if (redraw) drawEverything();
+
+  if (frameCount % 20 == 0) {
+    flowers = addIndividualPlant(bg.width, bg.height, mask, flowers);
+    redraw = true;
+  }
 
 }
 
@@ -85,7 +90,13 @@ function drawEverything() {
       let _h = temp_milkweed.height * sc;
 
       // magic numbers help with offset within image
-      image(temp_milkweed, x-_w*.5, y - _h * .5, _w, _h, 0, 0, temp_milkweed.width, temp_milkweed.height);
+      push();
+      drawingContext.shadowOffsetX = 0;
+      drawingContext.shadowOffsetY = 0;
+      drawingContext.shadowBlur = 15;
+      drawingContext.shadowColor = color(0, 255, 0, 80);
+      image(temp_milkweed, x - _w * .5, y - _h * .5, _w, _h, 0, 0, temp_milkweed.width, temp_milkweed.height);
+      pop();
     }
 
     image(overlay, 0, 0, width, h, 0, 0, bg.width, bg.height);
