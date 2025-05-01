@@ -44,11 +44,10 @@ function setup() {
 function draw() {
   if (redraw) drawEverything();
 
-  if (frameCount % 20 == 0) {
+  if (frameCount % 20 == 0 && flowers.length < 10000) {
     flowers = addIndividualPlant(bg.width, bg.height, mask, flowers);
     redraw = true;
   }
-
 }
 
 // draw everything with respect to the canvas size
