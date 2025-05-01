@@ -9,7 +9,7 @@ function setupRandomData(w, h, mask) {
     let flower_data = [];
 
     mask.loadPixels();
-    for (let i = 0; i < 2000; i++) {
+    for (let i = 0; i < 15000; i++) {
         // map color to age for visual distinction
         let new_d = new Date();
         let old_d = new Date(2025, 0, 1);
@@ -38,6 +38,8 @@ function setupRandomData(w, h, mask) {
 
             timeout--;
         }
+
+        // y -= temp_milkweed.height;
 
         let p = { id: i, timestamp: d, location: { x: x, y: y }, QR_id: int(random(0, 50)), color: col };
 
