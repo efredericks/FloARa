@@ -20,15 +20,20 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   textAlign(CENTER);
+  loadData(); // Load flower data from Firestore
+  redraw = false;
+}
+//Temp data
 
-  // loadData();
+  /* // loadData();
   flowers = setupRandomData(bg.width, bg.height);
 
   drawEverything();
 
   redraw = false;
   debug = false;
-}
+} */
+
 function draw() {
   if (redraw) drawEverything();
 }
@@ -81,6 +86,23 @@ function drawEverything() {
 function loadData() {
 }
 
+async function loadData() {
+  if (!window.getFlowerData) {
+    console.warn("Firestore loader not available");
+    return;
+  }
+
+  try {
+    const rawData = await window.getFlowerData();
+    flowers = rawData.map(f => ({
+      location: f.location,
+      color: color(f.color || "white")
+    }));
+    redraw = true;
+  } catch (err) {
+    console.error("Error loading flowers from Firestore:", err);
+  }
+}
 // resize all images wrt aspect ratio
 function resizeImages() {
 
