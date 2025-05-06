@@ -130,7 +130,7 @@ function drawEverything() {
       pop();
     }
 
-    image(overlay, 0, 0, width, h, 0, 0, bg.width, bg.height);
+    // image(overlay, 0, 0, width, h, 0, 0, bg.width, bg.height);
   }
 
   redraw = false;
