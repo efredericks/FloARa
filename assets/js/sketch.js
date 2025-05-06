@@ -8,6 +8,7 @@ let flowers = [];
 let redraw;
 
 let wind_fs;
+let wind_material;
 
 let temp_milkweed;
 
@@ -22,16 +23,38 @@ function preload() {
   mask = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.mask.png");
   overlay = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.overlay.png");
 
-  temp_milkweed = loadImage("assets/img/milkweed/Milkweed_0000_5_sm.cropped.png");
+  // temp_milkweed = loadImage("assets/img/milkweed/Milkweed_0000_5_sm.cropped.png");
+  temp_milkweed = loadImage("assets/img/milkweed/Milkweed_5_outerglow.png");
 }
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  createCanvas(windowWidth, windowHeight, WEBGL);
   pixelDensity(1);
   textAlign(CENTER);
 
+  wind_material = baseMaterialShader().modify({
+    uniforms: {
+      'float time': null // You can put a value here if you want a default
+      // ...or a function returning a value if you want a dynamically set default
+    },
+    'Inputs getPixelInputs': `(Inputs inputs) {
+      vec2 coord = inputs.texCoord;
+
+      vec2 Size = vec2(201,463);//256, 128);
+      vec2 Wave = vec2(48, 10);
+
+    // uv = vTexCoord + vec2(cos((uv.y / Wave.x + _time) * 6.2831) * Wave.y, 0) / Size * (1.0 - vTexCoord.y);
+
+      coord = coord + vec2(cos((coord.y / Wave.x + time) * 6.2831) * Wave.y, 0) / Size * (1.0 - coord.y);
+      // coord.x += 0.1 * sin(time * 0.001 + coord.y * 10.0);
+
+      inputs.color = texture(uSampler, coord);
+      return inputs;
+    }`
+  })
+
   // loadData();
 
-  flowers = setupRandomData(bg.width, bg.height, mask, 2500);
+  flowers = setupRandomData(bg.width, bg.height, mask, 25);
   // wind_fs = temp_milkweed_gfx.createFilterShader(wind_src);
 
   drawEverything();
@@ -40,6 +63,7 @@ function setup() {
   debug = false;
 
   frameRate(24);
+
 }
 function draw() {
   if (redraw) drawEverything();
@@ -48,10 +72,13 @@ function draw() {
     flowers = addIndividualPlant(bg.width, bg.height, mask, flowers);
     redraw = true;
   }
+    redraw = true;
 }
 
 // draw everything with respect to the canvas size
 function drawEverything() {
+  translate(-width / 2, -height / 2);
+
   background(0);
 
   // force landscape mode
@@ -85,15 +112,20 @@ function drawEverything() {
 
       // perspective for 'farther away'
       let sc = map(y, height, height * 0.2, 1.0, 0.001);
-      let _w = temp_milkweed.width * sc;
-      let _h = temp_milkweed.height * sc;
+      let _w = (temp_milkweed.width * 1) * sc;
+      let _h = (temp_milkweed.height * 1) * sc;
 
       // magic numbers help with offset within image
       push();
-      drawingContext.shadowOffsetX = 0;
-      drawingContext.shadowOffsetY = 0;
-      drawingContext.shadowBlur = 15;
-      drawingContext.shadowColor = color(0, 255, 0, 80);
+
+      shader(wind_material);
+      wind_material.setUniform('time', millis() /2400)
+
+
+      // drawingContext.shadowOffsetX = 0;
+      // drawingContext.shadowOffsetY = 0;
+      // drawingContext.shadowBlur = 15;
+      // drawingContext.shadowColor = color(0, 255, 0, 80);
       image(temp_milkweed, x - _w * .5, y - _h * .5, _w, _h, 0, 0, temp_milkweed.width, temp_milkweed.height);
       pop();
     }
@@ -124,8 +156,6 @@ function windowResized() {
     let h_aspect = bg.height / h;
     temp_milkweed_gfx.image(temp_milkweed, f.location.x / w_aspect, f.location.y / h_aspect);
   }
-
-
 
   resizeImages();
   drawEverything();
