@@ -23,7 +23,7 @@ function setup() {
   loadData(); // Load flower data from Firestore
   redraw = false;
 }
-//Temp data
+
 
   /* // loadData();
   flowers = setupRandomData(bg.width, bg.height);
@@ -82,10 +82,6 @@ function drawEverything() {
 }
 
 // reads in plant information from database
-// -though temporary reads from temp-data.js
-function loadData() {
-}
-
 async function loadData() {
   if (!window.getFlowerData) {
     console.warn("Firestore loader not available");
@@ -103,6 +99,7 @@ async function loadData() {
     console.error("Error loading flowers from Firestore:", err);
   }
 }
+
 // resize all images wrt aspect ratio
 function resizeImages() {
 

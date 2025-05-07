@@ -10,26 +10,38 @@
     <main>
     </main>
     <script src="temp-data.js"></script>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
       import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyB8QX7P1bz_NTjiuOrYvAy5fe6jFWB1GwU",
-    authDomain: "floara-388a1.firebaseapp.com",
-    projectId: "floara-388a1",
-    storageBucket: "floara-388a1.appspot.com",
-    messagingSenderId: "82081375122",
-    appId: "1:82081375122:web:8772b4a4055de1c0b4174b"
-  };
+      const firebaseConfig = {
+        apiKey: "AIzaSyDczt4Is3FPtDR-zqneuzHyU0sPfo-Sf7w",
+        authDomain: "floara-388a1.firebaseapp.com",
+        projectId: "floara-388a1",
+        storageBucket: "floara-388a1.firebasestorage.app",
+        messagingSenderId: "82081375122",
+        appId: "1:82081375122:web:8772b4a4055de1c0b4174b",
+        measurementId: "G-X3KHSFJP80"
+      };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+      try {
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-  window.getFlowerData = async function () {
-    const snapshot = await getDocs(collection(db, "flowers"));
-    return snapshot.docs.map(doc => doc.data());
-  };
+        window.getFlowerData = async function () {
+          try {
+            const snapshot = await getDocs(collection(db, "flowers"));
+            const data = snapshot.docs.map(doc => doc.data());
+            return data;
+          } catch (error) {
+            console.error("Error fetching flowers:", error);
+            return [];
+          }
+        };
+      } catch (error) {
+        console.error("Error initializing Firebase:", error);
+      }
     </script>
     <script src="./assets/js/sketch.js"></script>
   </body>
