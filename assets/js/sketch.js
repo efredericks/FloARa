@@ -19,13 +19,16 @@ let wind_on = true;
 // load in background and flowers at full resolution
 function preload() {
   // bg = loadImage("assets/img/gvsu-bg.jpg");
-  bg = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.png");;
+  // bg = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.png");;
+  bg = loadImage("assets/img/gvsu-hd.jpeg");
+
   mask = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.mask.png");
   overlay = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.overlay.png");
 
   // temp_milkweed = loadImage("assets/img/milkweed/Milkweed_0000_5_sm.cropped.png");
   temp_milkweed = loadImage("assets/img/milkweed/Milkweed_5_outerglow.png");
 }
+
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
   pixelDensity(1);
@@ -33,7 +36,8 @@ function setup() {
 
   wind_material = baseMaterialShader().modify({
     uniforms: {
-      'float time': null // You can put a value here if you want a default
+      'float time': null, // You can put a value here if you want a default
+      'float offset': null,
       // ...or a function returning a value if you want a dynamically set default
     },
     'Inputs getPixelInputs': `(Inputs inputs) {
@@ -44,7 +48,7 @@ function setup() {
 
     // uv = vTexCoord + vec2(cos((uv.y / Wave.x + _time) * 6.2831) * Wave.y, 0) / Size * (1.0 - vTexCoord.y);
 
-      coord = coord + vec2(cos((coord.y / Wave.x + time) * 6.2831) * Wave.y, 0) / Size * (1.0 - coord.y);
+      coord = coord + vec2(cos(offset + (coord.y / Wave.x + time) * 6.2831) * Wave.y, 0) / Size * (1.0 - coord.y);
       // coord.x += 0.1 * sin(time * 0.001 + coord.y * 10.0);
 
       inputs.color = texture(uSampler, coord);
@@ -54,7 +58,7 @@ function setup() {
 
   // loadData();
 
-  flowers = setupRandomData(bg.width, bg.height, mask, 25);
+  flowers = setupRandomData(bg.width, bg.height, mask, 250);
   // wind_fs = temp_milkweed_gfx.createFilterShader(wind_src);
 
   drawEverything();
@@ -105,6 +109,7 @@ function drawEverything() {
       noTint();
     }
 
+    let i = 0;
     for (let f of flowers) {
       let h_aspect = bg.height / h;
       let x = (f.location.x / w_aspect);
@@ -112,14 +117,16 @@ function drawEverything() {
 
       // perspective for 'farther away'
       let sc = map(y, height, height * 0.2, 1.0, 0.001);
-      let _w = (temp_milkweed.width * 1) * sc;
-      let _h = (temp_milkweed.height * 1) * sc;
+      let _w = (temp_milkweed.width * .3) * sc;
+      let _h = (temp_milkweed.height * .3) * sc;
 
       // magic numbers help with offset within image
       push();
 
       shader(wind_material);
-      wind_material.setUniform('time', millis() /2400)
+      wind_material.setUniform("offset", i);
+      wind_material.setUniform('time', millis() / 2400);
+      i++;
 
 
       // drawingContext.shadowOffsetX = 0;
