@@ -9,6 +9,20 @@
   <body>
     <main>
     </main>
+    <div id="flowerPopup" class="flower-popup">
+      <h3>Place a Flower</h3>
+      <p>Click anywhere on the image to place your flower</p>
+      <div>
+        <label>Color: 
+          <input type="color" id="flowerColor" value="#ffffff">
+          <span class="color-preview"></span>
+        </label>
+      </div>
+      <div class="button-group">
+        <button id="cancelPlacement" class="cancel-btn">Cancel</button>
+        <button id="placeFlower" class="place-btn">Place Flower</button>
+      </div>
+    </div>
     <script src="temp-data.js"></script>
     <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
     <script type="module">
