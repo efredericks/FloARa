@@ -13,6 +13,7 @@ let wind_material;
 let dither_fs, tv_fs, rgb_fs;
 
 let temp_milkweed;
+let temp_nymphaea;
 
 // temp variables
 let debug = false;
@@ -32,6 +33,7 @@ function preload() {
 
   // temp_milkweed = loadImage("assets/img/milkweed/Milkweed_0000_5_sm.cropped.png");
   temp_milkweed = loadImage("assets/img/milkweed/Milkweed_5_outerglow.png");
+  temp_nymphaea = loadImage("assets/img/Nymphaea-Odorata-Ella-Kane/nymphaea_odorata_stage5.png");
 
   font = loadFont("assets/fonts/Quicksand-Medium.ttf");
 }
@@ -140,8 +142,16 @@ function drawEverything() {
 
       // perspective for 'farther away'
       let sc = map(y, height, height * 0.2, 1.0, 0.001);
-      let _w = (temp_milkweed.width * 0.4) * sc;
-      let _h = (temp_milkweed.height * 0.4) * sc;
+      let _w, _h, _img;
+      if (f.QR_id == 0) {
+        _w = (temp_milkweed.width * 0.4) * sc;
+        _h = (temp_milkweed.height * 0.4) * sc;
+        _img = temp_milkweed;
+      } else {
+        _w = (temp_nymphaea.width * 0.04) * sc;
+        _h = (temp_nymphaea.height * 0.04) * sc;
+        _img = temp_nymphaea;
+      }
 
       // magic numbers help with offset within image
       push();
@@ -156,7 +166,7 @@ function drawEverything() {
       // drawingContext.shadowOffsetY = 0;
       // drawingContext.shadowBlur = 15;
       // drawingContext.shadowColor = color(0, 255, 0, 80);
-      image(temp_milkweed, x - _w * .5, y - _h * .5, _w, _h, 0, 0, temp_milkweed.width, temp_milkweed.height);
+      image(_img, x - _w * .5, y - _h * .5, _w, _h, 0, 0, _img.width, _img.height);
       pop();
     }
 

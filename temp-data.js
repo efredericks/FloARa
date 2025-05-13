@@ -41,7 +41,7 @@ function setupRandomData(w, h, mask, num=5000) {
 
         // y -= temp_milkweed.height;
 
-        let p = { id: i, timestamp: d, location: { x: x, y: y }, QR_id: int(random(0, 50)), color: col };
+        let p = { id: i, timestamp: d, location: { x: x, y: y }, QR_id: int(random(0, 2)), color: col };
 
         flower_data.push(p);
     }
@@ -86,7 +86,7 @@ function addIndividualPlant(w, h, mask, flower_data) {
 
         // y -= temp_milkweed.height;
 
-        let p = { id: idx, timestamp: d, location: { x: x, y: y }, QR_id: int(random(0, 50)), color: col };
+        let p = { id: idx, timestamp: d, location: { x: x, y: y }, QR_id: int(random(0, 2)), color: col };
 
         flower_data.push(p);
     // }
