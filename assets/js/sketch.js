@@ -18,6 +18,8 @@ let temp_milkweed;
 let debug = false;
 let wind_on = true;
 
+let font;
+
 // load in background and flowers at full resolution
 function preload() {
   // bg = loadImage("assets/img/gvsu-bg.jpg");
@@ -30,11 +32,15 @@ function preload() {
 
   // temp_milkweed = loadImage("assets/img/milkweed/Milkweed_0000_5_sm.cropped.png");
   temp_milkweed = loadImage("assets/img/milkweed/Milkweed_5_outerglow.png");
+
+  font = loadFont("assets/fonts/Quicksand-Medium.ttf");
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
   pixelDensity(1);
+
+  textFont(font);
   textAlign(CENTER);
 
   wind_material = baseMaterialShader().modify({
@@ -75,6 +81,8 @@ function setup() {
 
   frameRate(24);
 }
+
+
 function draw() {
   if (redraw) drawEverything();
 
