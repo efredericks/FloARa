@@ -10,6 +10,8 @@ let redraw;
 let wind_fs;
 let wind_material;
 
+let dither_fs, tv_fs, rgb_fs;
+
 let temp_milkweed;
 
 // temp variables
@@ -21,8 +23,9 @@ function preload() {
   // bg = loadImage("assets/img/gvsu-bg.jpg");
   // bg = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.png");;
   bg = loadImage("assets/img/gvsu-hd.jpeg");
+  mask = loadImage("assets/img/gvsu-hd-mask.jpg");
 
-  mask = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.mask.png");
+  // mask = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.mask.png");
   overlay = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.overlay.png");
 
   // temp_milkweed = loadImage("assets/img/milkweed/Milkweed_0000_5_sm.cropped.png");
@@ -66,8 +69,11 @@ function setup() {
   redraw = false;
   debug = false;
 
-  frameRate(24);
+  dither_fs = createFilterShader(dither_src);
+  tv_fs = createFilterShader(tv_noise_src);
+  rgb_fs = createFilterShader(rgb_src);
 
+  frameRate(24);
 }
 function draw() {
   if (redraw) drawEverything();
@@ -76,7 +82,16 @@ function draw() {
     flowers = addIndividualPlant(bg.width, bg.height, mask, flowers);
     redraw = true;
   }
-    redraw = true;
+  redraw = true;
+
+  /*
+  rgb_fs.setUniform("_noise", 0.1);
+  filter(rgb_fs);
+  tv_fs.setUniform("_noise", 0.5*cos(millis()*0.001));
+  filter(tv_fs);
+  dither_fs.setUniform("which", 2);
+  filter(dither_fs);
+  */
 }
 
 // draw everything with respect to the canvas size
@@ -117,8 +132,8 @@ function drawEverything() {
 
       // perspective for 'farther away'
       let sc = map(y, height, height * 0.2, 1.0, 0.001);
-      let _w = (temp_milkweed.width * .3) * sc;
-      let _h = (temp_milkweed.height * .3) * sc;
+      let _w = (temp_milkweed.width * 0.4) * sc;
+      let _h = (temp_milkweed.height * 0.4) * sc;
 
       // magic numbers help with offset within image
       push();
