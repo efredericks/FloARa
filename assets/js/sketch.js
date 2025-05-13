@@ -11,6 +11,7 @@ let wind_fs;
 let wind_material;
 
 let dither_fs, tv_fs, rgb_fs;
+let shaders_on;
 
 let temp_milkweed;
 let temp_nymphaea;
@@ -68,6 +69,7 @@ function setup() {
   })
 
   // loadData();
+  shaders_on = false;
 
   flowers = setupRandomData(bg.width, bg.height, mask, 250);
   // wind_fs = temp_milkweed_gfx.createFilterShader(wind_src);
@@ -94,14 +96,18 @@ function draw() {
   }
   redraw = true;
 
-  /*
-  rgb_fs.setUniform("_noise", 0.1);
-  filter(rgb_fs);
-  tv_fs.setUniform("_noise", 0.5*cos(millis()*0.001));
-  filter(tv_fs);
-  dither_fs.setUniform("which", 2);
-  filter(dither_fs);
-  */
+  if (shaders_on) {
+    rgb_fs.setUniform("_noise", 0.1);
+    filter(rgb_fs);
+    tv_fs.setUniform("_noise", 0.5 * cos(millis() * 0.001));
+    filter(tv_fs);
+    dither_fs.setUniform("which", 2);
+    filter(dither_fs);
+  }
+}
+
+function doubleClicked() {
+  shaders_on = !shaders_on;
 }
 
 // draw everything with respect to the canvas size
@@ -188,14 +194,14 @@ function resizeImages() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  temp_milkweed_gfx = createGraphics(width, height);
+  // temp_milkweed_gfx = createGraphics(width, height);
 
-  for (let f of flowers) {
-    let w_aspect = bg.width / width;
-    let h = bg.height / w_aspect;
-    let h_aspect = bg.height / h;
-    temp_milkweed_gfx.image(temp_milkweed, f.location.x / w_aspect, f.location.y / h_aspect);
-  }
+  // for (let f of flowers) {
+  //   let w_aspect = bg.width / width;
+  //   let h = bg.height / w_aspect;
+  //   let h_aspect = bg.height / h;
+  //   temp_milkweed_gfx.image(temp_milkweed, f.location.x / w_aspect, f.location.y / h_aspect);
+  // }
 
   resizeImages();
   drawEverything();
