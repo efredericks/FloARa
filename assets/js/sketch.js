@@ -11,7 +11,7 @@ let wind_fs;
 let wind_material;
 
 let dither_fs, tv_fs, rgb_fs;
-let shaders_on;
+let shaders_on, touch_timer;
 
 let temp_milkweed;
 let temp_nymphaea;
@@ -70,6 +70,7 @@ function setup() {
 
   // loadData();
   shaders_on = false;
+  touch_timer = 0;
 
   flowers = setupRandomData(bg.width, bg.height, mask, 250);
   // wind_fs = temp_milkweed_gfx.createFilterShader(wind_src);
@@ -104,6 +105,14 @@ function draw() {
     dither_fs.setUniform("which", 2);
     filter(dither_fs);
   }
+
+  console.log(touches.length);
+  if (touches.length > 2) {
+    if (touch_timer == 0)
+      shaders_on = !shaders_on;
+    touch_timer = 10;
+  }
+  if (touch_timer > 0) touch_timer--; // avoid multi toggling
 }
 
 function doubleClicked() {
