@@ -123,7 +123,8 @@ async function loadData() {
     const rawData = await window.getFlowerData();
     flowers = rawData.map(f => ({
       location: f.location,
-      color: color(f.color || "white")
+      color: color(f.color || "white"),
+      id: f.id
     }));
     redraw = true;
   } catch (err) {
@@ -142,8 +143,107 @@ function windowResized() {
   drawEverything();
 }
 
+// insert flower by keypress function 
+//press 1-9 to place a flower
+
 function mousePressed() {
-  if (isPlacingFlower && pendingFlowerColor) {
+  if (mouseButton === RIGHT) {
+    // Handle right-click for flower removal
+    const w_aspect = bg.width / width;
+    const h_aspect = bg.height / (bg.height / w_aspect);
+    
+    // Convert mouse coordinates to image coordinates
+    const imageX = mouseX * w_aspect;
+    const imageY = mouseY * h_aspect;
+    
+    // Check if click is within image bounds
+    if (imageX >= 0 && imageX <= bg.width && imageY >= 0 && imageY <= bg.height) {
+      // Find the closest flower within a certain radius
+      const clickRadius = 20 / w_aspect; // Same as flower size
+      let closestFlower = null;
+      let minDistance = Infinity;
+      
+      for (let i = 0; i < flowers.length; i++) {
+        const flower = flowers[i];
+        const dx = flower.location.x / w_aspect - mouseX;
+        const dy = flower.location.y / h_aspect - mouseY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < clickRadius && distance < minDistance) {
+          minDistance = distance;
+          closestFlower = { index: i, flower: flower };
+        }
+      }
+      
+      if (closestFlower && closestFlower.flower.id) {
+        // Create overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        document.body.appendChild(overlay);
+        
+        // Show confirmation popup
+        const popup = document.createElement('div');
+        popup.className = 'confirmation-popup';
+        
+        // Add confirmation message
+        const message = document.createElement('p');
+        message.textContent = 'Remove this flower?';
+        popup.appendChild(message);
+        
+        // Add button container
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'button-container';
+        
+        // Add cancel button
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.className = 'cancel-btn';
+        cancelBtn.onclick = () => {
+          document.body.removeChild(overlay);
+          document.body.removeChild(popup);
+        };
+        
+        // Add confirm button
+        const confirmBtn = document.createElement('button');
+        confirmBtn.textContent = 'Remove';
+        confirmBtn.className = 'confirm-btn';
+        confirmBtn.onclick = async () => {
+          const success = await window.deleteFlower(closestFlower.flower.id);
+          if (success) {
+            flowers.splice(closestFlower.index, 1);
+            redraw = true;
+            
+            // Show success message
+            const successPopup = document.createElement('div');
+            successPopup.className = 'confirmation-popup';
+            
+            const successMessage = document.createElement('p');
+            successMessage.textContent = 'Flower removed successfully!';
+            successPopup.appendChild(successMessage);
+            
+            const okBtn = document.createElement('button');
+            okBtn.textContent = 'OK';
+            okBtn.className = 'success-btn';
+            okBtn.onclick = () => {
+              document.body.removeChild(successPopup);
+            };
+            successPopup.appendChild(okBtn);
+            
+            document.body.appendChild(successPopup);
+          }
+          document.body.removeChild(overlay);
+          document.body.removeChild(popup);
+        };
+        
+        buttonContainer.appendChild(cancelBtn);
+        buttonContainer.appendChild(confirmBtn);
+        popup.appendChild(buttonContainer);
+        
+        document.body.appendChild(popup);
+      }
+    }
+    return false; // Prevent default context menu
+  } else if (isPlacingFlower && pendingFlowerColor) {
     const w_aspect = bg.width / width;
     const h_aspect = bg.height / (bg.height / w_aspect);
     
@@ -165,11 +265,41 @@ function mousePressed() {
             x: imageX,
             y: imageY
           },
-          color: color(pendingFlowerColor)
+          color: pendingFlowerColor,
+          timestamp: new Date().toISOString()
         };
         
-        flowers.push(newFlower);
+        // First add to local array to maintain current functionality
+        flowers.push({
+          location: newFlower.location,
+          color: color(pendingFlowerColor)
+        });
         redraw = true;
+
+        // Then try to save to Firebase
+        window.addFlower(newFlower).then(flowerId => {
+          if (flowerId) {
+            // Create and show confirmation popup
+            const popup = document.createElement('div');
+            popup.className = 'confirmation-popup';
+            
+            // Add success message
+            const message = document.createElement('p');
+            message.textContent = 'Flower successfully added!';
+            popup.appendChild(message);
+            
+            // Add close button
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = 'OK';
+            closeBtn.className = 'success-btn';
+            closeBtn.onclick = () => {
+              document.body.removeChild(popup);
+            };
+            popup.appendChild(closeBtn);
+            
+            document.body.appendChild(popup);
+          }
+        });
       }
       
       // Reset placement state regardless of whether flower was placed
@@ -180,7 +310,7 @@ function mousePressed() {
 }
 
 function keyPressed() {
-  if (key == " ") {
+  if (key === " ") {
     debug = !debug;
     redraw = true;
   } else if (key >= "1" && key <= "9") {

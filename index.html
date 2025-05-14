@@ -27,7 +27,7 @@
     <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-      import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+      import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyDczt4Is3FPtDR-zqneuzHyU0sPfo-Sf7w",
@@ -46,11 +46,34 @@
         window.getFlowerData = async function () {
           try {
             const snapshot = await getDocs(collection(db, "flowers"));
-            const data = snapshot.docs.map(doc => doc.data());
+            const data = snapshot.docs.map(doc => ({
+              ...doc.data(),
+              id: doc.id
+            }));
             return data;
           } catch (error) {
             console.error("Error fetching flowers:", error);
             return [];
+          }
+        };
+
+        window.addFlower = async function(flowerData) {
+          try {
+            const docRef = await addDoc(collection(db, "flowers"), flowerData);
+            return docRef.id;
+          } catch (error) {
+            console.error("Error adding flower:", error);
+            return null;
+          }
+        };
+
+        window.deleteFlower = async function(flowerId) {
+          try {
+            await deleteDoc(doc(db, "flowers", flowerId));
+            return true;
+          } catch (error) {
+            console.error("Error deleting flower:", error);
+            return false;
           }
         };
       } catch (error) {
