@@ -14,9 +14,11 @@ let dither_fs, tv_fs, rgb_fs;
 // let shaders_on; 
 let touch_timer;
 
+// unsure if hd_scale is necessary or if my math is just off
+// TBD: probably would be better to render as full-def and then scale to viewport
 let QR_map = {
-  0: { name: 'Milkweed', scale: 0.4 },
-  1: { name: 'Nymphaea', scale: 0.04 },
+  0: { name: 'Milkweed', scale: 0.4, hd_scale: 0.7 },
+  1: { name: 'Nymphaea', scale: 0.04, hd_scale: 0.07 },
   99: { name: 'Piranha', scale: 0.4 },
 }
 let plant_images = {};
@@ -104,7 +106,7 @@ function setup() {
 function draw() {
   if (redraw) drawEverything();
 
-  if (frameCount % 20 == 0 && flowers.length < 10000) {
+  if (frameCount % 20 == 0 && flowers.length < 10000 && adding_flowers) {
     flowers = addIndividualPlant(bg.width, bg.height, mask, flowers);
     redraw = true;
   }
@@ -133,45 +135,98 @@ function doubleClicked() {
 }
 
 // draw everything with respect to the canvas size
-function drawEverything() {
-  translate(-width / 2, -height / 2);
+function drawEverything(saving = false) {
 
-  background(0);
+  if (!saving) {
+    translate(-width / 2, -height / 2);
 
-
-  // force landscape mode
-  if (width < height) {
-    push();
-    fill(255);
-    textSize(width * 0.05);
-    textAlign(CENTER, CENTER);
-    // translate(width * 0.5, height * 0.5);
-    text("Please rotate your device", width/2,height/2);
-    pop();
-  } else {
     background(0);
 
-    // landscape image - maintain aspect ratio wrt width
-    let w_aspect = bg.width / width;
-    let h = bg.height / w_aspect;
-    image(bg, 0, 0, width, h, 0, 0, bg.width, bg.height);
 
-    // debug
-    if (debug) {
-      tint(255, 127);
-      image(mask, 0, 0, width, h, 0, 0, bg.width, bg.height);
-      noTint();
+    // force landscape mode
+    if (width < height) {
+      push();
+      fill(255);
+      textSize(width * 0.05);
+      textAlign(CENTER, CENTER);
+      // translate(width * 0.5, height * 0.5);
+      text("Please rotate your device", width / 2, height / 2);
+      pop();
+    } else {
+      background(0);
+
+      // landscape image - maintain aspect ratio wrt width
+      let w_aspect = bg.width / width;
+      let h = bg.height / w_aspect;
+      image(bg, 0, 0, width, h, 0, 0, bg.width, bg.height);
+
+      // debug
+      if (debug) {
+        tint(255, 127);
+        image(mask, 0, 0, width, h, 0, 0, bg.width, bg.height);
+        noTint();
+      }
+
+      let i = 0;
+      let now = new Date();
+      for (let f of flowers) {
+        let h_aspect = bg.height / h;
+        let x = (f.location.x / w_aspect);
+        let y = (f.location.y / h_aspect);
+
+        // perspective for 'farther away'
+        let sc = map(y, height, height * 0.2, 1.0, 0.001);
+        let _w, _h, _img;
+
+        // currently a day will change the plant
+        let date_diff = Math.floor(dateDifference(now, f.timestamp));
+        let idx = 0;
+        if ((date_diff / 5) > 4) idx = 4;
+        else idx = Math.floor(date_diff / 5);
+
+        _img = plant_images[QR_map[f.QR_id].name][idx];
+        _w = (_img.width * QR_map[f.QR_id].scale) * sc;
+        _h = (_img.height * QR_map[f.QR_id].scale) * sc;
+
+
+        // magic numbers help with offset within image
+        push();
+
+        if (animate_scene) {
+          shader(wind_material);
+          wind_material.setUniform("offset", i);
+          wind_material.setUniform('time', millis() / 2400);
+          i++;
+        }
+
+
+        // drawingContext.shadowOffsetX = 0;
+        // drawingContext.shadowOffsetY = 0;
+        // drawingContext.shadowBlur = 15;
+        // drawingContext.shadowColor = color(0, 255, 0, 80);
+        image(_img, x - _w * .5, y - _h * .5, _w, _h, 0, 0, _img.width, _img.height);
+        pop();
+      }
+
+      // image(overlay, 0, 0, width, h, 0, 0, bg.width, bg.height);
     }
+  } else { // generate HQ image for saving
+    let to_save = createGraphics(bg.width, bg.height);
+    to_save.background(0);
+    to_save.image(bg, 0, 0);
+
+    // let w_aspect = 1.0;
+    // let h = bg.height / w_aspect;
 
     let i = 0;
     let now = new Date();
     for (let f of flowers) {
-      let h_aspect = bg.height / h;
-      let x = (f.location.x / w_aspect);
-      let y = (f.location.y / h_aspect);
+      // let h_aspect = bg.height / h;
+      let x = (f.location.x);// / w_aspect);
+      let y = (f.location.y);// / h_aspect);
 
       // perspective for 'farther away'
-      let sc = map(y, height, height * 0.2, 1.0, 0.001);
+      let sc = map(y, bg.height, bg.height * 0.2, 1.0, 0.001);
       let _w, _h, _img;
 
       // currently a day will change the plant
@@ -181,30 +236,14 @@ function drawEverything() {
       else idx = Math.floor(date_diff / 5);
 
       _img = plant_images[QR_map[f.QR_id].name][idx];
-      _w = (_img.width * QR_map[f.QR_id].scale) * sc;
-      _h = (_img.height * QR_map[f.QR_id].scale) * sc;
+      _w = (_img.width * QR_map[f.QR_id].hd_scale) * sc;
+      _h = (_img.height * QR_map[f.QR_id].hd_scale) * sc;
 
 
       // magic numbers help with offset within image
-      push();
-
-      if (animate_scene) {
-        shader(wind_material);
-        wind_material.setUniform("offset", i);
-        wind_material.setUniform('time', millis() / 2400);
-        i++;
-      }
-
-
-      // drawingContext.shadowOffsetX = 0;
-      // drawingContext.shadowOffsetY = 0;
-      // drawingContext.shadowBlur = 15;
-      // drawingContext.shadowColor = color(0, 255, 0, 80);
-      image(_img, x - _w * .5, y - _h * .5, _w, _h, 0, 0, _img.width, _img.height);
-      pop();
+      to_save.image(_img, x - _w * .5, y - _h * .5, _w, _h, 0, 0, _img.width, _img.height);
     }
-
-    // image(overlay, 0, 0, width, h, 0, 0, bg.width, bg.height);
+    return to_save;
   }
 
   redraw = false;
@@ -253,6 +292,8 @@ function dateDifference(start, end) {
 }
 
 // save triggered by menu
+// need to tweak this to save the full res...
 function saveImage() {
-  save("floara.png");
+  let ret = drawEverything(saving=true);
+  ret.save("floara.png");
 }
