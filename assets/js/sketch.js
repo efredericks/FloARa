@@ -251,3 +251,8 @@ function getPixelID(x, y, g = null) {
 function dateDifference(start, end) {
   return (start - end) / (1000 * 3600 * 24);
 }
+
+// save triggered by menu
+function saveImage() {
+  save("floara.png");
+}

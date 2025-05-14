@@ -17,6 +17,7 @@
     <li><a class="menuItem" id="toggle_glitch" href="#">toggle glitch shaders</a></li>
     <li><a class="menuItem" id="playback" href="#">start from beginning</a></li>
     <li><a class="menuItem" id="current" href="#">start from now</a></li>
+    <li><a class="menuItem" id="save" href="#">save image</a></li>
   </ul>
   <button class="hamburger">
     <!-- material icons https://material.io/resources/icons/ -->
@@ -54,6 +55,7 @@
       if (e !== undefined) {
         if (e.id == 'toggle_anim') animate_scene = !animate_scene;
         else if (e.id == 'toggle_glitch') shaders_on = !shaders_on;
+        else if (e.id == 'save') saveImage();
       }
     }
 
