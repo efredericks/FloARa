@@ -2,9 +2,65 @@
   margin: 0px;
   padding: 0px;
 }
-html, body {
-  overflow:hidden;
+
+@font-face {
+    font-family: "Quicksand";
+    src: url("/assets/fonts/Quicksand-Medium.ttf");
 }
+
+html,
+body {
+  overflow: hidden;
+}
+
 canvas {
   display: block;
+}
+
+.menuItem {
+  display: block;
+  margin: 2rem 4rem;
+  font-size: 1.4rem;
+  color: white;
+  text-decoration: none;
+  font-family: "Quicksand", "sans-serif";
+}
+
+.menuItem:hover {
+  text-decoration: underline;
+}
+
+.hamburger {
+  position: fixed;
+  z-index: 100;
+  top: 1rem;
+  right: 1rem;
+  padding: 4px;
+  /* invisible as it seems that the default element comes with its own style */
+  background: #00000000;
+  border: #00000000 solid 0px;
+  cursor: pointer;
+}
+
+.closeIcon {
+  display: none;
+}
+
+.menu {
+  position: fixed;
+  transform: translateY(-100%);
+  transition: transform 0.2s;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99;
+  background: rgba(0, 0, 0, 0.353);
+  color: white;
+  list-style: none;
+  padding-top: 4rem;
+}
+
+.showMenu {
+  transform: translateY(0);
 }

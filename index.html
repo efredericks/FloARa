@@ -1,16 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <script src="./assets/js/p5.js"></script>
-    <script src="./assets/js/p5.sound.min.js"></script>
-    <script src="./assets/js/shaders.js"></script>
-    <link rel="stylesheet" type="text/css" href="./assets/style.css">
-    <meta charset="utf-8" />
-  </head>
-  <body>
-    <main>
-    </main>
-    <script src="temp-data.js"></script>
-    <script src="./assets/js/sketch.js"></script>
-  </body>
+
+<head>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <script src="./assets/js/p5.js"></script>
+  <script src="./assets/js/p5.sound.min.js"></script>
+  <script src="./assets/js/shaders.js"></script>
+  <link rel="stylesheet" type="text/css" href="./assets/style.css">
+  <meta charset="utf-8" />
+</head>
+
+<body>
+  <ul class="menu">
+    <li><a class="menuItem" id="toggle_anim" href="#">toggle animation</a></li>
+    <li><a class="menuItem" id="toggle_glitch" href="#">toggle glitch shaders</a></li>
+    <li><a class="menuItem" id="playback" href="#">start from beginning</a></li>
+    <li><a class="menuItem" id="current" href="#">start from now</a></li>
+  </ul>
+  <button class="hamburger">
+    <!-- material icons https://material.io/resources/icons/ -->
+    <i class="menuIcon material-icons">menu</i>
+    <i class="closeIcon material-icons">close</i>
+  </button>
+  <main>
+  </main>
+
+  <script>
+    // GUI
+    // c/o https://dev.to/ljcdev/easy-hamburger-menu-with-js-2do0
+    const menu = document.querySelector(".menu");
+    const menuItems = document.querySelectorAll(".menuItem");
+    const hamburger = document.querySelector(".hamburger");
+    const closeIcon = document.querySelector(".closeIcon");
+    const menuIcon = document.querySelector(".menuIcon");
+
+    // used in p5
+    let animate_scene = true;
+    let shaders_on = false;
+
+    function toggleMenu(e) {
+      if (menu.classList.contains("showMenu")) {
+        menu.classList.remove("showMenu");
+        closeIcon.style.display = "none";
+        menuIcon.style.display = "block";
+      } else {
+        menu.classList.add("showMenu");
+        closeIcon.style.display = "block";
+        menuIcon.style.display = "none";
+      }
+
+      // toggle p5 vars
+      if (e !== undefined) {
+        if (e.id == 'toggle_anim') animate_scene = !animate_scene;
+        else if (e.id == 'toggle_glitch') shaders_on = !shaders_on;
+      }
+    }
+
+    hamburger.addEventListener("click", toggleMenu);
+
+    menuItems.forEach(
+      function (menuItem) {
+        menuItem.addEventListener("click", (e) => toggleMenu(e.target));
+      }
+    )
+  </script>
+  <script src="temp-data.js"></script>
+  <script src="./assets/js/sketch.js"></script>
+</body>
+
 </html>

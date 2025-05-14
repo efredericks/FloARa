@@ -11,7 +11,8 @@ let wind_fs;
 let wind_material;
 
 let dither_fs, tv_fs, rgb_fs;
-let shaders_on, touch_timer;
+// let shaders_on; 
+let touch_timer;
 
 let QR_map = {
   0: { name: 'Milkweed', scale: 0.4 },
@@ -82,7 +83,7 @@ function setup() {
   })
 
   // loadData();
-  shaders_on = false;
+  // shaders_on = false;
   touch_timer = 0;
 
   flowers = setupRandomData(bg.width, bg.height, mask, 250);
@@ -107,7 +108,8 @@ function draw() {
     flowers = addIndividualPlant(bg.width, bg.height, mask, flowers);
     redraw = true;
   }
-  redraw = true;
+
+  if (animate_scene) redraw = true;
 
   if (shaders_on) {
     rgb_fs.setUniform("_noise", 0.1);
@@ -136,6 +138,7 @@ function drawEverything() {
 
   background(0);
 
+
   // force landscape mode
   if (width < height) {
     push();
@@ -143,7 +146,7 @@ function drawEverything() {
     textSize(width * 0.05);
     textAlign(CENTER, CENTER);
     // translate(width * 0.5, height * 0.5);
-    text("Please rotate your device", 0, 0);
+    text("Please rotate your device", width/2,height/2);
     pop();
   } else {
     background(0);
@@ -185,10 +188,12 @@ function drawEverything() {
       // magic numbers help with offset within image
       push();
 
-      shader(wind_material);
-      wind_material.setUniform("offset", i);
-      wind_material.setUniform('time', millis() / 2400);
-      i++;
+      if (animate_scene) {
+        shader(wind_material);
+        wind_material.setUniform("offset", i);
+        wind_material.setUniform('time', millis() / 2400);
+        i++;
+      }
 
 
       // drawingContext.shadowOffsetX = 0;
