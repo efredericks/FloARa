@@ -1,77 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="./assets/js/p5.js"></script>
+    <script src="./assets/js/p5.sound.min.js"></script>
+    <script src="./assets/js/shaders.js"></script>
+    <link rel="stylesheet" type="text/css" href="./assets/style.css">
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <ul class="menu">
+      <li><a class="menuItem" id="toggle_adding" href="#">toggle adding flowers</a></li>
+      <li><a class="menuItem" id="toggle_anim" href="#">toggle animation</a></li>
+      <li><a class="menuItem" id="toggle_glitch" href="#">toggle glitch shaders</a></li>
+      <li><a class="menuItem" id="playback" href="#">start from beginning</a></li>
+      <li><a class="menuItem" id="current" href="#">start from now</a></li>
+      <li><a class="menuItem" id="save" href="#">save image</a></li>
+    </ul>
+    <button class="hamburger">
+      <i class="menuIcon material-icons">menu</i>
+      <i class="closeIcon material-icons">close</i>
+    </button>
+    <main>
+    </main>
+    <div id="flowerPopup" class="flower-popup">
+      <h3>Place a Flower</h3>
+      <p>Click anywhere on the image to place your flower</p>
+      <div>
+        <label>Color: 
+          <input type="color" id="flowerColor" value="#ffffff">
+          <span class="color-preview"></span>
+        </label>
+      </div>
+      <div class="button-group">
+        <button id="cancelPlacement" class="cancel-btn">Cancel</button>
+        <button id="placeFlower" class="place-btn">Place Flower</button>
+      </div>
+    </div>
+    <script src="temp-data.js"></script>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <script>
+      // GUI
+      const menu = document.querySelector(".menu");
+      const menuItems = document.querySelectorAll(".menuItem");
+      const hamburger = document.querySelector(".hamburger");
+      const closeIcon = document.querySelector(".closeIcon");
+      const menuIcon = document.querySelector(".menuIcon");
 
-<head>
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+      // used in p5
+      window.animate_scene = true;
+      window.shaders_on = false;
+      window.adding_flowers = false;
 
-  <script src="./assets/js/p5.js"></script>
-  <script src="./assets/js/p5.sound.min.js"></script>
-  <script src="./assets/js/shaders.js"></script>
-  <link rel="stylesheet" type="text/css" href="./assets/style.css">
-  <meta charset="utf-8" />
-</head>
+      function toggleMenu(e) {
+        if (menu.classList.contains("showMenu")) {
+          menu.classList.remove("showMenu");
+          closeIcon.style.display = "none";
+          menuIcon.style.display = "block";
+        } else {
+          menu.classList.add("showMenu");
+          closeIcon.style.display = "block";
+          menuIcon.style.display = "none";
+        }
 
-<body>
-  <ul class="menu">
-    <li><a class="menuItem" id="toggle_adding" href="#">toggle adding flowers</a></li>
-    <li><a class="menuItem" id="toggle_anim" href="#">toggle animation</a></li>
-    <li><a class="menuItem" id="toggle_glitch" href="#">toggle glitch shaders</a></li>
-    <li><a class="menuItem" id="playback" href="#">start from beginning</a></li>
-    <li><a class="menuItem" id="current" href="#">start from now</a></li>
-    <li><a class="menuItem" id="save" href="#">save image</a></li>
-  </ul>
-  <button class="hamburger">
-    <!-- material icons https://material.io/resources/icons/ -->
-    <i class="menuIcon material-icons">menu</i>
-    <i class="closeIcon material-icons">close</i>
-  </button>
-  <main>
-  </main>
-
-  <script>
-    // GUI
-    // c/o https://dev.to/ljcdev/easy-hamburger-menu-with-js-2do0
-    const menu = document.querySelector(".menu");
-    const menuItems = document.querySelectorAll(".menuItem");
-    const hamburger = document.querySelector(".hamburger");
-    const closeIcon = document.querySelector(".closeIcon");
-    const menuIcon = document.querySelector(".menuIcon");
-
-    // used in p5
-    let animate_scene = true;
-    let shaders_on = false;
-    let adding_flowers = false;
-
-    function toggleMenu(e) {
-      if (menu.classList.contains("showMenu")) {
-        menu.classList.remove("showMenu");
-        closeIcon.style.display = "none";
-        menuIcon.style.display = "block";
-      } else {
-        menu.classList.add("showMenu");
-        closeIcon.style.display = "block";
-        menuIcon.style.display = "none";
+        // toggle p5 vars
+        if (e !== undefined) {
+          if (e.id == 'toggle_anim') window.animate_scene = !window.animate_scene;
+          else if (e.id == 'toggle_glitch') window.shaders_on = !window.shaders_on;
+          else if (e.id == 'toggle_adding') window.adding_flowers = !window.adding_flowers;
+          else if (e.id == 'save') saveImage();
+        }
       }
 
-      // toggle p5 vars
-      if (e !== undefined) {
-        if (e.id == 'toggle_anim') animate_scene = !animate_scene;
-        else if (e.id == 'toggle_glitch') shaders_on = !shaders_on;
-        else if (e.id == 'toggle_adding') adding_flowers = !adding_flowers;
-        else if (e.id == 'save') saveImage();
+      hamburger.addEventListener("click", toggleMenu);
+
+      menuItems.forEach(
+        function (menuItem) {
+          menuItem.addEventListener("click", (e) => toggleMenu(e.target));
+        }
+      )
+    </script>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+      import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyDczt4Is3FPtDR-zqneuzHyU0sPfo-Sf7w",
+        authDomain: "floara-388a1.firebaseapp.com",
+        projectId: "floara-388a1",
+        storageBucket: "floara-388a1.firebasestorage.app",
+        messagingSenderId: "82081375122",
+        appId: "1:82081375122:web:8772b4a4055de1c0b4174b",
+        measurementId: "G-X3KHSFJP80"
+      };
+
+      try {
+        console.log("Initializing Firebase...");
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        console.log("Firebase initialized successfully");
+
+        window.getFlowerData = async function () {
+          try {
+            console.log("Fetching flower data...");
+            const snapshot = await getDocs(collection(db, "flowers"));
+            const data = snapshot.docs.map(doc => ({
+              ...doc.data(),
+              id: doc.id
+            }));
+            console.log("Flower data fetched:", data);
+            return data;
+          } catch (error) {
+            console.error("Error fetching flowers:", error);
+            return [];
+          }
+        };
+
+        window.addFlower = async function(flowerData) {
+          try {
+            const docRef = await addDoc(collection(db, "flowers"), flowerData);
+            return docRef.id;
+          } catch (error) {
+            console.error("Error adding flower:", error);
+            return null;
+          }
+        };
+
+        window.deleteFlower = async function(flowerId) {
+          try {
+            await deleteDoc(doc(db, "flowers", flowerId));
+            return true;
+          } catch (error) {
+            console.error("Error deleting flower:", error);
+            return false;
+          }
+        };
+      } catch (error) {
+        console.error("Error initializing Firebase:", error);
       }
-    }
-
-    hamburger.addEventListener("click", toggleMenu);
-
-    menuItems.forEach(
-      function (menuItem) {
-        menuItem.addEventListener("click", (e) => toggleMenu(e.target));
-      }
-    )
-  </script>
-  <script src="temp-data.js"></script>
-  <script src="./assets/js/sketch.js"></script>
-</body>
-
+    </script>
+    <script src="./assets/js/sketch.js"></script>
+  </body>
 </html>

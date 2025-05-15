@@ -1,6 +1,7 @@
 * {
   margin: 0px;
   padding: 0px;
+  font-family: Arial, sans-serif;
 }
 
 @font-face {
@@ -36,7 +37,6 @@ canvas {
   top: 1rem;
   right: 1rem;
   padding: 4px;
-  /* invisible as it seems that the default element comes with its own style */
   background: #00000000;
   border: #00000000 solid 0px;
   cursor: pointer;
@@ -63,4 +63,191 @@ canvas {
 
 .showMenu {
   transform: translateY(0);
+}
+
+.flower-popup {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 300px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-family: Arial, sans-serif;
+}
+
+.flower-popup.active {
+  display: block;
+  animation: popupFadeIn 0.3s ease-out;
+}
+
+.flower-popup h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1.5em;
+  font-weight: 600;
+}
+
+.flower-popup p {
+  margin: 0 0 20px 0;
+  color: #666;
+  font-size: 1em;
+  line-height: 1.5;
+}
+
+.flower-popup label {
+  display: block;
+  margin-bottom: 15px;
+  color: #444;
+  font-size: 0.95em;
+}
+
+.flower-popup input[type="color"] {
+  margin-left: 10px;
+  width: 50px;
+  height: 30px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.flower-popup .button-group {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 25px;
+}
+
+.flower-popup button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.flower-popup .cancel-btn {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.flower-popup .cancel-btn:hover {
+  background: #e0e0e0;
+}
+
+.flower-popup .place-btn {
+  background: #4CAF50;
+  color: white;
+}
+
+.flower-popup .place-btn:hover {
+  background: #45a049;
+}
+
+@keyframes popupFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  animation: overlayFadeIn 0.3s ease-out;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Confirmation popup styles */
+.confirmation-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 300px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: popupFadeIn 0.3s ease-out;
+}
+
+.confirmation-popup p {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 1.1em;
+  text-align: center;
+}
+
+.confirmation-popup .button-container {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.confirmation-popup button {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.confirmation-popup .cancel-btn {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.confirmation-popup .cancel-btn:hover {
+  background: #e0e0e0;
+}
+
+.confirmation-popup .confirm-btn {
+  background: #ff4444;
+  color: white;
+}
+
+.confirmation-popup .confirm-btn:hover {
+  background: #ff3333;
+}
+
+.confirmation-popup .success-btn {
+  background: #4CAF50;
+  color: white;
+}
+
+.confirmation-popup .success-btn:hover {
+  background: #45a049;
 }
