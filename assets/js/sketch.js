@@ -42,18 +42,36 @@ function preload() {
   // mask = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.mask.png");
   overlay = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.overlay.png");
 
-  // temp_milkweed = loadImage("assets/img/milkweed/Milkweed_0000_5_sm.cropped.png");
+  // Initialize plant image arrays
+  plant_images = {
+    'Milkweed': [],
+    'Nymphaea': [],
+    'Piranha': []
+  };
 
-  plant_images[QR_map[0].name] = [];
-  plant_images[QR_map[1].name] = [];
-  plant_images[QR_map[99].name] = [];
+  console.log("Loading Milkweed images...");
+  // Load Milkweed images - using same image for all stages for now
+  const milkweedImg = loadImage("assets/img/milkweed/Milkweed_5_outerglow.png");
+  for (let i = 0; i < 5; i++) {
+    plant_images['Milkweed'].push(milkweedImg);
+  }
 
+  console.log("Loading Nymphaea images...");
+  // Load Nymphaea images
   for (let i = 1; i <= 5; i++) {
-    plant_images[QR_map[0].name].push(loadImage("assets/img/milkweed/Milkweed_5_outerglow.png"));
-    plant_images[QR_map[1].name].push(loadImage(`assets/img/Nymphaea-Odorata-Ella-Kane/nymphaea_odorata_stage${i}.png`));
+    const nymphaeaImg = loadImage(`assets/img/Nymphaea-Odorata-Ella-Kane/nymphaea_odorata_stage${i}.png`);
+    plant_images['Nymphaea'].push(nymphaeaImg);
+  }
+
+  console.log("Loading Piranha images...");
+  // Load Piranha images - using Milkweed image as placeholder
+  for (let i = 0; i < 5; i++) {
+    plant_images['Piranha'].push(milkweedImg);
   }
 
   font = loadFont("assets/fonts/Quicksand-Medium.ttf");
+  
+  console.log("Preload complete. Plant images:", plant_images);
 }
 
 function setup() {
@@ -177,12 +195,21 @@ function drawEverything(saving = false) {
 
       let i = 0;
       let now = new Date();
+      console.log("Available plant images:", plant_images);
+      console.log("QR_map:", QR_map);
+      
       for (let f of flowers) {
-        // Skip invalid flowers
-        if (!f.QR_id || !QR_map[f.QR_id] || !QR_map[f.QR_id].name) {
-          console.warn("Skipping invalid flower:", f);
+        console.log("Processing flower:", f);
+        
+        // Skip invalid flowers - allow QR_id: 0 (Milkweed)
+        if (f.QR_id === undefined || f.QR_id === null || !QR_map[f.QR_id] || !QR_map[f.QR_id].name) {
+          console.warn("Skipping invalid flower - QR_id:", f.QR_id, "QR_map entry:", QR_map[f.QR_id]);
           continue;
         }
+
+        let plantName = QR_map[f.QR_id].name;
+        console.log("Plant name:", plantName);
+        console.log("Plant images for this type:", plant_images[plantName]);
 
         let h_aspect = bg.height / h;
         let x = (f.location.x / w_aspect);
@@ -193,12 +220,24 @@ function drawEverything(saving = false) {
         let _w, _h, _img;
 
         // currently a day will change the plant
-        let date_diff = Math.floor(dateDifference(now, f.timestamp));
+        let date_diff = Math.floor(dateDifference(now, new Date(f.timestamp)));
         let idx = 0;
         if ((date_diff / 5) > 4) idx = 4;
         else idx = Math.floor(date_diff / 5);
 
-        _img = plant_images[QR_map[f.QR_id].name][idx];
+        console.log("Stage index:", idx);
+
+        // Check if plant images are loaded
+        if (!plant_images[plantName] || !plant_images[plantName][idx]) {
+          console.warn("Plant image not loaded for flower:", {
+            plantName,
+            stage: idx,
+            availableImages: plant_images[plantName]
+          });
+          continue;
+        }
+
+        _img = plant_images[plantName][idx];
         _w = (_img.width * QR_map[f.QR_id].scale) * sc;
         _h = (_img.height * QR_map[f.QR_id].scale) * sc;
 
@@ -210,6 +249,11 @@ function drawEverything(saving = false) {
           wind_material.setUniform("offset", i);
           wind_material.setUniform('time', millis() / 2400);
           i++;
+        }
+
+        // Apply color tinting if the flower has a color
+        if (f.color) {
+          tint(f.color);
         }
 
         image(_img, x - _w * .5, y - _h * .5, _w, _h, 0, 0, _img.width, _img.height);
@@ -243,6 +287,12 @@ function drawEverything(saving = false) {
       if ((date_diff / 5) > 4) idx = 4;
       else idx = Math.floor(date_diff / 5);
 
+      // Check if plant images are loaded
+      if (!plant_images[QR_map[f.QR_id].name] || !plant_images[QR_map[f.QR_id].name][idx]) {
+        console.warn("Plant image not loaded for flower:", f);
+        continue;
+      }
+
       _img = plant_images[QR_map[f.QR_id].name][idx];
       _w = (_img.width * QR_map[f.QR_id].hd_scale) * sc;
       _h = (_img.height * QR_map[f.QR_id].hd_scale) * sc;
@@ -264,13 +314,66 @@ async function loadData() {
 
   try {
     const rawData = await window.getFlowerData();
-    flowers = rawData.map(f => ({
-      location: f.location,
-      color: color(f.color || "white"),
-      id: f.id,
-      QR_id: f.QR_id || 0  // Default to Milkweed (QR_id: 0) if not specified
-    }));
-    console.log("Loaded flowers:", flowers);
+    console.log("Raw flower data from Firebase:", rawData);
+    
+    flowers = rawData.map(f => {
+      // Try to find QR_id in different possible field names
+      let qrId;
+      if (f.QR_id !== undefined && f.QR_id !== null) {
+        qrId = parseInt(f.QR_id);
+      } else if (f.qr_id !== undefined && f.qr_id !== null) {
+        qrId = parseInt(f.qr_id);
+      } else if (f.type !== undefined && f.type !== null) {
+        // Map type names to QR_ids
+        switch(f.type.toLowerCase()) {
+          case 'milkweed':
+            qrId = 0;
+            break;
+          case 'nymphaea':
+            qrId = 1;
+            break;
+          case 'piranha':
+            qrId = 99;
+            break;
+          default:
+            qrId = 0;
+        }
+      } else if (f.flowerType !== undefined && f.flowerType !== null) {
+        // Map flowerType names to QR_ids
+        switch(f.flowerType.toLowerCase()) {
+          case 'milkweed':
+            qrId = 0;
+            break;
+          case 'nymphaea':
+            qrId = 1;
+            break;
+          case 'piranha':
+            qrId = 99;
+            break;
+          default:
+            qrId = 0;
+        }
+      } else {
+        console.log("No valid QR_id found, defaulting to Milkweed (0):", f);
+        qrId = 0;
+      }
+
+      // Validate the QR_id
+      if (isNaN(qrId) || !QR_map[qrId]) {
+        console.log("Invalid QR_id found, defaulting to Milkweed (0):", f);
+        qrId = 0;
+      }
+      
+      return {
+        location: f.location,
+        color: color(f.color || "white"),
+        id: f.id,
+        QR_id: qrId,
+        timestamp: f.timestamp || new Date().toISOString()
+      };
+    });
+    
+    console.log("Processed flowers:", flowers);
     redraw = true;
   } catch (err) {
     console.error("Error loading flowers from Firestore:", err);
@@ -399,19 +502,23 @@ function mousePressed() {
       
       // If the mask pixel is black (0,0,0), it's a valid position (grass)
       if (maskPixel[0] === 0 && maskPixel[1] === 0 && maskPixel[2] === 0) {
+        const plantType = parseInt(document.getElementById('plantType').value);
         const newFlower = {
           location: {
             x: imageX,
             y: imageY
           },
           color: pendingFlowerColor,
+          QR_id: plantType,
           timestamp: new Date().toISOString()
         };
         
         // First add to local array to maintain current functionality
         flowers.push({
           location: newFlower.location,
-          color: color(pendingFlowerColor)
+          color: color(pendingFlowerColor),
+          QR_id: plantType,
+          timestamp: newFlower.timestamp
         });
         redraw = true;
 

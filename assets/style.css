@@ -101,11 +101,22 @@ canvas {
   line-height: 1.5;
 }
 
+.flower-popup select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-left: 10px;
+  background-color: white;
+}
+
 .flower-popup label {
   display: block;
   margin-bottom: 15px;
-  color: #444;
-  font-size: 0.95em;
+}
+
+.flower-popup label:last-of-type {
+  margin-bottom: 20px;
 }
 
 .flower-popup input[type="color"] {
@@ -250,4 +261,13 @@ canvas {
 
 .confirmation-popup .success-btn:hover {
   background: #45a049;
+}
+
+.confirmation-popup .qr-btn {
+  background: #2196F3;
+  color: white;
+}
+
+.confirmation-popup .qr-btn:hover {
+  background: #1976D2;
 }
