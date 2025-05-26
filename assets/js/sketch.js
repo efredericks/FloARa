@@ -32,6 +32,53 @@ let wind_on = true;
 let font;
 let ctx;
 
+// Add to global variables at the top
+let hoveredFlower = null;
+
+// Add to global variables at top
+let plantInfo = {
+  'Milkweed': {
+    scientificName: "Asclepias syriaca",
+    description: "A native wildflower crucial for monarch butterflies",
+    growthStages: [
+      "Seedling emerges",
+      "Early growth with small leaves",
+      "Mature plant with developed leaves",
+      "Flowering stage",
+      "Seed pod development"
+    ],
+    nativeRegion: "North America",
+    // Placeholder for more detailed info to come from Sara/Argo
+    ecology: "Important host plant for monarch butterflies"
+  },
+  'Nymphaea': {
+    scientificName: "Nymphaea odorata",
+    description: "Fragrant water lily native to North America",
+    growthStages: [
+      "Underwater leaf development",
+      "First floating leaves appear",
+      "Multiple leaves on surface",
+      "Flower bud development",
+      "Blooming flower"
+    ],
+    nativeRegion: "North American wetlands",
+    ecology: "Provides habitat for aquatic life"
+  },
+  'Piranha': {
+    scientificName: "Piranha Plant",
+    description: "An invasive species with distinctive snapping behavior",
+    growthStages: [
+      "Small sprout",
+      "Developing stem",
+      "Growing teeth",
+      "Nearly mature",
+      "Fully developed"
+    ],
+    nativeRegion: "Unknown",
+    ecology: "Highly aggressive, tends to displace native species"
+  }
+};
+
 // load in background and flowers at full resolution
 function preload() {
   // bg = loadImage("assets/img/gvsu-bg.jpg");
@@ -134,6 +181,9 @@ function setup() {
 }
 
 function draw() {
+  // Update hovered flower
+  updateHoveredFlower();
+  
   if (redraw) drawEverything();
 
   if (frameCount % 20 == 0 && flowers.length < 10000 && window.adding_flowers) {
@@ -254,6 +304,34 @@ function drawEverything(saving = false) {
         // Apply color tinting if the flower has a color
         if (f.color) {
           tint(f.color);
+        }
+
+        // Add highlight glow effect if this is the hovered flower
+        if (hoveredFlower === f) {
+          // Draw glow effect
+          push();
+          noStroke();
+          drawingContext.shadowBlur = 20;
+          drawingContext.shadowColor = 'rgba(255, 255, 255, 0.5)';
+          // Increase scale slightly for glow effect
+          let glowScale = 1.1;
+          image(_img, x - (_w * glowScale) * .5, y - (_h * glowScale) * .5, 
+                _w * glowScale, _h * glowScale, 0, 0, _img.width, _img.height);
+          pop();
+          
+          // Draw info popup
+          push();
+          fill(255);
+          noStroke();
+          textAlign(LEFT);
+          textSize(16);
+          let infoX = x + _w/2 + 10;
+          let infoY = y;
+          rect(infoX - 5, infoY - 5, 150, 65, 5);
+          fill(0);
+          text(`Type: ${plantName}`, infoX, infoY + 15);
+          text(`Age: ${Math.floor(date_diff)} days`, infoX, infoY + 35);
+          pop();
         }
 
         image(_img, x - _w * .5, y - _h * .5, _w, _h, 0, 0, _img.width, _img.height);
@@ -389,19 +467,16 @@ function windowResized() {
 //press 1-9 to place a flower
 
 function mousePressed() {
+  const w_aspect = bg.width / width;
+  const h_aspect = bg.height / (bg.height / w_aspect);
+  
+  // Convert mouse coordinates to image coordinates
+  const imageX = mouseX * w_aspect;
+  const imageY = mouseY * h_aspect;
+  
   if (mouseButton === RIGHT) {
     // Handle right-click for flower removal
-    const w_aspect = bg.width / width;
-    const h_aspect = bg.height / (bg.height / w_aspect);
-    
-    // Convert mouse coordinates to image coordinates
-    const imageX = mouseX * w_aspect;
-    const imageY = mouseY * h_aspect;
-    
-    // Check if click is within image bounds
     if (imageX >= 0 && imageX <= bg.width && imageY >= 0 && imageY <= bg.height) {
-      // Find the closest flower within a certain radius
-      const clickRadius = 20 / w_aspect; // Same as flower size
       let closestFlower = null;
       let minDistance = Infinity;
       
@@ -411,9 +486,20 @@ function mousePressed() {
         const dy = flower.location.y / h_aspect - mouseY;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
+        // Use larger radius for Milkweed (QR_id: 0)
+        const clickRadius = flower.QR_id === 0 ? 80 / w_aspect : 40 / w_aspect;
+        
         if (distance < clickRadius && distance < minDistance) {
           minDistance = distance;
           closestFlower = { index: i, flower: flower };
+        }
+      }
+      
+      // If hovering over a flower, prioritize that one for deletion
+      if (hoveredFlower && !closestFlower) {
+        const index = flowers.findIndex(f => f === hoveredFlower);
+        if (index !== -1) {
+          closestFlower = { index, flower: hoveredFlower };
         }
       }
       
@@ -427,9 +513,10 @@ function mousePressed() {
         const popup = document.createElement('div');
         popup.className = 'confirmation-popup';
         
-        // Add confirmation message
+        // Add confirmation message with flower type
         const message = document.createElement('p');
-        message.textContent = 'Remove this flower?';
+        const flowerType = QR_map[closestFlower.flower.QR_id].name;
+        message.textContent = `Remove this ${flowerType}?`;
         popup.appendChild(message);
         
         // Add button container
@@ -485,73 +572,94 @@ function mousePressed() {
       }
     }
     return false; // Prevent default context menu
-  } else if (isPlacingFlower && pendingFlowerColor) {
-    const w_aspect = bg.width / width;
-    const h_aspect = bg.height / (bg.height / w_aspect);
-    
-    // Convert mouse coordinates to image coordinates
-    const imageX = mouseX * w_aspect;
-    const imageY = mouseY * h_aspect;
-    
-    // Check if click is within image bounds
+  } else if (mouseButton === LEFT && !isPlacingFlower) {
+    // Handle left-click for plant information
     if (imageX >= 0 && imageX <= bg.width && imageY >= 0 && imageY <= bg.height) {
-      // Check if the clicked position is valid (on grass)
-      const maskX = Math.floor(imageX);
-      const maskY = Math.floor(imageY);
-      const maskPixel = mask.get(maskX, maskY);
+      let selectedFlower = null;
+      let minDistance = Infinity;
       
-      // If the mask pixel is black (0,0,0), it's a valid position (grass)
-      if (maskPixel[0] === 0 && maskPixel[1] === 0 && maskPixel[2] === 0) {
-        const plantType = parseInt(document.getElementById('plantType').value);
-        const newFlower = {
-          location: {
-            x: imageX,
-            y: imageY
-          },
-          color: pendingFlowerColor,
-          QR_id: plantType,
-          timestamp: new Date().toISOString()
-        };
-        
-        // First add to local array to maintain current functionality
-        flowers.push({
-          location: newFlower.location,
-          color: color(pendingFlowerColor),
-          QR_id: plantType,
-          timestamp: newFlower.timestamp
-        });
-        redraw = true;
-
-        // Then try to save to Firebase
-        window.addFlower(newFlower).then(flowerId => {
-          if (flowerId) {
-            // Create and show confirmation popup
-            const popup = document.createElement('div');
-            popup.className = 'confirmation-popup';
-            
-            // Add success message
-            const message = document.createElement('p');
-            message.textContent = 'Flower successfully added!';
-            popup.appendChild(message);
-            
-            // Add close button
-            const closeBtn = document.createElement('button');
-            closeBtn.textContent = 'OK';
-            closeBtn.className = 'success-btn';
-            closeBtn.onclick = () => {
-              document.body.removeChild(popup);
-            };
-            popup.appendChild(closeBtn);
-            
-            document.body.appendChild(popup);
+      // First check if we're hovering over a flower
+      if (hoveredFlower) {
+        selectedFlower = hoveredFlower;
+      } else {
+        // Otherwise check for flowers within click radius
+        for (let i = 0; i < flowers.length; i++) {
+          const flower = flowers[i];
+          const dx = flower.location.x / w_aspect - mouseX;
+          const dy = flower.location.y / h_aspect - mouseY;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          // Use larger radius for Milkweed (QR_id: 0)
+          const clickRadius = flower.QR_id === 0 ? 80 / w_aspect : 40 / w_aspect;
+          
+          if (distance < clickRadius && distance < minDistance) {
+            minDistance = distance;
+            selectedFlower = flower;
           }
-        });
+        }
       }
       
-      // Reset placement state regardless of whether flower was placed
-      isPlacingFlower = false;
-      pendingFlowerColor = null;
+      if (selectedFlower) {
+        showPlantInfo(selectedFlower);
+      }
     }
+  } else if (isPlacingFlower && pendingFlowerColor) {
+    // Check if the clicked position is valid (on grass)
+    const maskX = Math.floor(imageX);
+    const maskY = Math.floor(imageY);
+    const maskPixel = mask.get(maskX, maskY);
+    
+    // If the mask pixel is black (0,0,0), it's a valid position (grass)
+    if (maskPixel[0] === 0 && maskPixel[1] === 0 && maskPixel[2] === 0) {
+      const plantType = parseInt(document.getElementById('plantType').value);
+      const newFlower = {
+        location: {
+          x: imageX,
+          y: imageY
+        },
+        color: pendingFlowerColor,
+        QR_id: plantType,
+        timestamp: new Date().toISOString()
+      };
+      
+      // First add to local array to maintain current functionality
+      flowers.push({
+        location: newFlower.location,
+        color: color(pendingFlowerColor),
+        QR_id: plantType,
+        timestamp: newFlower.timestamp
+      });
+      redraw = true;
+
+      // Then try to save to Firebase
+      window.addFlower(newFlower).then(flowerId => {
+        if (flowerId) {
+          // Create and show confirmation popup
+          const popup = document.createElement('div');
+          popup.className = 'confirmation-popup';
+          
+          // Add success message
+          const message = document.createElement('p');
+          message.textContent = 'Flower successfully added!';
+          popup.appendChild(message);
+          
+          // Add close button
+          const closeBtn = document.createElement('button');
+          closeBtn.textContent = 'OK';
+          closeBtn.className = 'success-btn';
+          closeBtn.onclick = () => {
+            document.body.removeChild(popup);
+          };
+          popup.appendChild(closeBtn);
+          
+          document.body.appendChild(popup);
+        }
+      });
+    }
+    
+    // Reset placement state regardless of whether flower was placed
+    isPlacingFlower = false;
+    pendingFlowerColor = null;
   }
 }
 
@@ -591,4 +699,82 @@ function dateDifference(start, end) {
 function saveImage() {
   let ret = drawEverything(saving=true);
   ret.save("floara.png");
+}
+
+// Add new function to update hoveredFlower
+function updateHoveredFlower() {
+  if (width < height) return; // Skip in portrait mode
+  
+  const w_aspect = bg.width / width;
+  const h_aspect = bg.height / (bg.height / w_aspect);
+  
+  // Convert mouse coordinates to image coordinates
+  const mouseImageX = mouseX * w_aspect;
+  const mouseImageY = mouseY * h_aspect;
+  
+  // Find the closest flower within hover radius
+  let closestFlower = null;
+  let minDistance = Infinity;
+  
+  for (let i = 0; i < flowers.length; i++) {
+    const flower = flowers[i];
+    const dx = flower.location.x / w_aspect - mouseX;
+    const dy = flower.location.y / h_aspect - mouseY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    // Use larger radius for Milkweed (QR_id: 0)
+    const hoverRadius = flower.QR_id === 0 ? 80 / w_aspect : 40 / w_aspect;
+    
+    if (distance < hoverRadius && distance < minDistance) {
+      minDistance = distance;
+      closestFlower = flower;
+    }
+  }
+  
+  hoveredFlower = closestFlower;
+  if (hoveredFlower) redraw = true;
+}
+
+// Add new function to show plant information
+function showPlantInfo(flower) {
+  const flowerType = QR_map[flower.QR_id].name;
+  const placementDate = new Date(flower.timestamp);
+  const now = new Date();
+  const ageDays = Math.floor(dateDifference(now, placementDate));
+  const growthStageIndex = Math.min(4, Math.floor(ageDays / 5));
+  
+  // Create overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  document.body.appendChild(overlay);
+  
+  // Create info popup
+  const popup = document.createElement('div');
+  popup.className = 'plant-info-popup';
+  
+  // Add content
+  const content = document.createElement('div');
+  content.className = 'plant-info-content';
+  content.innerHTML = `
+    <h2>${flowerType}</h2>
+    <div class="info-section">
+      <h4>Plant Details</h4>
+      <p>Age: ${ageDays} days</p>
+      <p>Growth Stage: ${growthStageIndex + 1} of 5</p>
+      <p>Planted: ${placementDate.toLocaleDateString()} at ${placementDate.toLocaleTimeString()}</p>
+    </div>
+  `;
+  popup.appendChild(content);
+  
+  // Add close button
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '×';
+  closeBtn.className = 'plant-info-close';
+  closeBtn.onclick = () => {
+    document.body.removeChild(overlay);
+    document.body.removeChild(popup);
+  };
+  popup.appendChild(closeBtn);
+  
+  document.body.appendChild(popup);
 }
