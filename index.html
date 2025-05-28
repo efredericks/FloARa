@@ -17,6 +17,13 @@
       <li><a class="menuItem" id="playback" href="#">start from beginning</a></li>
       <li><a class="menuItem" id="current" href="#">start from now</a></li>
       <li><a class="menuItem" id="save" href="#">save image</a></li>
+      <li>
+        <select id="plantFilter" class="menuItem" onchange="filterPlants(this.value)">
+          <option value="all">Show All Plants</option>
+          <option value="manual">Show Manual Plants</option>
+          <option value="propagated">Show Propagated Plants</option>
+        </select>
+      </li>
     </ul>
     <button class="hamburger">
       <i class="menuIcon material-icons">menu</i>
@@ -87,7 +94,12 @@
 
       menuItems.forEach(
         function (menuItem) {
-          menuItem.addEventListener("click", (e) => toggleMenu(e.target));
+          menuItem.addEventListener("click", (e) => {
+            // Don't toggle menu if clicking on select element
+            if (e.target.tagName !== 'SELECT') {
+              toggleMenu(e.target);
+            }
+          });
         }
       )
     </script>

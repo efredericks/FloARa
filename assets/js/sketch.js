@@ -34,50 +34,66 @@ let ctx;
 
 // Add to global variables at the top
 let hoveredFlower = null;
+let activePlantPopup = null;
 
 // Add to global variables at top
 let plantInfo = {
   'Milkweed': {
-    scientificName: "Asclepias syriaca",
-    description: "A native wildflower crucial for monarch butterflies",
+    scientificName: "Placeholder",
+    description: "A placeholder plant",
     growthStages: [
-      "Seedling emerges",
-      "Early growth with small leaves",
-      "Mature plant with developed leaves",
-      "Flowering stage",
-      "Seed pod development"
+      "Stage 1",
+      "Stage 2",
+      "Stage 3",
+      "Stage 4",
+      "Stage 5"
     ],
-    nativeRegion: "North America",
-    // Placeholder for more detailed info to come from Sara/Argo
-    ecology: "Important host plant for monarch butterflies"
+    nativeRegion: "Placeholder",
+    ecology: "Placeholder",
+    propagationRate: 0.1,
+    propagationRadius: 100,
+    suitableAreas: ['grass']
   },
   'Nymphaea': {
-    scientificName: "Nymphaea odorata",
-    description: "Fragrant water lily native to North America",
+    scientificName: "Placeholder",
+    description: "A placeholder plant",
     growthStages: [
-      "Underwater leaf development",
-      "First floating leaves appear",
-      "Multiple leaves on surface",
-      "Flower bud development",
-      "Blooming flower"
+      "Stage 1",
+      "Stage 2",
+      "Stage 3",
+      "Stage 4",
+      "Stage 5"
     ],
-    nativeRegion: "North American wetlands",
-    ecology: "Provides habitat for aquatic life"
+    nativeRegion: "Placeholder",
+    ecology: "Placeholder",
+    propagationRate: 0.05,
+    propagationRadius: 50,
+    suitableAreas: ['water']
   },
   'Piranha': {
-    scientificName: "Piranha Plant",
-    description: "An invasive species with distinctive snapping behavior",
+    scientificName: "Placeholder",
+    description: "A placeholder plant",
     growthStages: [
-      "Small sprout",
-      "Developing stem",
-      "Growing teeth",
-      "Nearly mature",
-      "Fully developed"
+      "Stage 1",
+      "Stage 2",
+      "Stage 3",
+      "Stage 4",
+      "Stage 5"
     ],
-    nativeRegion: "Unknown",
-    ecology: "Highly aggressive, tends to displace native species"
+    nativeRegion: "Placeholder",
+    ecology: "Placeholder",
+    propagationRate: 0.15,
+    propagationRadius: 150,
+    suitableAreas: ['grass', 'water']
   }
 };
+
+// Add to global variables at the top
+let propagationTimer = 0;
+const PROPAGATION_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+// Add to global variables at the top
+let plantFilter = 'all';
 
 // load in background and flowers at full resolution
 function preload() {
@@ -96,21 +112,18 @@ function preload() {
     'Piranha': []
   };
 
-  console.log("Loading Milkweed images...");
   // Load Milkweed images - using same image for all stages for now
   const milkweedImg = loadImage("assets/img/milkweed/Milkweed_5_outerglow.png");
   for (let i = 0; i < 5; i++) {
     plant_images['Milkweed'].push(milkweedImg);
   }
 
-  console.log("Loading Nymphaea images...");
   // Load Nymphaea images
   for (let i = 1; i <= 5; i++) {
     const nymphaeaImg = loadImage(`assets/img/Nymphaea-Odorata-Ella-Kane/nymphaea_odorata_stage${i}.png`);
     plant_images['Nymphaea'].push(nymphaeaImg);
   }
 
-  console.log("Loading Piranha images...");
   // Load Piranha images - using Milkweed image as placeholder
   for (let i = 0; i < 5; i++) {
     plant_images['Piranha'].push(milkweedImg);
@@ -186,12 +199,21 @@ function draw() {
   
   if (redraw) drawEverything();
 
+  // Check for propagation every 24 hours
+  const now = Date.now();
+  if (now - propagationTimer >= PROPAGATION_INTERVAL) {
+    propagatePlants();
+    propagationTimer = now;
+  }
+
   if (frameCount % 20 == 0 && flowers.length < 10000 && window.adding_flowers) {
     flowers = addIndividualPlant(bg.width, bg.height, mask, flowers);
     redraw = true;
   }
 
-  if (window.animate_scene) redraw = true;
+  if (window.animate_scene) {
+    redraw = true;
+  }
 
   if (window.shaders_on) {
     rgb_fs.setUniform("_noise", 0.1);
@@ -216,6 +238,8 @@ function doubleClicked() {
 
 // draw everything with respect to the canvas size
 function drawEverything(saving = false) {
+  console.log("Drawing everything, saving:", saving);
+  
   if (!saving) {
     translate(-width / 2, -height / 2);
     background(0);
@@ -249,6 +273,11 @@ function drawEverything(saving = false) {
       console.log("QR_map:", QR_map);
       
       for (let f of flowers) {
+        // Skip if plant doesn't match current filter
+        if (plantFilter !== 'all' && f.propagationType !== plantFilter) {
+          continue;
+        }
+        
         console.log("Processing flower:", f);
         
         // Skip invalid flowers - allow QR_id: 0 (Milkweed)
@@ -294,6 +323,7 @@ function drawEverything(saving = false) {
         // magic numbers help with offset within image
         push();
 
+        // Apply wind animation only to plants
         if (window.animate_scene) {
           shader(wind_material);
           wind_material.setUniform("offset", i);
@@ -304,6 +334,16 @@ function drawEverything(saving = false) {
         // Apply color tinting if the flower has a color
         if (f.color) {
           tint(f.color);
+        }
+
+        // Add visual indicator for propagated plants
+        if (f.propagationType === 'propagated') {
+          push();
+          noFill();
+          stroke(100, 255, 100, 100); // Subtle green glow
+          strokeWeight(2);
+          ellipse(x, y, _w * 1.2, _h * 1.2);
+          pop();
         }
 
         // Add highlight glow effect if this is the hovered flower
@@ -318,20 +358,6 @@ function drawEverything(saving = false) {
           image(_img, x - (_w * glowScale) * .5, y - (_h * glowScale) * .5, 
                 _w * glowScale, _h * glowScale, 0, 0, _img.width, _img.height);
           pop();
-          
-          // Draw info popup
-          push();
-          fill(255);
-          noStroke();
-          textAlign(LEFT);
-          textSize(16);
-          let infoX = x + _w/2 + 10;
-          let infoY = y;
-          rect(infoX - 5, infoY - 5, 150, 65, 5);
-          fill(0);
-          text(`Type: ${plantName}`, infoX, infoY + 15);
-          text(`Age: ${Math.floor(date_diff)} days`, infoX, infoY + 35);
-          pop();
         }
 
         image(_img, x - _w * .5, y - _h * .5, _w, _h, 0, 0, _img.width, _img.height);
@@ -339,12 +365,14 @@ function drawEverything(saving = false) {
       }
     }
   } else { // generate HQ image for saving
+    console.log("Creating save graphics...");
     let to_save = createGraphics(bg.width, bg.height);
     to_save.background(0);
     to_save.image(bg, 0, 0);
 
-    let i = 0;
     let now = new Date();
+    console.log("Number of flowers to save:", flowers.length);
+    
     for (let f of flowers) {
       // Skip invalid flowers
       if (!f.QR_id || !QR_map[f.QR_id] || !QR_map[f.QR_id].name) {
@@ -360,23 +388,33 @@ function drawEverything(saving = false) {
       let _w, _h, _img;
 
       // currently a day will change the plant
-      let date_diff = Math.floor(dateDifference(now, f.timestamp));
+      let date_diff = Math.floor(dateDifference(now, new Date(f.timestamp)));
       let idx = 0;
       if ((date_diff / 5) > 4) idx = 4;
       else idx = Math.floor(date_diff / 5);
 
+      let plantName = QR_map[f.QR_id].name;
+      console.log("Processing plant for save:", plantName, "at stage", idx);
+
       // Check if plant images are loaded
-      if (!plant_images[QR_map[f.QR_id].name] || !plant_images[QR_map[f.QR_id].name][idx]) {
-        console.warn("Plant image not loaded for flower:", f);
+      if (!plant_images[plantName] || !plant_images[plantName][idx]) {
+        console.warn("Plant image not loaded for flower:", {
+          plantName,
+          stage: idx,
+          availableImages: plant_images[plantName]
+        });
         continue;
       }
 
-      _img = plant_images[QR_map[f.QR_id].name][idx];
+      _img = plant_images[plantName][idx];
       _w = (_img.width * QR_map[f.QR_id].hd_scale) * sc;
       _h = (_img.height * QR_map[f.QR_id].hd_scale) * sc;
 
+      console.log("Drawing plant at:", x, y, "with size:", _w, _h);
       to_save.image(_img, x - _w * .5, y - _h * .5, _w, _h, 0, 0, _img.width, _img.height);
     }
+    
+    console.log("Save graphics created successfully");
     return to_save;
   }
 
@@ -447,7 +485,8 @@ async function loadData() {
         color: color(f.color || "white"),
         id: f.id,
         QR_id: qrId,
-        timestamp: f.timestamp || new Date().toISOString()
+        timestamp: f.timestamp || new Date().toISOString(),
+        propagationType: f.propagationType || 'manual' // Set default propagationType for existing plants
       };
     });
     
@@ -609,52 +648,62 @@ function mousePressed() {
     const maskY = Math.floor(imageY);
     const maskPixel = mask.get(maskX, maskY);
     
+    // Get the selected plant type from the dropdown
+    const plantTypeSelect = document.getElementById('plantType');
+    const plantType = plantTypeSelect ? parseInt(plantTypeSelect.value) : 0;
+    
     // If the mask pixel is black (0,0,0), it's a valid position (grass)
     if (maskPixel[0] === 0 && maskPixel[1] === 0 && maskPixel[2] === 0) {
-      const plantType = parseInt(document.getElementById('plantType').value);
-      const newFlower = {
-        location: {
-          x: imageX,
-          y: imageY
-        },
-        color: pendingFlowerColor,
-        QR_id: plantType,
-        timestamp: new Date().toISOString()
-      };
+      const plantName = QR_map[plantType].name;
+      const suitableAreas = plantInfo[plantName].suitableAreas;
       
-      // First add to local array to maintain current functionality
-      flowers.push({
-        location: newFlower.location,
-        color: color(pendingFlowerColor),
-        QR_id: plantType,
-        timestamp: newFlower.timestamp
-      });
-      redraw = true;
+      if (isValidPlantLocation(imageX, imageY, suitableAreas)) {
+        const newFlower = {
+          location: {
+            x: imageX,
+            y: imageY
+          },
+          color: pendingFlowerColor,
+          QR_id: plantType,
+          timestamp: new Date().toISOString(),
+          propagationType: 'manual'
+        };
+        
+        // First add to local array to maintain current functionality
+        flowers.push({
+          location: newFlower.location,
+          color: color(pendingFlowerColor),
+          QR_id: plantType,
+          timestamp: newFlower.timestamp,
+          propagationType: 'manual'
+        });
+        redraw = true;
 
-      // Then try to save to Firebase
-      window.addFlower(newFlower).then(flowerId => {
-        if (flowerId) {
-          // Create and show confirmation popup
-          const popup = document.createElement('div');
-          popup.className = 'confirmation-popup';
-          
-          // Add success message
-          const message = document.createElement('p');
-          message.textContent = 'Flower successfully added!';
-          popup.appendChild(message);
-          
-          // Add close button
-          const closeBtn = document.createElement('button');
-          closeBtn.textContent = 'OK';
-          closeBtn.className = 'success-btn';
-          closeBtn.onclick = () => {
-            document.body.removeChild(popup);
-          };
-          popup.appendChild(closeBtn);
-          
-          document.body.appendChild(popup);
-        }
-      });
+        // Then try to save to Firebase
+        window.addFlower(newFlower).then(flowerId => {
+          if (flowerId) {
+            // Create and show confirmation popup
+            const popup = document.createElement('div');
+            popup.className = 'confirmation-popup';
+            
+            // Add success message
+            const message = document.createElement('p');
+            message.textContent = 'Flower successfully added!';
+            popup.appendChild(message);
+            
+            // Add close button
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = 'OK';
+            closeBtn.className = 'success-btn';
+            closeBtn.onclick = () => {
+              document.body.removeChild(popup);
+            };
+            popup.appendChild(closeBtn);
+            
+            document.body.appendChild(popup);
+          }
+        });
+      }
     }
     
     // Reset placement state regardless of whether flower was placed
@@ -697,8 +746,63 @@ function dateDifference(start, end) {
 // save triggered by menu
 // need to tweak this to save the full res...
 function saveImage() {
-  let ret = drawEverything(saving=true);
-  ret.save("floara.png");
+  console.log("Starting save process...");
+  console.log("Number of flowers:", flowers.length);
+  
+  // Create a new graphics buffer
+  let saveBuffer = createGraphics(bg.width, bg.height);
+  
+  // Draw background
+  saveBuffer.background(0);
+  saveBuffer.image(bg, 0, 0);
+  
+  // Draw all flowers
+  let now = new Date();
+  for (let f of flowers) {
+    if (!f.QR_id || !QR_map[f.QR_id] || !QR_map[f.QR_id].name) {
+      console.warn("Skipping invalid flower:", f);
+      continue;
+    }
+    
+    let plantName = QR_map[f.QR_id].name;
+    console.log("Processing plant for save:", plantName);
+    
+    let x = f.location.x;
+    let y = f.location.y;
+    
+    // Calculate perspective
+    let sc = map(y, bg.height, bg.height * 0.2, 1.0, 0.001);
+    
+    // Calculate growth stage
+    let date_diff = Math.floor(dateDifference(now, new Date(f.timestamp)));
+    let idx = Math.min(4, Math.floor(date_diff / 5));
+    console.log("Plant stage:", idx);
+    
+    // Get plant image
+    if (!plant_images[plantName] || !plant_images[plantName][idx]) {
+      console.warn("Plant image not loaded:", {
+        plantName,
+        stage: idx,
+        availableImages: plant_images[plantName]
+      });
+      continue;
+    }
+    
+    let _img = plant_images[plantName][idx];
+    console.log("Plant image loaded:", _img.width, "x", _img.height);
+    
+    // Calculate dimensions
+    let _w = (_img.width * QR_map[f.QR_id].hd_scale) * sc;
+    let _h = (_img.height * QR_map[f.QR_id].hd_scale) * sc;
+    console.log("Drawing plant at:", x, y, "with size:", _w, _h);
+    
+    // Draw plant
+    saveBuffer.image(_img, x - _w * .5, y - _h * .5, _w, _h, 0, 0, _img.width, _img.height);
+  }
+  
+  console.log("Saving image...");
+  saveBuffer.save('floara.png');
+  console.log("Save complete");
 }
 
 // Add new function to update hoveredFlower
@@ -737,10 +841,14 @@ function updateHoveredFlower() {
 
 // Add new function to show plant information
 function showPlantInfo(flower) {
-  const flowerType = QR_map[flower.QR_id].name;
+  // If there's already an active popup, don't create a new one
+  if (activePlantPopup) {
+    return;
+  }
+
+  const plantName = QR_map[flower.QR_id].name;
   const placementDate = new Date(flower.timestamp);
-  const now = new Date();
-  const ageDays = Math.floor(dateDifference(now, placementDate));
+  const ageDays = Math.floor((new Date() - placementDate) / (1000 * 60 * 60 * 24));
   const growthStageIndex = Math.min(4, Math.floor(ageDays / 5));
   
   // Create overlay
@@ -751,17 +859,20 @@ function showPlantInfo(flower) {
   // Create info popup
   const popup = document.createElement('div');
   popup.className = 'plant-info-popup';
+  activePlantPopup = popup; // Store reference to active popup
   
   // Add content
   const content = document.createElement('div');
   content.className = 'plant-info-content';
   content.innerHTML = `
-    <h2>${flowerType}</h2>
+    <h2>${plantName}</h2>
     <div class="info-section">
       <h4>Plant Details</h4>
       <p>Age: ${ageDays} days</p>
       <p>Growth Stage: ${growthStageIndex + 1} of 5</p>
       <p>Planted: ${placementDate.toLocaleDateString()} at ${placementDate.toLocaleTimeString()}</p>
+      <p>Type: ${flower.propagationType === 'manual' ? 'Manually Planted' : 'Naturally Propagated'}</p>
+      ${flower.propagationType === 'propagated' ? `<p>Parent Plant ID: ${flower.parentId}</p>` : ''}
     </div>
   `;
   popup.appendChild(content);
@@ -773,8 +884,112 @@ function showPlantInfo(flower) {
   closeBtn.onclick = () => {
     document.body.removeChild(overlay);
     document.body.removeChild(popup);
+    activePlantPopup = null; // Clear the active popup reference
   };
   popup.appendChild(closeBtn);
   
   document.body.appendChild(popup);
+}
+
+// Add new function for plant propagation
+function propagatePlants() {
+  console.log("Starting plant propagation...");
+  
+  for (const flower of flowers) {
+    const plantName = QR_map[flower.QR_id].name;
+    const plant = plantInfo[plantName];
+    
+    console.log(`Checking propagation for ${plantName}...`);
+    
+    // Only propagate if random chance succeeds
+    if (Math.random() < plant.propagationRate) {
+      console.log(`Propagation chance succeeded for ${plantName}`);
+      
+      // Try to find a suitable location within propagation radius
+      const angle = Math.random() * Math.PI * 2;
+      const distance = Math.random() * plant.propagationRadius;
+      const newX = flower.location.x + Math.cos(angle) * distance;
+      const newY = flower.location.y + Math.sin(angle) * distance;
+      
+      console.log(`Attempting propagation at location: (${newX}, ${newY})`);
+      
+      // Check if the new location is valid
+      if (isValidPlantLocation(newX, newY, plant.suitableAreas)) {
+        console.log("Location is valid for propagation");
+        
+        // Create the new flower data
+        const newFlower = {
+          location: { x: newX, y: newY },
+          color: flower.color.toString(), // Convert p5 color to string
+          QR_id: flower.QR_id,
+          timestamp: new Date().toISOString(),
+          propagationType: 'propagated',
+          parentId: flower.id,
+          type: plantName // Add plant type for easier querying
+        };
+        
+        console.log("Attempting to save to Firestore:", newFlower);
+        
+        // Add to Firestore first
+        if (window.addFlower) {
+          window.addFlower(newFlower)
+            .then(flowerId => {
+              if (flowerId) {
+                console.log(`Successfully saved to Firestore with ID: ${flowerId}`);
+                // Only add to local array after successful database save
+                newFlower.id = flowerId;
+                flowers.push({
+                  ...newFlower,
+                  color: color(newFlower.color) // Convert string color back to p5 color
+                });
+                redraw = true;
+              } else {
+                console.error("Firestore returned null ID for propagated plant");
+              }
+            })
+            .catch(error => {
+              console.error("Error saving propagated plant to Firestore:", error);
+            });
+        } else {
+          console.error("window.addFlower is not defined - Firestore integration may be missing");
+        }
+      } else {
+        console.log("Location is not valid for propagation");
+      }
+    } else {
+      console.log(`Propagation chance failed for ${plantName}`);
+    }
+  }
+}
+
+// Add function to check if location is valid for plant type
+function isValidPlantLocation(x, y, suitableAreas) {
+  // Get the pixel color at the location
+  const maskX = Math.floor(x);
+  const maskY = Math.floor(y);
+  const maskPixel = mask.get(maskX, maskY);
+  
+  // Check if the location is within bounds
+  if (maskX < 0 || maskX >= mask.width || maskY < 0 || maskY >= mask.height) {
+    return false;
+  }
+  
+  // Determine the area type based on mask color
+  let areaType;
+  if (maskPixel[0] === 0 && maskPixel[1] === 0 && maskPixel[2] === 0) {
+    areaType = 'grass';
+  } else if (maskPixel[0] === 255 && maskPixel[1] === 255 && maskPixel[2] === 255) {
+    areaType = 'water';
+  } else {
+    return false;
+  }
+  
+  // Check if the area type is suitable for the plant
+  return suitableAreas.includes(areaType);
+}
+
+// Add new function for filtering plants
+function filterPlants(filter) {
+  plantFilter = filter;
+  redraw = true;
 }

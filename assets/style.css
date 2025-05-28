@@ -179,21 +179,10 @@ canvas {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  z-index: 999;
-  animation: overlayFadeIn 0.3s ease-out;
-}
-
-@keyframes overlayFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  z-index: 1000;
 }
 
 /* Confirmation popup styles */
@@ -344,13 +333,26 @@ canvas {
   color: #2c3e50;
 }
 
-/* Ensure modal overlay is styled properly */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
+/* Add styling for the select menu item */
+.menu select.menuItem#plantFilter {
+  /* Inherit basic menu item styles */
+  -webkit-appearance: none; /* Remove default browser styling */
+  -moz-appearance: none;
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: 0; /* Remove default padding */
+  margin: 2rem 4rem; /* Match other menu items */
+  font-size: 1.4rem; /* Match other menu items */
+  color: white; /* Match other menu items */
+  cursor: pointer;
+  font-family: "Quicksand", "sans-serif"; /* Match other menu items */
 }
+
+/* Add a custom arrow for the select dropdown */
+.menu .menuItem#plantFilter::-ms-expand {
+  display: none;
+}
+
+/* Style the container or add a wrapper if more complex styling needed */
+/* For a simple arrow, you might need to use a background image or a pseudo-element */
