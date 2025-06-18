@@ -21,6 +21,7 @@ let touch_timer;
 let QR_map = {
   0: { name: 'Milkweed', scale: 0.4, hd_scale: 0.7 },
   1: { name: 'Nymphaea', scale: 0.04, hd_scale: 0.07 },
+  2: { name: 'Arrow-Arum-Peltandra-Virginica', scale: 0.2, hd_scale: 0.07 },
   99: { name: 'Piranha', scale: 0.4 },
 }
 let plant_images = {};
@@ -70,6 +71,22 @@ let plantInfo = {
     propagationRadius: 50,
     suitableAreas: ['water']
   },
+  'Arrow-Arum-Peltandra-Virginica': {
+    scientificName: "Placeholder",
+    description: "A placeholder plant",
+    growthStages: [
+      "Stage 1",
+      "Stage 2",
+      "Stage 3",
+      "Stage 4",
+      "Stage 5"
+    ],
+    nativeRegion: "Placeholder",
+    ecology: "Placeholder",
+    propagationRate: 0.95,
+    propagationRadius: 50,
+    suitableAreas: ['grass']
+  },
   'Piranha': {
     scientificName: "Placeholder",
     description: "A placeholder plant",
@@ -113,7 +130,8 @@ function preload() {
   plant_images = {
     'Milkweed': [],
     'Nymphaea': [],
-    'Piranha': []
+    'Piranha': [],
+    'Arrow-Arum-Peltandra-Virginica': [],
   };
 
   // Load Milkweed images - using same image for all stages for now
@@ -126,6 +144,12 @@ function preload() {
   for (let i = 1; i <= 5; i++) {
     const nymphaeaImg = loadImage(`assets/img/Nymphaea-Odorata-Ella-Kane/nymphaea_odorata_stage${i}.png`);
     plant_images['Nymphaea'].push(nymphaeaImg);
+  }
+
+  // Load Peltandra-Virginica images
+  for (let i = 1; i <= 5; i++) {
+    const peltandraImg = loadImage(`assets/img/Arrow-Arum-Peltandra-Virginica/Colored/Arrow_Arum_Stage_${i}.png`);
+    plant_images['Arrow-Arum-Peltandra-Virginica'].push(peltandraImg);
   }
 
   // Load Piranha images - using Milkweed image as placeholder
@@ -452,6 +476,9 @@ async function loadData() {
           case 'nymphaea':
             qrId = 1;
             break;
+          case 'arrow-arum-peltandra-virginica':
+            qrId = 2;
+            break;
           case 'piranha':
             qrId = 99;
             break;
@@ -466,6 +493,9 @@ async function loadData() {
             break;
           case 'nymphaea':
             qrId = 1;
+            break;
+          case 'arrow-arum-peltandra-virginica':
+            qrId = 2;
             break;
           case 'piranha':
             qrId = 99;
