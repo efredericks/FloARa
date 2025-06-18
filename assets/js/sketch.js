@@ -22,6 +22,7 @@ let QR_map = {
   0: { name: 'Milkweed', scale: 0.4, hd_scale: 0.7 },
   1: { name: 'Nymphaea', scale: 0.04, hd_scale: 0.07 },
   2: { name: 'Arrow-Arum-Peltandra-Virginica', scale: 0.2, hd_scale: 0.07 },
+  3: { name: 'Paper-Birch', scale: 0.2, hd_scale: 0.07 },
   99: { name: 'Piranha', scale: 0.4 },
 }
 let plant_images = {};
@@ -70,6 +71,22 @@ let plantInfo = {
     propagationRate: 0.05,
     propagationRadius: 50,
     suitableAreas: ['water']
+  },
+  'Paper-Birch': {
+    scientificName: "Placeholder",
+    description: "A placeholder plant",
+    growthStages: [
+      "Stage 1",
+      "Stage 2",
+      "Stage 3",
+      "Stage 4",
+      "Stage 5"
+    ],
+    nativeRegion: "Placeholder",
+    ecology: "Placeholder",
+    propagationRate: 0.05,
+    propagationRadius: 50,
+    suitableAreas: ['grass']
   },
   'Arrow-Arum-Peltandra-Virginica': {
     scientificName: "Placeholder",
@@ -132,6 +149,7 @@ function preload() {
     'Nymphaea': [],
     'Piranha': [],
     'Arrow-Arum-Peltandra-Virginica': [],
+    'Paper-Birch': [],
   };
 
   // Load Milkweed images - using same image for all stages for now
@@ -150,6 +168,12 @@ function preload() {
   for (let i = 1; i <= 5; i++) {
     const peltandraImg = loadImage(`assets/img/Arrow-Arum-Peltandra-Virginica/Colored/Arrow_Arum_Stage_${i}.png`);
     plant_images['Arrow-Arum-Peltandra-Virginica'].push(peltandraImg);
+  }
+
+  // Load Paper Birch images
+  for (let i = 1; i <= 5; i++) {
+    const birchImg = loadImage(`assets/img/Paper-Birch/Colored/Paper_Birch_Stage_${i}.png`);
+    plant_images['Paper-Birch'].push(birchImg);
   }
 
   // Load Piranha images - using Milkweed image as placeholder
@@ -479,6 +503,9 @@ async function loadData() {
           case 'arrow-arum-peltandra-virginica':
             qrId = 2;
             break;
+          case 'paper-birch':
+            qrId = 3;
+            break;
           case 'piranha':
             qrId = 99;
             break;
@@ -496,6 +523,9 @@ async function loadData() {
             break;
           case 'arrow-arum-peltandra-virginica':
             qrId = 2;
+            break;
+          case 'paper-birch':
+            qrId = 3;
             break;
           case 'piranha':
             qrId = 99;
