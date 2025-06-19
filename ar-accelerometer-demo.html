@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AR Accelerometer Plant Placement Demo</title>
+  <script src="./assets/js/p5.js"></script>
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: #eaf6f6; }
+    #placeBtn {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 18px 36px;
+      font-size: 1.3rem;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      z-index: 10;
+      cursor: pointer;
+    }
+    #placeBtn:active { background: #388e3c; }
+    .plant {
+      fill: #4CAF50;
+      stroke: #388e3c;
+      stroke-width: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div id="motionMsg" style="position:fixed;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.95);z-index:100;font-size:1.3rem;color:#388e3c;">Tap anywhere to enable motion controls</div>
+  <div style="position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:10px;">
+    <label style="font-size:1rem;color:#388e3c;">
+      Plant:
+      <select id="plantType">
+        <option value="milkweed">Milkweed</option>
+        <option value="nymphaea">Nymphaea</option>
+      </select>
+    </label>
+    <label style="font-size:1rem;color:#388e3c;">
+      Stage:
+      <select id="plantStage">
+        <option value="0">1</option>
+        <option value="1">2</option>
+        <option value="2">3</option>
+        <option value="3">4</option>
+        <option value="4">5</option>
+      </select>
+    </label>
+  </div>
+  <button id="placeBtn">Place Plant</button>
+  <script src="assets/js/accelerometer-placement.js"></script>
+</body>
+</html> 
