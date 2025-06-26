@@ -333,20 +333,25 @@ canvas {
   color: #2c3e50;
 }
 
-/* Add styling for the select menu item */
+/* Modern override for all label, select, option, and menuItem text */
+label, select, option, .menuItem, .flower-popup label, .flower-popup select, .flower-popup option {
+  color: #263238 !important;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+}
+
+/* Specifically override the menu dropdown */
 .menu select.menuItem#plantFilter {
-  /* Inherit basic menu item styles */
-  -webkit-appearance: none; /* Remove default browser styling */
-  -moz-appearance: none;
-  appearance: none;
-  background: transparent;
-  border: none;
-  padding: 0; /* Remove default padding */
-  margin: 2rem 4rem; /* Match other menu items */
-  font-size: 1.4rem; /* Match other menu items */
-  color: white; /* Match other menu items */
-  cursor: pointer;
-  font-family: "Quicksand", "sans-serif"; /* Match other menu items */
+  color: #263238 !important;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+  background: #fff;
+  border: 1.5px solid #26a69a;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 1.1rem;
+}
+
+.menu select.menuItem#plantFilter:focus {
+  border-color: #2196f3;
 }
 
 /* Add a custom arrow for the select dropdown */
