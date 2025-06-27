@@ -275,14 +275,6 @@ function draw() {
       redraw = true;
     }
 
-    if (window.shaders_on) {
-      rgb_fs.setUniform("_noise", 0.1);
-      filter(rgb_fs);
-      tv_fs.setUniform("_noise", 0.5 * cos(millis() * 0.001));
-      filter(tv_fs);
-      dither_fs.setUniform("which", 2);
-      filter(dither_fs);
-    }
 
     if (touches.length > 2) {
       if (touch_timer == 0)
@@ -293,21 +285,38 @@ function draw() {
   } else {
     // animate from beginning until all flowers placed
     drawEverything();
-    if ((flowers.length < animating_flowers.length) && (frameCount % animate_interval == 0)) {
-      flowers.push(animating_flowers[animating_index]);
 
-      // sort flowers array on y location so things in front don't get overdrawn
-      flowers = flowers.sort((x, y) => {
-        return x.location.y > y.location.y;
-      });
+    // transition timing
+    if (animating_index < 0) animating_index++;
+    else {
+      window.shaders_on = false;
 
-      // increment index and check if done
-      animating_index++;
-      if (animating_index > animating_flowers.length - 1) { // done
-        is_animating = false;
-        animating_index = animating_flowers.length - 1;
+      if ((flowers.length < animating_flowers.length) && (frameCount % animate_interval == 0)) {
+        flowers.push(animating_flowers[animating_index]);
+
+        // sort flowers array on y location so things in front don't get overdrawn
+        flowers = flowers.sort((x, y) => {
+          return x.location.y > y.location.y;
+        });
+
+        // increment index and check if done
+        animating_index++;
+        if (animating_index > animating_flowers.length - 1) { // done
+          is_animating = false;
+          animating_index = animating_flowers.length - 1;
+        }
       }
     }
+  }
+
+  // things that happen at the end regardless of state
+  if (window.shaders_on) {
+    rgb_fs.setUniform("_noise", 0.3);
+    filter(rgb_fs);
+    tv_fs.setUniform("_noise", 0.5 * cos(millis() * 0.01));
+    filter(tv_fs);
+    dither_fs.setUniform("which", 2);
+    filter(dither_fs);
   }
 }
 
@@ -1093,7 +1102,9 @@ function filterPlants(filter) {
 // sort them by date, then add them back to the main flowers list based on frameCount
 function animateStart() {
   is_animating = true;
-  animating_index = 0;
+  animating_index = -5;
+
+  window.shaders_on = true;
 
   // first time
   if (animating_flowers.length === 0) {
