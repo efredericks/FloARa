@@ -16,6 +16,12 @@ let dither_fs, tv_fs, rgb_fs;
 // let shaders_on; 
 let touch_timer;
 
+// play from start variables
+let animating_flowers = []; // backup list of flowers from firebase
+let animating_index = 0; // current index to draw
+let is_animating = false; // flag
+let animate_interval = 20; // mod for frameCount when re-adding flowers to scene
+
 // unsure if hd_scale is necessary or if my math is just off
 // TBD: probably would be better to render as full-def and then scale to viewport
 let QR_map = {
@@ -246,42 +252,63 @@ function setup() {
 }
 
 function draw() {
-  // Update hovered flower
-  updateHoveredFlower();
 
-  if (redraw) drawEverything();
+  if (!is_animating) {
+    // Update hovered flower
+    updateHoveredFlower();
 
-  // Check for propagation every 24 hours
-  const now = Date.now();
-  if (now - propagationTimer >= PROPAGATION_INTERVAL) {
-    propagatePlants();
-    propagationTimer = now;
+    if (redraw) drawEverything();
+
+    // Check for propagation every 24 hours
+    const now = Date.now();
+    if (now - propagationTimer >= PROPAGATION_INTERVAL) {
+      propagatePlants();
+      propagationTimer = now;
+    }
+
+    if (frameCount % 20 == 0 && flowers.length < 10000 && window.adding_flowers) {
+      flowers = addIndividualPlant(bg.width, bg.height, mask, flowers);
+      redraw = true;
+    }
+
+    if (window.animate_scene) {
+      redraw = true;
+    }
+
+    if (window.shaders_on) {
+      rgb_fs.setUniform("_noise", 0.1);
+      filter(rgb_fs);
+      tv_fs.setUniform("_noise", 0.5 * cos(millis() * 0.001));
+      filter(tv_fs);
+      dither_fs.setUniform("which", 2);
+      filter(dither_fs);
+    }
+
+    if (touches.length > 2) {
+      if (touch_timer == 0)
+        window.shaders_on = !window.shaders_on;
+      touch_timer = 10;
+    }
+    if (touch_timer > 0) touch_timer--; // avoid multi toggling
+  } else {
+    // animate from beginning until all flowers placed
+    drawEverything();
+    if ((flowers.length < animating_flowers.length) && (frameCount % animate_interval == 0)) {
+      flowers.push(animating_flowers[animating_index]);
+
+      // sort flowers array on y location so things in front don't get overdrawn
+      flowers = flowers.sort((x, y) => {
+        return x.location.y > y.location.y;
+      });
+
+      // increment index and check if done
+      animating_index++;
+      if (animating_index >= animating_flowers.length - 1) { // done
+        is_animating = false;
+        animating_index = animating_flowers.length - 1;
+      }
+    }
   }
-
-  if (frameCount % 20 == 0 && flowers.length < 10000 && window.adding_flowers) {
-    flowers = addIndividualPlant(bg.width, bg.height, mask, flowers);
-    redraw = true;
-  }
-
-  if (window.animate_scene) {
-    redraw = true;
-  }
-
-  if (window.shaders_on) {
-    rgb_fs.setUniform("_noise", 0.1);
-    filter(rgb_fs);
-    tv_fs.setUniform("_noise", 0.5 * cos(millis() * 0.001));
-    filter(tv_fs);
-    dither_fs.setUniform("which", 2);
-    filter(dither_fs);
-  }
-
-  if (touches.length > 2) {
-    if (touch_timer == 0)
-      window.shaders_on = !window.shaders_on;
-    touch_timer = 10;
-  }
-  if (touch_timer > 0) touch_timer--; // avoid multi toggling
 }
 
 function doubleClicked() {
@@ -786,6 +813,8 @@ function keyPressed() {
     isPlacingFlower = true;
     pendingFlowerColor = null;
     document.getElementById('flowerPopup').classList.add('active');
+  } else if (key == "A") {
+    animateStart();
   }
 }
 
@@ -1058,4 +1087,21 @@ function isValidPlantLocation(x, y, suitableAreas) {
 function filterPlants(filter) {
   plantFilter = filter;
   redraw = true;
+}
+
+// create a backup flowers array from the database
+// sort them by date, then add them back to the main flowers list based on frameCount
+function animateStart() {
+  is_animating = true;
+  animating_index = 0;
+
+  // first time
+  if (animating_flowers.length === 0) {
+    animating_flowers = flowers.sort((x, y) => {
+      return new Date(x.timestamp) - new Date(y.timestamp);
+    });
+    flowers = [];
+  } else { // going again
+    flowers = [];
+  }
 }
