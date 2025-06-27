@@ -303,7 +303,7 @@ function draw() {
 
       // increment index and check if done
       animating_index++;
-      if (animating_index >= animating_flowers.length - 1) { // done
+      if (animating_index > animating_flowers.length - 1) { // done
         is_animating = false;
         animating_index = animating_flowers.length - 1;
       }
