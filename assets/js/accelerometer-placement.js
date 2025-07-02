@@ -33,6 +33,64 @@ let placedPlantAnimations = [];
 // SVG for flower icon (as a string)
 const flowerSVG = `<svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="14" r="5" fill="#26a69a"/><g><ellipse cx="14" cy="5" rx="3" ry="5" fill="#80cbc4"/><ellipse cx="14" cy="23" rx="3" ry="5" fill="#80cbc4"/><ellipse cx="5" cy="14" rx="5" ry="3" fill="#80cbc4"/><ellipse cx="23" cy="14" rx="5" ry="3" fill="#80cbc4"/></g></svg>`;
 
+// --- Hamburger Menu Functions ---
+
+// 1. Toggle Adding Flowers
+window.adding_flowers = false;
+function updatePlaceBtnState() {
+  const btn = document.getElementById('placeBtn');
+  if (btn) btn.disabled = !window.adding_flowers;
+  console.log('[Menu] Place Plant button is now', window.adding_flowers ? 'ENABLED' : 'DISABLED');
+}
+window.toggleAddingFlowers = function() {
+  window.adding_flowers = !window.adding_flowers;
+  updatePlaceBtnState();
+  // Optional: visually indicate state
+  const btn = document.getElementById('placeBtn');
+  if (btn) btn.style.opacity = window.adding_flowers ? '1' : '0.5';
+  console.log('[Menu] Toggled adding flowers:', window.adding_flowers);
+};
+updatePlaceBtnState();
+
+// 2. Toggle Animation
+window.animate_scene = true;
+window.toggleAnimation = function() {
+  window.animate_scene = !window.animate_scene;
+  console.log('[Menu] Animation is now', window.animate_scene ? 'ON' : 'OFF');
+};
+
+// 3. Toggle Glitch Shaders
+window.shaders_on = false;
+window.toggleGlitchShaders = function() {
+  window.shaders_on = !window.shaders_on;
+  console.log('[Menu] Glitch shader is now', window.shaders_on ? 'ON' : 'OFF');
+};
+
+// 4. Save Image
+window.saveImage = function() {
+  console.log('[Menu] Saving image...');
+  saveCanvas('floara-ar', 'png');
+};
+
+// 5. Playback (Start from Beginning)
+window.playback = function() {
+  placedPlants = [];
+  console.log('[Menu] All plants cleared.');
+};
+
+// 6. Current (Start from Now)
+window.current = function() {
+  pulsePhase = 0;
+  console.log('[Menu] Animation phase reset.');
+};
+
+// 7. Filter Plants
+window.plantFilter = 'all';
+window.filterPlants = function(filter) {
+  window.plantFilter = filter;
+  console.log('[Menu] Plant filter set to', filter);
+};
+
 function preload() {
   bgImg = loadImage('assets/img/gvsu-hd.jpeg');
   // Milkweed stages 5-1 (reverse order for dropdown 1-5)
@@ -133,9 +191,9 @@ function draw() {
   easedViewfinder.x += (viewfinder.x - easedViewfinder.x) * ease;
   easedViewfinder.y += (viewfinder.y - easedViewfinder.y) * ease;
 
-  // Draw placed plants
+  // Draw placed plants (with filter)
   for (let p of placedPlants) {
-    drawPlantImg(p.x, p.y, p.type, p.stage);
+    drawPlantImg(p.x, p.y, p.type, p.stage, p.source || 'manual');
   }
 
   // --- Modern crosshair with pulse and glow ---
@@ -212,15 +270,43 @@ function draw() {
 
   // --- Snackbar ---
   if (showSnackbar) drawSnackbar();
+
+  // --- Glitch shader effect ---
+  if (window.shaders_on) {
+    applyGlitchShader();
+  }
 }
 
-function drawPlantImg(x, y, type, stage) {
+// --- Device Type Detection Helper ---
+function getDeviceType() {
+  const ua = navigator.userAgent;
+  const width = Math.min(window.innerWidth, window.innerHeight);
+  if (/Mobi|Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)) {
+    // Tablet detection: iPad or Android tablets (width > 600px)
+    if (/iPad|Tablet|Nexus 7|Nexus 10|KFAPWI|Silk/i.test(ua) || (width >= 600 && width < 1024)) {
+      return 'tablet';
+    }
+    return 'phone';
+  }
+  // Desktop or large tablet
+  if (width >= 1024) return 'desktop';
+  if (width >= 600) return 'tablet';
+  return 'phone';
+}
+
+function drawPlantImg(x, y, type, stage, source) {
+  if (window.plantFilter === 'manual' && source !== 'manual') return;
+  if (window.plantFilter === 'propagated' && source !== 'propagated') return;
   let img = plantImgs[type] && plantImgs[type][stage];
   if (img) {
-    // Responsive scale, clamped
+    let deviceType = getDeviceType();
     let baseScale = type === 'milkweed' ? 0.10 : 0.07;
-    let scale = baseScale * (min(width, height) / 600); // 600 is a reference size
-    scale = constrain(scale, 0.06, 0.16); // Clamp for reasonable min/max
+    // Adjust scale based on device type
+    if (deviceType === 'phone') baseScale *= 0.8; // smaller on phones
+    else if (deviceType === 'tablet') baseScale *= 1.25; // larger on tablets
+    // desktop: default
+    let scale = baseScale * (min(width, height) / 600);
+    scale = constrain(scale, 0.06, 0.18); // allow slightly larger max for tablets
     let w = img.width * scale;
     let h = img.height * scale;
     image(img, x - w/2, y - h/2, w, h);
@@ -228,9 +314,11 @@ function drawPlantImg(x, y, type, stage) {
 }
 
 document.getElementById('placeBtn').addEventListener('click', function() {
+  if (!window.adding_flowers) return;
   const type = document.getElementById('plantType').value;
   const stage = parseInt(document.getElementById('plantStage').value);
-  placedPlants.push({ x: viewfinder.x, y: viewfinder.y, type, stage });
+  placedPlants.push({ x: viewfinder.x, y: viewfinder.y, type, stage, source: 'manual' });
+  console.log('[Action] Plant placed at', viewfinder.x, viewfinder.y, 'type:', type, 'stage:', stage);
 });
 
 function windowResized() {
@@ -302,13 +390,16 @@ function createFAB() {
 }
 
 function onPlacePlant() {
-  // Place plant logic (call your existing placement function)
-  placePlantWithAnimation();
+  // Place plant at current viewfinder location
+  const type = document.getElementById('plantType').value;
+  const stage = parseInt(document.getElementById('plantStage').value);
+  placedPlants.push({ x: viewfinder.x, y: viewfinder.y, type, stage });
   // Haptic feedback
   if (window.navigator.vibrate) window.navigator.vibrate(30);
   // Snackbar
   showSnackbar = true;
   snackbarTimer = millis();
+  // Optionally, trigger animation if you want (e.g., call animatePlacedPlants or similar)
 }
 
 // --- Snackbar ---
@@ -405,4 +496,30 @@ function drawPlantAt(plant, scale) {
   scale(scale);
   // ... draw plant image based on plant.type and plant.stage ...
   pop();
+}
+
+// --- Glitch Shader (simple invert effect) ---
+function applyGlitchShader() {
+  loadPixels();
+  for (let i = 0; i < pixels.length; i += 4) {
+    pixels[i] = 255 - pixels[i];     // R
+    pixels[i+1] = 255 - pixels[i+1]; // G
+    pixels[i+2] = 255 - pixels[i+2]; // B
+  }
+  updatePixels();
+}
+
+// --- Update Place Plant button state on load ---
+document.addEventListener('DOMContentLoaded', updatePlaceBtnState);
+
+// --- Update Place Plant button state on menu toggle ---
+const placeBtn = document.getElementById('placeBtn');
+if (placeBtn) {
+  placeBtn.addEventListener('click', function() {
+    if (!window.adding_flowers) return;
+    const type = document.getElementById('plantType').value;
+    const stage = parseInt(document.getElementById('plantStage').value);
+    placedPlants.push({ x: viewfinder.x, y: viewfinder.y, type, stage, source: 'manual' });
+    console.log('[Action] Plant placed at', viewfinder.x, viewfinder.y, 'type:', type, 'stage:', stage);
+  });
 } 

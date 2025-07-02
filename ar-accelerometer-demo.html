@@ -101,10 +101,12 @@
 
       // toggle p5 vars
       if (e !== undefined) {
-        if (e.id == 'toggle_anim') window.animate_scene = !window.animate_scene;
-        else if (e.id == 'toggle_glitch') window.shaders_on = !window.shaders_on;
-        else if (e.id == 'toggle_adding') window.adding_flowers = !window.adding_flowers;
-        else if (e.id == 'save') saveImage && saveImage();
+        if (e.id == 'toggle_anim') window.toggleAnimation && window.toggleAnimation();
+        else if (e.id == 'toggle_glitch') window.toggleGlitchShaders && window.toggleGlitchShaders();
+        else if (e.id == 'toggle_adding') window.toggleAddingFlowers && window.toggleAddingFlowers();
+        else if (e.id == 'save') window.saveImage && window.saveImage();
+        else if (e.id == 'playback') window.playback && window.playback();
+        else if (e.id == 'current') window.current && window.current();
       }
     }
 
