@@ -13,7 +13,7 @@
 
 <body>
   <ul class="menu">
-    <li><span class="menuHeader menuItem">Experience options:</span></li>
+    <li><span class="menuHeader">Experience options:</span></li>
     <li><a class="menuItem" id="playback" href="#">Start from beginning</a></li>
     <li><a class="menuItem" id="toggle_anim" href="#">Toggle animation</a></li>
     <li><a class="menuItem" id="save" href="#">Save image</a></li>
@@ -24,7 +24,7 @@
         <option value="propagated">Show propagated plants</option>
       </select>
     </li>
-    <li><span class="menuHeader menuItem">--debugging--</span></li>
+    <li><span class="menuHeader">--debugging--</span></li>
     <li><a class="menuItem" id="toggle_adding" href="#">toggle adding flowers</a></li>
     <li><a class="menuItem" id="toggle_glitch" href="#">toggle glitch shaders</a></li>
     <li><a class="menuItem" id="current" href="#">start from now</a></li>
@@ -67,6 +67,7 @@
     // GUI
     const menu = document.querySelector(".menu");
     const menuItems = document.querySelectorAll(".menuItem");
+    const menuHeaders = document.querySelectorAll(".menuHeader");
     const hamburger = document.querySelector(".hamburger");
     const closeIcon = document.querySelector(".closeIcon");
     const menuIcon = document.querySelector(".menuIcon");
@@ -84,6 +85,7 @@
 
         // show/hide each menu item as it was being wonky on mobile
         menuItems.forEach((m) => { m.style.display = "none"; });
+        menuHeaders.forEach((m) => { m.style.display = "none"; });
       } else {
         menu.classList.add("showMenu");
         closeIcon.style.display = "block";
@@ -91,6 +93,7 @@
 
         // show/hide each menu item as it was being wonky on mobile
         menuItems.forEach((m) => { m.style.display = "block"; });
+        menuHeaders.forEach((m) => { m.style.display = "block"; });
       }
 
 
