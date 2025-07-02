@@ -29,7 +29,8 @@ canvas {
 }
 
 .menuItem {
-  display: block;
+  display:none;
+  /* display: block; */
   margin: 1rem 5rem;
   font-size: 2.4rem;
   /* color: white; */
