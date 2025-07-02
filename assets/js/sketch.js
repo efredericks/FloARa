@@ -187,7 +187,8 @@ function preload() {
     plant_images['Piranha'].push(milkweedImg);
   }
 
-  font = loadFont("assets/fonts/Quicksand-Medium.ttf");
+  // font = loadFont("assets/fonts/Quicksand-Medium.ttf");
+  font = loadFont("assets/fonts/BenchNine-Regular.ttf");
 
   console.log("Preload complete. Plant images:", plant_images);
 }
