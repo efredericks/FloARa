@@ -17,6 +17,8 @@ let dither_fs, tv_fs, rgb_fs;
 // let shaders_on; 
 let touch_timer;
 
+let modalActive = false;
+
 // play from start variables
 let animating_flowers = []; // backup list of flowers from firebase
 let animating_index = 0; // current index to draw
@@ -688,122 +690,21 @@ function windowResized() {
 //press 1-9 to place a flower
 
 function mousePressed() {
-  const w_aspect = bg.width / width;
-  const h_aspect = bg.height / (bg.height / w_aspect);
+  // disable all interactivity if a modal window is open
+  if (!modalActive) {
+    const w_aspect = bg.width / width;
+    const h_aspect = bg.height / (bg.height / w_aspect);
 
-  // Convert mouse coordinates to image coordinates
-  const imageX = mouseX * w_aspect;
-  const imageY = mouseY * h_aspect;
+    // Convert mouse coordinates to image coordinates
+    const imageX = mouseX * w_aspect;
+    const imageY = mouseY * h_aspect;
 
-  if (mouseButton === RIGHT) {
-    // Handle right-click for flower removal
-    if (imageX >= 0 && imageX <= bg.width && imageY >= 0 && imageY <= bg.height) {
-      let closestFlower = null;
-      let minDistance = Infinity;
+    if (mouseButton === RIGHT) {
+      // Handle right-click for flower removal
+      if (imageX >= 0 && imageX <= bg.width && imageY >= 0 && imageY <= bg.height) {
+        let closestFlower = null;
+        let minDistance = Infinity;
 
-      for (let i = 0; i < flowers.length; i++) {
-        const flower = flowers[i];
-        const dx = flower.location.x / w_aspect - mouseX;
-        const dy = flower.location.y / h_aspect - mouseY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        // Use larger radius for Milkweed (QR_id: 0)
-        const clickRadius = flower.QR_id === 0 ? 80 / w_aspect : 40 / w_aspect;
-
-        if (distance < clickRadius && distance < minDistance) {
-          minDistance = distance;
-          closestFlower = { index: i, flower: flower };
-        }
-      }
-
-      // If hovering over a flower, prioritize that one for deletion
-      if (hoveredFlower && !closestFlower) {
-        const index = flowers.findIndex(f => f === hoveredFlower);
-        if (index !== -1) {
-          closestFlower = { index, flower: hoveredFlower };
-        }
-      }
-
-      if (closestFlower && closestFlower.flower.id) {
-        // Create overlay
-        const overlay = document.createElement('div');
-        overlay.className = 'modal-overlay';
-        document.body.appendChild(overlay);
-
-        // Show confirmation popup
-        const popup = document.createElement('div');
-        popup.className = 'confirmation-popup';
-
-        // Add confirmation message with flower type
-        const message = document.createElement('p');
-        const flowerType = QR_map[closestFlower.flower.QR_id].name;
-        message.textContent = `Remove this ${flowerType}?`;
-        popup.appendChild(message);
-
-        // Add button container
-        const buttonContainer = document.createElement('div');
-        buttonContainer.className = 'button-container';
-
-        // Add cancel button
-        const cancelBtn = document.createElement('button');
-        cancelBtn.textContent = 'Cancel';
-        cancelBtn.className = 'cancel-btn';
-        cancelBtn.onclick = () => {
-          document.body.removeChild(overlay);
-          document.body.removeChild(popup);
-        };
-
-        // Add confirm button
-        const confirmBtn = document.createElement('button');
-        confirmBtn.textContent = 'Remove';
-        confirmBtn.className = 'confirm-btn';
-        confirmBtn.onclick = async () => {
-          const success = await window.deleteFlower(closestFlower.flower.id);
-          if (success) {
-            flowers.splice(closestFlower.index, 1);
-            redraw = true;
-
-            // Show success message
-            const successPopup = document.createElement('div');
-            successPopup.className = 'confirmation-popup';
-
-            const successMessage = document.createElement('p');
-            successMessage.textContent = 'Flower removed successfully!';
-            successPopup.appendChild(successMessage);
-
-            const okBtn = document.createElement('button');
-            okBtn.textContent = 'OK';
-            okBtn.className = 'success-btn';
-            okBtn.onclick = () => {
-              document.body.removeChild(successPopup);
-            };
-            successPopup.appendChild(okBtn);
-
-            document.body.appendChild(successPopup);
-          }
-          document.body.removeChild(overlay);
-          document.body.removeChild(popup);
-        };
-
-        buttonContainer.appendChild(cancelBtn);
-        buttonContainer.appendChild(confirmBtn);
-        popup.appendChild(buttonContainer);
-
-        document.body.appendChild(popup);
-      }
-    }
-    return false; // Prevent default context menu
-  } else if (mouseButton === LEFT && !isPlacingFlower) {
-    // Handle left-click for plant information
-    if (imageX >= 0 && imageX <= bg.width && imageY >= 0 && imageY <= bg.height) {
-      let selectedFlower = null;
-      let minDistance = Infinity;
-
-      // First check if we're hovering over a flower
-      if (hoveredFlower) {
-        selectedFlower = hoveredFlower;
-      } else {
-        // Otherwise check for flowers within click radius
         for (let i = 0; i < flowers.length; i++) {
           const flower = flowers[i];
           const dx = flower.location.x / w_aspect - mouseX;
@@ -811,87 +712,193 @@ function mousePressed() {
           const distance = Math.sqrt(dx * dx + dy * dy);
 
           // Use larger radius for Milkweed (QR_id: 0)
-          const clickRadius = flower.QR_id === 0 ? 80 / w_aspect : 80 / w_aspect;
+          const clickRadius = flower.QR_id === 0 ? 80 / w_aspect : 40 / w_aspect;
 
           if (distance < clickRadius && distance < minDistance) {
             minDistance = distance;
-            selectedFlower = flower;
+            closestFlower = { index: i, flower: flower };
           }
         }
-      }
 
-      if (selectedFlower) {
-        showPlantInfo(selectedFlower);
-      }
-    }
-  } else if (isPlacingFlower && pendingFlowerColor) {
-    // Check if the clicked position is valid (on grass)
-    const maskX = Math.floor(imageX);
-    const maskY = Math.floor(imageY);
-    // const maskPixel = mask.get(maskX, maskY);
+        // If hovering over a flower, prioritize that one for deletion
+        if (hoveredFlower && !closestFlower) {
+          const index = flowers.findIndex(f => f === hoveredFlower);
+          if (index !== -1) {
+            closestFlower = { index, flower: hoveredFlower };
+          }
+        }
 
-    // Get the selected plant type from the dropdown
-    const plantTypeSelect = document.getElementById('plantType');
-    const plantType = plantTypeSelect ? parseInt(plantTypeSelect.value) : 0;
+        if (closestFlower && closestFlower.flower.id) {
+          // Create overlay
+          const overlay = document.createElement('div');
+          overlay.className = 'modal-overlay';
+          document.body.appendChild(overlay);
 
-    // If the mask pixel is black (0,0,0), it's a valid position (grass)
-    // if (maskPixel[0] === 0 && maskPixel[1] === 0 && maskPixel[2] === 0) {
-    // emf - removed as isValidPlantLocation handles this
-    const plantName = QR_map[plantType].name;
-    const suitableAreas = plantInfo[plantName].suitableAreas;
-
-    if (isValidPlantLocation(imageX, imageY, suitableAreas)) {
-      const newFlower = {
-        location: {
-          x: imageX,
-          y: imageY
-        },
-        color: pendingFlowerColor,
-        QR_id: plantType,
-        timestamp: new Date().toISOString(),
-        propagationType: 'manual'
-      };
-
-      // First add to local array to maintain current functionality
-      flowers.push({
-        location: newFlower.location,
-        color: color(pendingFlowerColor),
-        QR_id: plantType,
-        timestamp: newFlower.timestamp,
-        propagationType: 'manual'
-      });
-      redraw = true;
-
-      // Then try to save to Firebase
-      window.addFlower(newFlower).then(flowerId => {
-        if (flowerId) {
-          // Create and show confirmation popup
+          // Show confirmation popup
           const popup = document.createElement('div');
           popup.className = 'confirmation-popup';
 
-          // Add success message
+          // Add confirmation message with flower type
           const message = document.createElement('p');
-          message.textContent = 'Flower successfully added!';
+          const flowerType = QR_map[closestFlower.flower.QR_id].name;
+          message.textContent = `Remove this ${flowerType}?`;
           popup.appendChild(message);
 
-          // Add close button
-          const closeBtn = document.createElement('button');
-          closeBtn.textContent = 'OK';
-          closeBtn.className = 'success-btn';
-          closeBtn.onclick = () => {
+          // Add button container
+          const buttonContainer = document.createElement('div');
+          buttonContainer.className = 'button-container';
+
+          // Add cancel button
+          const cancelBtn = document.createElement('button');
+          cancelBtn.textContent = 'Cancel';
+          cancelBtn.className = 'cancel-btn';
+          cancelBtn.onclick = () => {
+            document.body.removeChild(overlay);
             document.body.removeChild(popup);
           };
-          popup.appendChild(closeBtn);
+
+          // Add confirm button
+          const confirmBtn = document.createElement('button');
+          confirmBtn.textContent = 'Remove';
+          confirmBtn.className = 'confirm-btn';
+          confirmBtn.onclick = async () => {
+            const success = await window.deleteFlower(closestFlower.flower.id);
+            if (success) {
+              flowers.splice(closestFlower.index, 1);
+              redraw = true;
+
+              // Show success message
+              const successPopup = document.createElement('div');
+              successPopup.className = 'confirmation-popup';
+
+              const successMessage = document.createElement('p');
+              successMessage.textContent = 'Flower removed successfully!';
+              successPopup.appendChild(successMessage);
+
+              const okBtn = document.createElement('button');
+              okBtn.textContent = 'OK';
+              okBtn.className = 'success-btn';
+              okBtn.onclick = () => {
+                document.body.removeChild(successPopup);
+              };
+              successPopup.appendChild(okBtn);
+
+              document.body.appendChild(successPopup);
+            }
+            document.body.removeChild(overlay);
+            document.body.removeChild(popup);
+          };
+
+          buttonContainer.appendChild(cancelBtn);
+          buttonContainer.appendChild(confirmBtn);
+          popup.appendChild(buttonContainer);
 
           document.body.appendChild(popup);
         }
-      });
-    }
-    // }
+      }
+      return false; // Prevent default context menu
+    } else if (mouseButton === LEFT && !isPlacingFlower) {
+      // Handle left-click for plant information
+      if (imageX >= 0 && imageX <= bg.width && imageY >= 0 && imageY <= bg.height) {
+        let selectedFlower = null;
+        let minDistance = Infinity;
 
-    // Reset placement state regardless of whether flower was placed
-    isPlacingFlower = false;
-    pendingFlowerColor = null;
+        // First check if we're hovering over a flower
+        if (hoveredFlower) {
+          selectedFlower = hoveredFlower;
+        } else {
+          // Otherwise check for flowers within click radius
+          for (let i = 0; i < flowers.length; i++) {
+            const flower = flowers[i];
+            const dx = flower.location.x / w_aspect - mouseX;
+            const dy = flower.location.y / h_aspect - mouseY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Use larger radius for Milkweed (QR_id: 0)
+            const clickRadius = flower.QR_id === 0 ? 80 / w_aspect : 80 / w_aspect;
+
+            if (distance < clickRadius && distance < minDistance) {
+              minDistance = distance;
+              selectedFlower = flower;
+            }
+          }
+        }
+
+        if (selectedFlower) {
+          showPlantInfo(selectedFlower);
+        }
+      }
+    } else if (isPlacingFlower && pendingFlowerColor) {
+      // Check if the clicked position is valid (on grass)
+      const maskX = Math.floor(imageX);
+      const maskY = Math.floor(imageY);
+      // const maskPixel = mask.get(maskX, maskY);
+
+      // Get the selected plant type from the dropdown
+      const plantTypeSelect = document.getElementById('plantType');
+      const plantType = plantTypeSelect ? parseInt(plantTypeSelect.value) : 0;
+
+      // If the mask pixel is black (0,0,0), it's a valid position (grass)
+      // if (maskPixel[0] === 0 && maskPixel[1] === 0 && maskPixel[2] === 0) {
+      // emf - removed as isValidPlantLocation handles this
+      const plantName = QR_map[plantType].name;
+      const suitableAreas = plantInfo[plantName].suitableAreas;
+
+      if (isValidPlantLocation(imageX, imageY, suitableAreas)) {
+        const newFlower = {
+          location: {
+            x: imageX,
+            y: imageY
+          },
+          color: pendingFlowerColor,
+          QR_id: plantType,
+          timestamp: new Date().toISOString(),
+          propagationType: 'manual'
+        };
+
+        // First add to local array to maintain current functionality
+        flowers.push({
+          location: newFlower.location,
+          color: color(pendingFlowerColor),
+          QR_id: plantType,
+          timestamp: newFlower.timestamp,
+          propagationType: 'manual'
+        });
+        redraw = true;
+
+        // Then try to save to Firebase
+        window.addFlower(newFlower).then(flowerId => {
+          if (flowerId) {
+            // Create and show confirmation popup
+            const popup = document.createElement('div');
+            popup.className = 'confirmation-popup';
+
+            // Add success message
+            const message = document.createElement('p');
+            message.textContent = 'Flower successfully added!';
+            popup.appendChild(message);
+            modalActive = true;
+
+            // Add close button
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = 'OK';
+            closeBtn.className = 'success-btn';
+            closeBtn.onclick = () => {
+              document.body.removeChild(popup);
+              modalActive = false;
+            };
+            popup.appendChild(closeBtn);
+
+            document.body.appendChild(popup);
+          }
+        });
+      }
+      // }
+
+      // Reset placement state regardless of whether flower was placed
+      isPlacingFlower = false;
+      pendingFlowerColor = null;
+    }
   }
 }
 
