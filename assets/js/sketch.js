@@ -62,7 +62,7 @@ let plantInfo = {
     propagationRate: 0.1,
     propagationRadius: 100,
     suitableAreas: ['grass'],
-    windDivider: 2400, 
+    windDivider: 2400,
   },
   'Nymphaea': {
     scientificName: "Placeholder",
@@ -79,7 +79,7 @@ let plantInfo = {
     propagationRate: 0.05,
     propagationRadius: 50,
     suitableAreas: ['water'],
-    windDivider: 3400, 
+    windDivider: 3400,
   },
   'Paper-Birch': {
     scientificName: "Placeholder",
@@ -96,7 +96,7 @@ let plantInfo = {
     propagationRate: 0.05,
     propagationRadius: 50,
     suitableAreas: ['grass'],
-    windDivider: 6400, 
+    windDivider: 6400,
   },
   'Arrow-Arum-Peltandra-Virginica': {
     scientificName: "Placeholder",
@@ -113,7 +113,7 @@ let plantInfo = {
     propagationRate: 0.95,
     propagationRadius: 50,
     suitableAreas: ['grass'],
-    windDivider: 2400, 
+    windDivider: 2400,
   },
   'Piranha': {
     scientificName: "Placeholder",
@@ -130,7 +130,7 @@ let plantInfo = {
     propagationRate: 0.15,
     propagationRadius: 150,
     suitableAreas: ['grass', 'water'],
-    windDivider: 2400, 
+    windDivider: 2400,
   }
 };
 
@@ -261,10 +261,12 @@ function setup() {
 function draw() {
 
   if (!is_animating) {
-    // Update hovered flower
-    updateHoveredFlower();
+    // // Update hovered flower
+    // updateHoveredFlower();
 
     if (redraw) drawEverything();
+    // Update hovered flower
+    updateHoveredFlower();
 
     // Check for propagation every 24 hours
     const now = Date.now();
@@ -328,7 +330,44 @@ function draw() {
 }
 
 function doubleClicked() {
-  window.shaders_on = !window.shaders_on;
+  // window.shaders_on = !window.shaders_on;
+  animateStart();
+}
+
+// return scaled flower image information
+function calculateImageInfo(flower, bg) {
+  let now = new Date();
+  let plantName = QR_map[flower.QR_id].name;
+
+  let date_diff = Math.floor(dateDifference(now, new Date(flower.timestamp)));
+  let idx = 0;
+  if ((date_diff / 5) > 4) idx = 4;
+  else idx = Math.floor(date_diff / 5);
+
+  // debugging
+  idx = GLOB_IDX;
+
+  let w_aspect = bg.width / width;
+  let h = bg.height / w_aspect;
+  let h_aspect = bg.height / h;
+  let x = (flower.location.x / w_aspect);
+  let y = (flower.location.y / h_aspect);
+
+  // perspective for 'farther away'
+  let sc = map(y, height, height * 0.2, 1.0, 0.001);
+  let _w, _h, _img;
+
+
+  // Check if plant images are loaded
+  if (!plant_images[plantName] || !plant_images[plantName][idx]) {
+    return null;
+  }
+
+  _img = plant_images[plantName][idx];
+  _w = (_img.width * QR_map[flower.QR_id].scale) * sc;
+  _h = (_img.height * QR_map[flower.QR_id].scale) * sc;
+
+  return { x: x, y: y, w: _w, h: _h, idx: idx, plantName: plantName };
 }
 
 // draw everything with respect to the canvas size
@@ -356,14 +395,14 @@ function drawEverything(saving = false) {
       image(bg, 0, 0, width, h, 0, 0, bg.width, bg.height);
 
       // debug
-      if (debug) {
-        tint(255, 127);
-        image(mask, 0, 0, width, h, 0, 0, bg.width, bg.height);
-        noTint();
-      }
+      // if (debug) {
+      //   tint(255, 127);
+      //   image(mask, 0, 0, width, h, 0, 0, bg.width, bg.height);
+      //   noTint();
+      // }
 
       let i = 0;
-      let now = new Date();
+      // let now = new Date();
       // console.log("Available plant images:", plant_images);
       // console.log("QR_map:", QR_map);
 
@@ -381,23 +420,31 @@ function drawEverything(saving = false) {
           continue;
         }
 
-        let plantName = QR_map[f.QR_id].name;
-        // console.log("Plant name:", plantName);
-        // console.log("Plant images for this type:", plant_images[plantName]);
+        // let plantName = QR_map[f.QR_id].name;
+        // // console.log("Plant name:", plantName);
+        // // console.log("Plant images for this type:", plant_images[plantName]);
+
+        // // currently a day will change the plant
+        // let date_diff = Math.floor(dateDifference(now, new Date(f.timestamp)));
+        // let idx = 0;
+        // if ((date_diff / 5) > 4) idx = 4;
+        // else idx = Math.floor(date_diff / 5);
+
+        // // debugging
+        // idx = GLOB_IDX;
+
+        let image_info = calculateImageInfo(f, bg);
+
+        let plantName = image_info.plantName;
+        let idx = image_info.idx;
 
         let h_aspect = bg.height / h;
-        let x = (f.location.x / w_aspect);
-        let y = (f.location.y / h_aspect);
+        let x = image_info.x;//(f.location.x / w_aspect);
+        let y = image_info.y;//(f.location.y / h_aspect);
 
         // perspective for 'farther away'
         let sc = map(y, height, height * 0.2, 1.0, 0.001);
         let _w, _h, _img;
-
-        // currently a day will change the plant
-        let date_diff = Math.floor(dateDifference(now, new Date(f.timestamp)));
-        let idx = 0;
-        if ((date_diff / 5) > 4) idx = 4;
-        else idx = Math.floor(date_diff / 5);
 
         // console.log("Stage index:", idx);
 
@@ -412,8 +459,8 @@ function drawEverything(saving = false) {
         }
 
         _img = plant_images[plantName][idx];
-        _w = (_img.width * QR_map[f.QR_id].scale) * sc;
-        _h = (_img.height * QR_map[f.QR_id].scale) * sc;
+        _w = image_info.w;//(_img.width * QR_map[f.QR_id].scale) * sc;
+        _h = image_info.h;//(_img.height * QR_map[f.QR_id].scale) * sc;
 
         // magic numbers help with offset within image
         push();
@@ -441,21 +488,48 @@ function drawEverything(saving = false) {
           pop();
         }
 
-        // Add highlight glow effect if this is the hovered flower
-        if (hoveredFlower === f) {
-          // Draw glow effect
+        // // Add highlight glow effect if this is the hovered flower
+        // if (hoveredFlower === f) {
+        //   // Draw glow effect
+        //   push();
+        //   noStroke();
+        //   drawingContext.shadowBlur = 20;
+        //   drawingContext.shadowColor = 'rgba(255, 255, 255, 0.5)';
+        //   // Increase scale slightly for glow effect
+        //   let glowScale = 1.1;
+        //   image(_img, x - (_w * glowScale) * .5, y - (_h * glowScale) * .5,
+        //     _w * glowScale, _h * glowScale, 0, 0, _img.width, _img.height);
+        //   pop();
+        // }
+
+        if (debug) {
           push();
-          noStroke();
-          drawingContext.shadowBlur = 20;
-          drawingContext.shadowColor = 'rgba(255, 255, 255, 0.5)';
-          // Increase scale slightly for glow effect
-          let glowScale = 1.1;
-          image(_img, x - (_w * glowScale) * .5, y - (_h * glowScale) * .5,
-            _w * glowScale, _h * glowScale, 0, 0, _img.width, _img.height);
+          stroke(0);
+          noFill();
+          rect(x - _w * .5, y - _h * .5 - _h * 0.5, _w, _h);
+          fill(color(255, 0, 255))
+          stroke(0);
+          text(`${Math.floor(x - _w * .5)}:${Math.floor(y - _h * .5 - _h * .5)}`, x - _w * .5, y - _h * .5 - _h * 0.5);
           pop();
         }
 
-        image(_img, x - _w * .5, y - _h * .5, _w, _h, 0, 0, _img.width, _img.height);
+        // // Add highlight glow effect if this is the hovered flower
+        let glowScale = 1.0;
+        if (hoveredFlower === f) {
+          // Draw glow effect
+          // push();
+          // noStroke();
+          // Increase scale slightly for glow effect
+          glowScale = 1.1;
+          // image(_img, x - (_w * glowScale) * .5, y - (_h * glowScale) * .5,
+          // _w * glowScale, _h * glowScale, 0, 0, _img.width, _img.height);
+          // pop();
+        }
+
+        // incorporate hover scaling
+        let _x = x - (_w * glowScale) * .5;
+        let _y = y - (_h * glowScale);
+        image(_img, _x, _y, _w * glowScale, _h * glowScale, 0, 0, _img.width, _img.height);
         pop();
       }
     }
@@ -487,6 +561,7 @@ function drawEverything(saving = false) {
       let idx = 0;
       if ((date_diff / 5) > 4) idx = 4;
       else idx = Math.floor(date_diff / 5);
+
 
       let plantName = QR_map[f.QR_id].name;
       // console.log("Processing plant for save:", plantName, "at stage", idx);
@@ -736,7 +811,7 @@ function mousePressed() {
           const distance = Math.sqrt(dx * dx + dy * dy);
 
           // Use larger radius for Milkweed (QR_id: 0)
-          const clickRadius = flower.QR_id === 0 ? 80 / w_aspect : 40 / w_aspect;
+          const clickRadius = flower.QR_id === 0 ? 80 / w_aspect : 80 / w_aspect;
 
           if (distance < clickRadius && distance < minDistance) {
             minDistance = distance;
@@ -820,6 +895,7 @@ function mousePressed() {
   }
 }
 
+let GLOB_IDX = 0;
 function keyPressed() {
   if (key === " ") {
     debug = !debug;
@@ -831,7 +907,11 @@ function keyPressed() {
     document.getElementById('flowerPopup').classList.add('active');
   } else if (key == "A") {
     animateStart();
+  } else if (key == "f") {
+    GLOB_IDX++;
+    if (GLOB_IDX > 4) GLOB_IDX = 0;
   }
+
 }
 
 // get pixel ID for pixels array
@@ -919,31 +999,58 @@ function saveImage() {
 function updateHoveredFlower() {
   if (width < height) return; // Skip in portrait mode
 
-  const w_aspect = bg.width / width;
-  const h_aspect = bg.height / (bg.height / w_aspect);
-
-  // Convert mouse coordinates to image coordinates
-  const mouseImageX = mouseX * w_aspect;
-  const mouseImageY = mouseY * h_aspect;
-
-  // Find the closest flower within hover radius
+  // point/rect collision and sorting based on y-depth
+  let hovered_flowers = [];
   let closestFlower = null;
-  let minDistance = Infinity;
 
-  for (let i = 0; i < flowers.length; i++) {
-    const flower = flowers[i];
-    const dx = flower.location.x / w_aspect - mouseX;
-    const dy = flower.location.y / h_aspect - mouseY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
+  for (let f of flowers) {
+    let image_info = calculateImageInfo(f, bg);
 
-    // Use larger radius for Milkweed (QR_id: 0)
-    const hoverRadius = flower.QR_id === 0 ? 80 / w_aspect : 40 / w_aspect;
+    // offset by half width and full height - anchor is bottom middle
+    let start_x = image_info.x - image_info.w / 2;
+    let start_y = image_info.y - image_info.h;
 
-    if (distance < hoverRadius && distance < minDistance) {
-      minDistance = distance;
-      closestFlower = flower;
-    }
+    if (mouseX >= start_x && mouseX <= start_x + image_info.w &&
+      mouseY >= start_y && mouseY <= start_y + image_info.h)
+      hovered_flowers.push(f);
   }
+
+  // dont sort if only 1
+  if (hovered_flowers.length == 1) closestFlower = hovered_flowers[0];
+  else if (hovered_flowers.length > 1) {
+    // otherwise sort
+    hovered_flowers = hovered_flowers.sort((x, y) => {
+      return x.location.y < y.location.y;
+    });
+    closestFlower = hovered_flowers[0];
+  }
+
+
+  // const w_aspect = bg.width / width;
+  // const h_aspect = bg.height / (bg.height / w_aspect);
+
+  // // Convert mouse coordinates to image coordinates
+  // const mouseImageX = mouseX * w_aspect;
+  // const mouseImageY = mouseY * h_aspect;
+
+  // // Find the closest flower within hover radius
+  // let closestFlower = null;
+  // let minDistance = Infinity;
+
+  // for (let i = 0; i < flowers.length; i++) {
+  //   const flower = flowers[i];
+  //   const dx = flower.location.x / w_aspect - mouseX;
+  //   const dy = flower.location.y / h_aspect - mouseY;
+  //   const distance = Math.sqrt(dx * dx + dy * dy);
+
+  //   // Use larger radius for Milkweed (QR_id: 0)
+  //   const hoverRadius = flower.QR_id === 0 ? 80 / w_aspect : 40 / w_aspect;
+
+  //   if (distance < hoverRadius && distance < minDistance) {
+  //     minDistance = distance;
+  //     closestFlower = flower;
+  //   }
+  // }
 
   hoveredFlower = closestFlower;
   if (hoveredFlower) redraw = true;
