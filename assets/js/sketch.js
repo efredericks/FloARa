@@ -3,6 +3,7 @@
 p5.disableFriendlyErrors = true; // disables FES
 
 // global vars
+let hi_res_bg, hi_res_mask;
 let bg, mask, overlay;
 let flowers = [];
 let redraw;
@@ -143,16 +144,12 @@ let plantFilter = 'all';
 
 // load in background and flowers at full resolution
 function preload() {
-  // bg = loadImage("assets/img/gvsu-bg.jpg");
-  // bg = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.png");;
-
-  // bg = loadImage("assets/img/gvsu-hd.jpeg");
-  // mask = loadImage("assets/img/gvsu-hd-mask.jpg");
-
+  // keeping a hires version, but scaling to 50% immediately as mobile chrome can't handle it
+  hi_res_bg = loadImage("assets/img/BG-Retouch.jpg");
   bg = loadImage("assets/img/BG-Retouch.jpg");
+  hi_res_mask = loadImage("assets/img/BG-Retouch-mask.png");
   mask = loadImage("assets/img/BG-Retouch-mask.png");
 
-  // mask = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.mask.png");
   overlay = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.overlay.png");
 
   // Initialize plant image arrays
@@ -203,6 +200,9 @@ function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
   pixelDensity(1);
   noSmooth();
+
+  bg.resize(bg.width * 0.5, 0);
+  mask.resize(mask.width * 0.5, 0);
 
   textFont(font);
   textAlign(CENTER);
