@@ -45,6 +45,7 @@ let hoveredFlower = null;
 let activePlantPopup = null;
 
 // Add to global variables at top
+// windDivider --> larger means less wind (millis() / windDivider)
 let plantInfo = {
   'Milkweed': {
     scientificName: "Placeholder",
@@ -60,7 +61,8 @@ let plantInfo = {
     ecology: "Placeholder",
     propagationRate: 0.1,
     propagationRadius: 100,
-    suitableAreas: ['grass']
+    suitableAreas: ['grass'],
+    windDivider: 2400, 
   },
   'Nymphaea': {
     scientificName: "Placeholder",
@@ -76,7 +78,8 @@ let plantInfo = {
     ecology: "Placeholder",
     propagationRate: 0.05,
     propagationRadius: 50,
-    suitableAreas: ['water']
+    suitableAreas: ['water'],
+    windDivider: 3400, 
   },
   'Paper-Birch': {
     scientificName: "Placeholder",
@@ -92,7 +95,8 @@ let plantInfo = {
     ecology: "Placeholder",
     propagationRate: 0.05,
     propagationRadius: 50,
-    suitableAreas: ['grass']
+    suitableAreas: ['grass'],
+    windDivider: 6400, 
   },
   'Arrow-Arum-Peltandra-Virginica': {
     scientificName: "Placeholder",
@@ -108,7 +112,8 @@ let plantInfo = {
     ecology: "Placeholder",
     propagationRate: 0.95,
     propagationRadius: 50,
-    suitableAreas: ['grass']
+    suitableAreas: ['grass'],
+    windDivider: 2400, 
   },
   'Piranha': {
     scientificName: "Placeholder",
@@ -124,7 +129,8 @@ let plantInfo = {
     ecology: "Placeholder",
     propagationRate: 0.15,
     propagationRadius: 150,
-    suitableAreas: ['grass', 'water']
+    suitableAreas: ['grass', 'water'],
+    windDivider: 2400, 
   }
 };
 
@@ -416,7 +422,7 @@ function drawEverything(saving = false) {
         if (window.animate_scene) {
           shader(wind_material);
           wind_material.setUniform("offset", i);
-          wind_material.setUniform('time', millis() / 2400);
+          wind_material.setUniform('time', millis() / plantInfo[plantName].windDivider); //2400);
           i++;
         }
 
