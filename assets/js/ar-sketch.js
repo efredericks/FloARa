@@ -12,6 +12,7 @@ function preload() {
     bg = loadImage("assets/img/BG-Retouch.jpg");
     mask = loadImage("assets/img/BG-Retouch-mask.png");
 }
+
 function setup() {
     createCanvas(windowWidth, windowHeight, WEBGL);
     pixelDensity(1);
@@ -22,8 +23,6 @@ function setup() {
 
     windowX = 0;// bg.width / 2 - width / 2;
     windowY = 0;//bg.height / 2 - height / 2;
-
-    // startDeviceRotationDetect();
 
     // accelerometer Data
     window.addEventListener("devicemotion", function (e) {
@@ -38,14 +37,12 @@ function setup() {
 
 function draw() {
     translate(-width / 2, -height / 2);
-    // if (width < height) background(color(255, 0, 255));
-    // else {
     background(0);
     image(bg, 0, 0, width, height, windowX, windowY, width, height);
 
-    fill(color(255, 0, 0));
-    noStroke();
-    circle(width / 2, height / 2, 25);
+    // fill(color(255, 0, 0));
+    // noStroke();
+    // circle(width / 2, height / 2, 25);
 
     // allow scrolling, not pushing
     if (keyIsPressed) {
@@ -54,14 +51,12 @@ function draw() {
         if (key == "a") updatePos(-scrollSpeed, 0);
         if (key == "d") updatePos(scrollSpeed, 0);
     }
-    // }
 }
 
 function mousePressed() {
     // get world coords
     let x = mouseX + windowX;
     let y = mouseY + windowY;
-    // alert(`${Math.floor(x)}:${Math.floor(y)}`);
 
     const newFlower = {
         location: {
@@ -73,32 +68,38 @@ function mousePressed() {
         timestamp: new Date().toISOString(),
         propagationType: 'manual'
     };
-    window.addFlower(newFlower).then(flowerId => {
-        if (flowerId) {
-            alert("Flower successfully added");
-            // // Create and show confirmation popup
-            // const popup = document.createElement('div');
-            // popup.className = 'confirmation-popup';
 
-            // // Add success message
-            // const message = document.createElement('p');
-            // message.textContent = 'Flower successfully added!';
-            // popup.appendChild(message);
-            // modalActive = true;
+    // tbd - highlight suitable areas for planting?
+    const plantName = QR_map[0].name;
+    const suitableAreas = plantInfo[plantName].suitableAreas;
+    if (isValidPlantLocation(x, y, suitableAreas)) {
+        window.addFlower(newFlower).then(flowerId => {
+            if (flowerId) {
+                alert("Flower successfully added");
+                // // Create and show confirmation popup
+                // const popup = document.createElement('div');
+                // popup.className = 'confirmation-popup';
 
-            // // Add close button
-            // const closeBtn = document.createElement('button');
-            // closeBtn.textContent = 'OK';
-            // closeBtn.className = 'success-btn';
-            // closeBtn.onclick = () => {
-            //     document.body.removeChild(popup);
-            //     modalActive = false;
-            // };
-            // popup.appendChild(closeBtn);
+                // // Add success message
+                // const message = document.createElement('p');
+                // message.textContent = 'Flower successfully added!';
+                // popup.appendChild(message);
+                // modalActive = true;
 
-            // document.body.appendChild(popup);
-        }
-    });
+                // // Add close button
+                // const closeBtn = document.createElement('button');
+                // closeBtn.textContent = 'OK';
+                // closeBtn.className = 'success-btn';
+                // closeBtn.onclick = () => {
+                //     document.body.removeChild(popup);
+                //     modalActive = false;
+                // };
+                // popup.appendChild(closeBtn);
+
+                // document.body.appendChild(popup);
+            }
+        });
+    }
 }
 
 function updatePos(x, y) {
