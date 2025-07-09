@@ -32,7 +32,7 @@ let QR_map = {
   1: { name: 'Nymphaea', scale: 0.04, hd_scale: 0.07 },
   2: { name: 'Arrow-Arum-Peltandra-Virginica', scale: 0.2, hd_scale: 0.07 },
   3: { name: 'Paper-Birch', scale: 0.2, hd_scale: 0.07 },
-  99: { name: 'Piranha', scale: 0.4 },
+  99: { name: 'Piranha', scale: 1.8, hd_scale: 1.0 },
 }
 let plant_images = {};
 
@@ -188,9 +188,13 @@ function preload() {
   }
 
   // Load Piranha images - using Milkweed image as placeholder
-  for (let i = 0; i < 5; i++) {
-    plant_images['Piranha'].push(milkweedImg);
-  }
+  // for (let i = 0; i < 5; i++) {
+  plant_images['Piranha'].push(loadImage("assets/img/Piranha/piranha-base-1.png"));
+  plant_images['Piranha'].push(loadImage("assets/img/Piranha/piranha-vine-1.png"));
+  plant_images['Piranha'].push(loadImage("assets/img/Piranha/piranha-vine-1.png"));
+  plant_images['Piranha'].push(loadImage("assets/img/Piranha/piranha-head-1.png"));
+  plant_images['Piranha'].push(loadImage("assets/img/Piranha/piranha-head-2.png"));
+  // }
 
   // font = loadFont("assets/fonts/Quicksand-Medium.ttf");
   font = loadFont("assets/fonts/BenchNine-Regular.ttf");
@@ -341,13 +345,30 @@ function calculateImageInfo(flower, bg) {
   let now = new Date();
   let plantName = QR_map[flower.QR_id].name;
 
-  let date_diff = Math.floor(dateDifference(now, new Date(flower.timestamp)));
   let idx = 0;
-  if ((date_diff / 5) > 4) idx = 4;
-  else idx = Math.floor(date_diff / 5);
+  let date_diff = Math.floor(dateDifference(now, new Date(flower.timestamp)));
+
+  // handle piranha specially as final two images are its animated head
+  // newly added not animating - handle better
+  if (flower.QR_id == 99) {
+    idx = GLOB_IDX;
+    if (idx >= 3) {
+      // animate every second between 'final' states
+      if (frameCount % flower.update_frame == 0) {
+        let cframe = flower.current_frame;
+        cframe++;
+        if (cframe > 2) cframe = -1;
+        flower.current_frame = cframe;
+      }
+    }
+  } else {
+    if ((date_diff / 5) > 4) idx = 4;
+    else idx = Math.floor(date_diff / 5);
+    idx = GLOB_IDX;
+  }
 
   // debugging
-  idx = GLOB_IDX;
+  // idx = GLOB_IDX;
 
   let w_aspect = bg.width / width;
   let h = bg.height / w_aspect;
@@ -504,35 +525,83 @@ function drawEverything(saving = false) {
         //   pop();
         // }
 
-        if (debug) {
-          push();
-          stroke(0);
-          noFill();
-          rect(x - _w * .5, y - _h * .5 - _h * 0.5, _w, _h);
-          fill(color(255, 0, 255))
-          stroke(0);
-          text(`${Math.floor(x - _w * .5)}:${Math.floor(y - _h * .5 - _h * .5)}`, x - _w * .5, y - _h * .5 - _h * 0.5);
+        // piranha
+        if (f.QR_id == 99) {
+          let glowScale = 1.0;
+          // if (hoveredFlower === f) {
+          //   glowScale = 1.1;
+          //   push();
+          //   stroke(0);
+          //   noFill();
+          //   rect(x - _w * .5, y - _h * .5 - _h * 0.5, _w, _h);
+          //   fill(color(255, 0, 255))
+          //   stroke(0);
+          //   pop();
+          // }
+          // incorporate hover scaling
+          let _w2 = plant_images[plantName][0].width;
+          let _h2 = plant_images[plantName][0].height;
+          let _x = x - (_w2 * glowScale) * .5;
+          let _y = y - (_h2 * glowScale);
+
+          let max_idx = constrain(idx, 0, 2);
+          for (let i = 0; i <= max_idx; i++) {
+            let _img2 = plant_images[plantName][i];
+            image(_img2, _x, _y, _w2 * glowScale, _h2 * glowScale, 0, 0, _img2.width, _img2.height);
+            _y -= _img2.height;
+          }
+          if (idx >= 3) {
+            let anim_idx = 3;
+            if (f.current_frame == 1) anim_idx = 4;
+            let _img2 = plant_images[plantName][anim_idx];
+            image(_img2, _x, _y, _w2 * glowScale, _h2 * glowScale, 0, 0, _img2.width, _img2.height);
+          }
+
+
+          pop();
+
+
+        } else {
+
+
+          if (debug) {
+            push();
+            stroke(0);
+            noFill();
+            rect(x - _w * .5, y - _h * .5 - _h * 0.5, _w, _h);
+            fill(color(255, 0, 255))
+            stroke(0);
+            text(`${Math.floor(x - _w * .5)}:${Math.floor(y - _h * .5 - _h * .5)}`, x - _w * .5, y - _h * .5 - _h * 0.5);
+            pop();
+          }
+
+          // // Add highlight glow effect if this is the hovered flower
+          let glowScale = 1.0;
+          if (hoveredFlower === f) {
+            // Draw glow effect
+            // push();
+            // noStroke();
+            // Increase scale slightly for glow effect
+            glowScale = 1.1;
+            // image(_img, x - (_w * glowScale) * .5, y - (_h * glowScale) * .5,
+            // _w * glowScale, _h * glowScale, 0, 0, _img.width, _img.height);
+            // pop();
+            push();
+            stroke(0);
+            noFill();
+            rect(x - _w * .5, y - _h * .5 - _h * 0.5, _w, _h);
+            fill(color(255, 0, 255))
+            stroke(0);
+            text(`${Math.floor(x - _w * .5)}:${Math.floor(y - _h * .5 - _h * .5)}`, x - _w * .5, y - _h * .5 - _h * 0.5);
+            pop();
+          }
+
+          // incorporate hover scaling
+          let _x = x - (_w * glowScale) * .5;
+          let _y = y - (_h * glowScale);
+          image(_img, _x, _y, _w * glowScale, _h * glowScale, 0, 0, _img.width, _img.height);
           pop();
         }
-
-        // // Add highlight glow effect if this is the hovered flower
-        let glowScale = 1.0;
-        if (hoveredFlower === f) {
-          // Draw glow effect
-          // push();
-          // noStroke();
-          // Increase scale slightly for glow effect
-          glowScale = 1.1;
-          // image(_img, x - (_w * glowScale) * .5, y - (_h * glowScale) * .5,
-          // _w * glowScale, _h * glowScale, 0, 0, _img.width, _img.height);
-          // pop();
-        }
-
-        // incorporate hover scaling
-        let _x = x - (_w * glowScale) * .5;
-        let _y = y - (_h * glowScale);
-        image(_img, _x, _y, _w * glowScale, _h * glowScale, 0, 0, _img.width, _img.height);
-        pop();
       }
     }
   } else { // generate HQ image for saving
@@ -664,12 +733,17 @@ async function loadData() {
         qrId = 0;
       }
 
+      // have a random update frame - mainly for piranha but may want to animate others?
+      const update_frame = int(random(20, 50));
+
       return {
         location: f.location,
         color: color(f.color || "white"),
         id: f.id,
         QR_id: qrId,
         timestamp: f.timestamp || new Date().toISOString(),
+        current_frame: -1,
+        update_frame: update_frame,
         propagationType: f.propagationType || 'manual' // Set default propagationType for existing plants
       };
     });
@@ -742,6 +816,7 @@ function mousePressed() {
           const message = document.createElement('p');
           const flowerType = QR_map[closestFlower.flower.QR_id].name;
           message.textContent = `Remove this ${flowerType}?`;
+          modalActive = true;
           popup.appendChild(message);
 
           // Add button container
@@ -755,6 +830,7 @@ function mousePressed() {
           cancelBtn.onclick = () => {
             document.body.removeChild(overlay);
             document.body.removeChild(popup);
+            modalActive = false;
           };
 
           // Add confirm button
@@ -762,6 +838,7 @@ function mousePressed() {
           confirmBtn.textContent = 'Remove';
           confirmBtn.className = 'confirm-btn';
           confirmBtn.onclick = async () => {
+            modalActive = false;
             const success = await window.deleteFlower(closestFlower.flower.id);
             if (success) {
               flowers.splice(closestFlower.index, 1);
@@ -774,12 +851,14 @@ function mousePressed() {
               const successMessage = document.createElement('p');
               successMessage.textContent = 'Flower removed successfully!';
               successPopup.appendChild(successMessage);
+              modalActive = true;
 
               const okBtn = document.createElement('button');
               okBtn.textContent = 'OK';
               okBtn.className = 'success-btn';
               okBtn.onclick = () => {
                 document.body.removeChild(successPopup);
+                modalActive = false;
               };
               successPopup.appendChild(okBtn);
 
@@ -1105,10 +1184,12 @@ function showPlantInfo(flower) {
   const closeBtn = document.createElement('button');
   closeBtn.textContent = '×';
   closeBtn.className = 'plant-info-close';
+  modalActive = true;
   closeBtn.onclick = () => {
     document.body.removeChild(overlay);
     document.body.removeChild(popup);
     activePlantPopup = null; // Clear the active popup reference
+    modalActive = false;
   };
   popup.appendChild(closeBtn);
 
@@ -1162,6 +1243,8 @@ function propagatePlants() {
                 console.log(`Successfully saved to Firestore with ID: ${flowerId}`);
                 // Only add to local array after successful database save
                 newFlower.id = flowerId;
+                newFlower.current_frame = -1;
+                newFlower.update_frame = int(random(20, 50));
                 flowers.push({
                   ...newFlower,
                   color: color(newFlower.color) // Convert string color back to p5 color
