@@ -59,7 +59,11 @@ function draw() {
     noStroke();
     rect(0, 0, width, 30);
     fill(color(20));
+    textAlign(LEFT);
     text(`Tap to place ${QR_map[currPlantID].name}`, 10, 22);
+    let t = "WADS / Accelerometer to move";
+    textAlign(RIGHT);
+    text(t, width - 10, 22);
 
     // allow scrolling, not pushing
     if (keyIsPressed) {
@@ -68,6 +72,10 @@ function draw() {
         if (key == "a") updatePos(-scrollSpeed, 0);
         if (key == "d") updatePos(scrollSpeed, 0);
     }
+}
+
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
 }
 
 function mousePressed() {
