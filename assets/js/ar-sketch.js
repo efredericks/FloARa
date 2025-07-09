@@ -7,10 +7,14 @@ let bg, mask;
 let windowX, windowY;
 let scrollSpeed = 5;
 let phoneSpeed = 2;
+let font;
+
+let currPlantID;
 
 function preload() {
     bg = loadImage("assets/img/BG-Retouch.jpg");
     mask = loadImage("assets/img/BG-Retouch-mask.png");
+    font = loadFont("assets/fonts/BenchNine-Regular.ttf");
 }
 
 function setup() {
@@ -24,6 +28,9 @@ function setup() {
     windowX = 0;// bg.width / 2 - width / 2;
     windowY = 0;//bg.height / 2 - height / 2;
 
+    textFont(font);
+    textSize(24);
+
     // accelerometer Data
     window.addEventListener("devicemotion", function (e) {
         // get accelerometer values
@@ -33,6 +40,14 @@ function setup() {
 
         if (!isNaN(x) && !isNaN(y)) updatePos(-x * phoneSpeed, y * phoneSpeed);
     });
+
+    currPlantID = 0;
+    let params = getURLParams();
+    if (params !== null && params.QR_id !== null) {
+        if (QR_map[params.QR_id] !== undefined) {
+            currPlantID = params.QR_id;
+        }
+    }
 }
 
 function draw() {
@@ -40,9 +55,11 @@ function draw() {
     background(0);
     image(bg, 0, 0, width, height, windowX, windowY, width, height);
 
-    // fill(color(255, 0, 0));
-    // noStroke();
-    // circle(width / 2, height / 2, 25);
+    fill(color(0, 0, 0, 20));
+    noStroke();
+    rect(0, 0, width, 30);
+    fill(color(20));
+    text(`Tap to place ${QR_map[currPlantID].name}`, 10, 22);
 
     // allow scrolling, not pushing
     if (keyIsPressed) {
@@ -99,6 +116,8 @@ function mousePressed() {
                 // document.body.appendChild(popup);
             }
         });
+    } else {
+        alert(`Invalid location for ${QR_map[currPlantID].name}`);
     }
 }
 
