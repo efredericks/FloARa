@@ -48,6 +48,8 @@ function setup() {
             currPlantID = params.QR_id;
         }
     }
+
+    startDeviceRotationDetect();
 }
 
 function draw() {
@@ -67,10 +69,14 @@ function draw() {
 
     // allow scrolling, not pushing
     if (keyIsPressed) {
-        if (key == "w") updatePos(0, -scrollSpeed);
-        if (key == "s") updatePos(0, scrollSpeed);
-        if (key == "a") updatePos(-scrollSpeed, 0);
-        if (key == "d") updatePos(scrollSpeed, 0);
+        if (keyIsDown(87)) updatePos(0, -scrollSpeed); // w
+        if (keyIsDown(83)) updatePos(0, scrollSpeed); // s
+        if (keyIsDown(65)) updatePos(-scrollSpeed, 0); // a
+        if (keyIsDown(68)) updatePos(scrollSpeed, 0); // d
+        // if (key == "w") updatePos(0, -scrollSpeed);
+        // if (key == "s") updatePos(0, scrollSpeed);
+        // if (key == "a") updatePos(-scrollSpeed, 0);
+        // if (key == "d") updatePos(scrollSpeed, 0);
     }
 }
 
@@ -139,22 +145,22 @@ function updatePos(x, y) {
 }
 
 // permission for accelerometer
-// function startDeviceRotationDetect() {
-//     // iOS 13 added a new security wall that prevents
-//     // access to sensors without requesting access through the OS
-//     // Access must be requested inside of a mousePressed event on
-//     // a HTML button
-//     //So first we check to see if this iOS by seeing if the
-//     // DeviceMotionEvent.requestPermission exists as a function
-//     // Otherwise it is not iOS 13+ so we can skip this step
-//     if (typeof (DeviceMotionEvent) !== "undefined" &&
-//         typeof (DeviceMotionEvent.requestPermission) === "function") {
-//         // If it does we make a button
-//         let button = createButton('click to allow access to sensors');
-//         // Then we set it's text big so it is easy to see
-//         button.style('font-size', '28px');
-//         // Then we make its 'mousePressed' functionality into another function
-//         // we write below
-//         button.mousePressed(DeviceMotionEvent.requestPermission);
-//     }
-// }
+function startDeviceRotationDetect() {
+    // iOS 13 added a new security wall that prevents
+    // access to sensors without requesting access through the OS
+    // Access must be requested inside of a mousePressed event on
+    // a HTML button
+    //So first we check to see if this iOS by seeing if the
+    // DeviceMotionEvent.requestPermission exists as a function
+    // Otherwise it is not iOS 13+ so we can skip this step
+    if (typeof (DeviceMotionEvent) !== "undefined" &&
+        typeof (DeviceMotionEvent.requestPermission) === "function") {
+        // If it does we make a button
+        let button = createButton('click to allow access to sensors');
+        // Then we set it's text big so it is easy to see
+        button.style('font-size', '28px');
+        // Then we make its 'mousePressed' functionality into another function
+        // we write below
+        button.mousePressed(DeviceMotionEvent.requestPermission);
+    }
+}
