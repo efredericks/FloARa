@@ -112,7 +112,91 @@ function setup() {
 
   textFont(font);
   textAlign(CENTER);
-  loadData(); // Load flower data from Firestore
+
+  // Use real-time Firestore listener if available
+  if (window.subscribeToFlowers) {
+    window.subscribeToFlowers(function(rawData) {
+      // Process data as in loadData()
+      flowers = rawData.map(f => {
+        // Try to find QR_id in different possible field names
+        let qrId;
+        if (f.QR_id !== undefined && f.QR_id !== null) {
+          qrId = parseInt(f.QR_id);
+        } else if (f.qr_id !== undefined && f.qr_id !== null) {
+          qrId = parseInt(f.qr_id);
+        } else if (f.type !== undefined && f.type !== null) {
+          // Map type names to QR_ids
+          switch (f.type.toLowerCase()) {
+            case 'milkweed':
+              qrId = 0;
+              break;
+            case 'nymphaea':
+              qrId = 1;
+              break;
+            case 'arrow-arum-peltandra-virginica':
+              qrId = 2;
+              break;
+            case 'paper-birch':
+              qrId = 3;
+              break;
+            case 'piranha':
+              qrId = 99;
+              break;
+            default:
+              qrId = 0;
+          }
+        } else if (f.flowerType !== undefined && f.flowerType !== null) {
+          // Map flowerType names to QR_ids
+          switch (f.flowerType.toLowerCase()) {
+            case 'milkweed':
+              qrId = 0;
+              break;
+            case 'nymphaea':
+              qrId = 1;
+              break;
+            case 'arrow-arum-peltandra-virginica':
+              qrId = 2;
+              break;
+            case 'paper-birch':
+              qrId = 3;
+              break;
+            case 'piranha':
+              qrId = 99;
+              break;
+            default:
+              qrId = 0;
+          }
+        } else {
+          console.log("No valid QR_id found, defaulting to Milkweed (0):", f);
+          qrId = 0;
+        }
+
+        // Validate the QR_id
+        if (isNaN(qrId) || !QR_map[qrId]) {
+          console.log("Invalid QR_id found, defaulting to Milkweed (0):", f);
+          qrId = 0;
+        }
+
+        // have a random update frame - mainly for piranha but may want to animate others?
+        const update_frame = int(random(20, 50));
+
+        return {
+          location: f.location,
+          color: color(f.color || "white"),
+          id: f.id,
+          QR_id: qrId,
+          timestamp: f.timestamp || new Date().toISOString(),
+          current_frame: -1,
+          update_frame: update_frame,
+          propagationType: f.propagationType || 'manual' // Set default propagationType for existing plants
+        };
+      });
+      redraw = true;
+    });
+  } else {
+    // Fallback: one-time load
+    loadData(); // Load flower data from Firestore
+  }
   redraw = false;
 
   // Setup popup event listeners

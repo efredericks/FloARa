@@ -20,7 +20,7 @@
     <script src="./assets/js/qr-generator.js"></script> -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDczt4Is3FPtDR-zqneuzHyU0sPfo-Sf7w",
@@ -52,6 +52,20 @@
           console.error("Error fetching flowers:", error);
           return [];
         }
+      };
+
+      // Real-time Firestore listener for flowers collection
+      window.subscribeToFlowers = function (callback) {
+        const unsubscribe = onSnapshot(collection(db, "flowers"), (snapshot) => {
+          const data = snapshot.docs.map(doc => ({
+            ...doc.data(),
+            id: doc.id
+          }));
+          callback(data);
+        }, (error) => {
+          console.error("Error in real-time flower listener:", error);
+        });
+        return unsubscribe; // Call this to stop listening
       };
 
       window.addFlower = async function (flowerData) {
