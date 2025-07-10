@@ -95,18 +95,18 @@ function mousePressed() {
             y: y,
         },
         color: "#000000",
-        QR_id: 0,
+        QR_id: currPlantID,
         timestamp: new Date().toISOString(),
         propagationType: 'manual'
     };
 
     // tbd - highlight suitable areas for planting?
-    const plantName = QR_map[0].name;
+    const plantName = QR_map[currPlantID].name;
     const suitableAreas = plantInfo[plantName].suitableAreas;
     if (isValidPlantLocation(x, y, suitableAreas)) {
         window.addFlower(newFlower).then(flowerId => {
             if (flowerId) {
-                alert("Flower successfully added");
+                alert(`${plantName} successfully added`);
                 // // Create and show confirmation popup
                 // const popup = document.createElement('div');
                 // popup.className = 'confirmation-popup';
@@ -131,7 +131,7 @@ function mousePressed() {
             }
         });
     } else {
-        alert(`Invalid location for ${QR_map[currPlantID].name}`);
+        alert(`Invalid location for ${plantName}`);
     }
 }
 
