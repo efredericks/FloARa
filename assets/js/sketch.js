@@ -401,6 +401,19 @@ function drawEverything(saving = false) {
       let h = bg.height / w_aspect;
       image(bg, 0, 0, width, h, 0, 0, bg.width, bg.height);
 
+      // EMPTY STATE HANDLING
+      // Only count flowers that match the current filter
+      let visibleFlowers = flowers.filter(f => plantFilter === 'all' || f.propagationType === plantFilter);
+      if (visibleFlowers.length === 0) {
+        push();
+        fill(255, 200, 200);
+        textSize(width * 0.04);
+        textAlign(CENTER, CENTER);
+        text("No flowers yet!", width / 2, height / 2);
+        pop();
+        return;
+      }
+
       // debug
       // if (debug) {
       //   tint(255, 127);
