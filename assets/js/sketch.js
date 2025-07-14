@@ -499,14 +499,14 @@ function drawEverything(saving = false) {
         }
 
         // Add visual indicator for propagated plants
-        if (f.propagationType === 'propagated') {
-          push();
-          noFill();
-          stroke(100, 255, 100, 100); // Subtle green glow
-          strokeWeight(2);
-          ellipse(x, y, _w * 1.2, _h * 1.2);
-          pop();
-        }
+        // if (f.propagationType === 'propagated') {
+        //   push();
+        //   noFill();
+        //   stroke(100, 255, 100, 100); // Subtle green glow
+        //   strokeWeight(2);
+        //   ellipse(x, y, _w * 1.2, _h * 1.2);
+        //   pop();
+        // }
 
         // // Add highlight glow effect if this is the hovered flower
         // if (hoveredFlower === f) {
