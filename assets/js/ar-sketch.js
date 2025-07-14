@@ -17,6 +17,7 @@ function preload() {
     font = loadFont("assets/fonts/BenchNine-Regular.ttf");
 }
 
+let overlay_gfx;
 function setup() {
     createCanvas(windowWidth, windowHeight, WEBGL);
     pixelDensity(1);
@@ -49,6 +50,30 @@ function setup() {
         }
     }
 
+    // give a helper visual for placement
+    overlay_gfx = createGraphics(bg.width, bg.height);
+    mask.loadPixels();
+    overlay_gfx.noStroke();
+    overlay_gfx.fill(color(255, 0, 255, 25));
+    let tgt_cols = [];
+    let currPlantName = QR_map[currPlantID].name;
+    for (let area of plantInfo[currPlantName].suitableAreas) {
+        if (area == "grass") tgt_cols.push(color(0, 0, 0));
+        else if (area == "water") tgt_cols.push(color(255, 0, 0));
+    }
+
+    // draw a shaded circle for every valid placement position
+    for (let y = 0; y < mask.height; y++) {
+        for (let x = 0; x < mask.width; x++) {
+            const idx = getPixelID(x, y, mask);
+            for (let col of tgt_cols) {
+                if (mask.pixels[idx] == red(col) && mask.pixels[idx + 1] == green(col) && mask.pixels[idx + 2] == blue(col)) {
+                    overlay_gfx.circle(x, y, 2);
+                }
+            }
+        }
+    }
+
     startDeviceRotationDetect();
 }
 
@@ -56,6 +81,7 @@ function draw() {
     translate(-width / 2, -height / 2);
     background(0);
     image(bg, 0, 0, width, height, windowX, windowY, width, height);
+    image(overlay_gfx, 0, 0, width, height, windowX, windowY, width, height);
 
     fill(color(0, 0, 0, 20));
     noStroke();
