@@ -15,8 +15,8 @@
 <body>
   <ul class="menu">
     <li><span class="menuHeader">Experience options:</span></li>
-    <li><a class="menuItem" id="playback" href="#">Start from beginning</a></li>
-    <li><a class="menuItem" id="toggle_anim" href="#">Toggle animation</a></li>
+    <li><a class="menuItem" id="playback" href="#">Start from the beginning</a></li>
+    <li><a class="menuItem" id="toggle_anim" href="#">Turn off wind</a></li>
     <li><a class="menuItem" id="save" href="#">Save image</a></li>
     <li>
       <select id="plantFilter" class="menuItem" onchange="filterPlants(this.value)">
@@ -25,10 +25,10 @@
         <option value="propagated">Show propagated plants</option>
       </select>
     </li>
-    <li><span class="menuHeader">--debugging--</span></li>
+    <!-- <li><span class="menuHeader">--debugging--</span></li>
     <li><a class="menuItem" id="toggle_adding" href="#">toggle adding flowers</a></li>
     <li><a class="menuItem" id="toggle_glitch" href="#">toggle glitch shaders</a></li>
-    <li><a class="menuItem" id="current" href="#">start from now</a></li>
+    <li><a class="menuItem" id="current" href="#">start from now</a></li> -->
   </ul>
   <button class="hamburger">
     <i class="menuIcon material-icons">menu</i>
@@ -100,8 +100,11 @@
 
       // toggle p5 vars
       if (e !== undefined) {
-        if (e.id == 'toggle_anim') window.animate_scene = !window.animate_scene;
-        else if (e.id == 'toggle_glitch') window.shaders_on = !window.shaders_on;
+        if (e.id == 'toggle_anim') {
+          window.animate_scene = !window.animate_scene;
+          if (window.animate_scene) document.getElementById("toggle_anim").innerText = "Turn off wind";
+          else document.getElementById("toggle_anim").innerText = "Turn on wind";
+        } else if (e.id == 'toggle_glitch') window.shaders_on = !window.shaders_on;
         else if (e.id == 'toggle_adding') window.adding_flowers = !window.adding_flowers;
         else if (e.id == 'save') saveImage();
         else if (e.id == 'playback') animateStart();

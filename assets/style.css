@@ -21,8 +21,12 @@ canvas {
 .menuHeader {
   /* display: block; */
   display:none;
-  margin: 1rem 4rem;
-  font-size: 2.4rem;
+  font-size: 2.25rem;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 2.25rem;
+  /* margin: 1rem 4rem;
+  font-size: 2.4rem; */
   color: #50b3de;
   text-decoration: none;
   font-family: "BenchNine", "sans-serif";
@@ -32,8 +36,12 @@ canvas {
 .menuItem {
   display:none;
   /* display: block; */
-  margin: 1rem 5rem;
-  font-size: 2.4rem;
+  /* margin: 1rem 5rem; */
+  /* margin: 0rem 5rem; */
+  font-size: 4rem;
+  line-height: 5.625rem;
+  font-weight: 400;
+  /* font-size: 2.4rem; */
   /* color: white; */
   color: #40c332;
   text-decoration: none;
@@ -73,7 +81,7 @@ canvas {
   color: white;
   list-style: none;
   padding-top: 4rem;
-  padding-left: 3rem;
+  padding-left: 13rem;
 }
 
 .showMenu {
@@ -357,11 +365,16 @@ canvas {
   background: transparent;
   border: none;
   padding: 0; /* Remove default padding */
-  margin: 1rem 5rem; /* Match other menu items */
-  font-size: 2.4rem; /* Match other menu items */
+  /* margin: 1rem 5rem; 
+  font-size: 2.4rem;  */
   color: white; /* Match other menu items */
   cursor: pointer;
   font-family: "BenchNine", "sans-serif"; /* Match other menu items */
+
+  /* margin: 0rem 5rem; */
+  font-size: 4rem;
+  line-height: 5.625rem;
+  font-weight: 400;
 }
 
 .menu select.menuItem#plantFilter option {
