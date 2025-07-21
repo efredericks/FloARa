@@ -44,6 +44,80 @@ const PROPAGATION_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 // Add to global variables at the top
 let plantFilter = 'all';
 
+// Add this near the top of the file, after global vars
+const plantDetails = {
+  0: {
+    commonName: "Milkweed",
+    scientificName: "Asclepias syriaca",
+    family: "Apocynaceae (Milkweed family)",
+    height: "2-6' (0.6-1.8 m)",
+    age: "Perennial",
+    habitat: "Meadows, fields, roadsides, sunny areas",
+    bark: "Green, smooth stem with milky sap",
+    leaf: "Opposite, oblong to elliptic, 4-8\" long, upper surface smooth, lower surface hairy",
+    flowers: "Pink to purplish, fragrant, in large rounded clusters (umbels)",
+    fruit: "Spindle-shaped pod (3-4\"), covered with soft hairs, splits to release silky seeds",
+    description: "Milkweed is a native perennial herb vital for monarch butterflies. It produces fragrant pink flowers and milky sap. The plant is toxic to most animals but essential for many insects.",
+    image: null
+  },
+  1: {
+    commonName: "Nymphaea",
+    scientificName: "Nymphaea odorata",
+    family: "Nymphaeaceae (Water Lily family)",
+    height: "Floating leaves up to 10\" across",
+    age: "Perennial",
+    habitat: "Ponds, lakes, slow streams, shallow water",
+    bark: "N/A (aquatic herb)",
+    leaf: "Round, floating, green above, purplish below, up to 10\" wide",
+    flowers: "Large, white, fragrant, 20-30 petals, yellow center, floats on water",
+    fruit: "Round, spongy berry, seeds dispersed in water",
+    description: "Nymphaea, or American white water lily, is an aquatic plant with large floating leaves and showy white flowers. It provides habitat for aquatic wildlife.",
+    image: null
+  },
+  2: {
+    commonName: "Arrow-Arum-Peltandra-Virginica",
+    scientificName: "Peltandra virginica",
+    family: "Araceae (Arum family)",
+    height: "2-3' (0.6-0.9 m)",
+    age: "Perennial",
+    habitat: "Wetlands, marshes, shallow water",
+    bark: "N/A (herbaceous)",
+    leaf: "Arrow-shaped, glossy green, 8-12\" long",
+    flowers: "Greenish-white spadix, partially enclosed by a hood-like spathe",
+    fruit: "Cluster of green berries turning black",
+    description: "Arrow Arum is a wetland plant with striking arrow-shaped leaves. It thrives in shallow water and is important for wetland wildlife.",
+    image: null
+  },
+  3: {
+    commonName: "Paper Birch",
+    scientificName: "Betula papyrifera",
+    family: "Betulaceae (Birch family)",
+    height: "50-70' (15-21 m)",
+    age: "Up to 100 years",
+    habitat: "Moist woods, riverbanks, cool climates",
+    bark: "White, peeling in papery strips, with dark horizontal lines",
+    leaf: "Oval, pointed, double-toothed edges, 2-4\" long",
+    flowers: "Catkins (male and female), wind-pollinated",
+    fruit: "Small winged nutlets in drooping clusters",
+    description: "Paper birch is a medium-sized tree known for its distinctive white, peeling bark. It is important for wildlife and was used by Indigenous peoples for canoes and containers.",
+    image: null
+  },
+  99: {
+    commonName: "Piranha Plant",
+    scientificName: "Piranha fictus",
+    family: "Fictionaceae",
+    height: "Varies (often depicted 2-4')",
+    age: "Eternal (video game logic)",
+    habitat: "Pipes, fantasy worlds, Mario games",
+    bark: "Green stem, red head with white spots",
+    leaf: "Large, cartoonish, green",
+    flowers: "Toothy mouth, sometimes spits fire",
+    fruit: "None (dangerous to approach)",
+    description: "The Piranha Plant is a fictional, carnivorous plant from the Mario universe. It lurks in pipes and snaps at passersby. Not recommended for gardens!",
+    image: null
+  }
+};
+
 // load in background and flowers at full resolution
 function preload() {
   // keeping a hires version, but scaling to 50% immediately as mobile chrome can't handle it
@@ -190,7 +264,7 @@ function setup() {
           update_frame: update_frame,
           propagationType: f.propagationType || 'manual' // Set default propagationType for existing plants
         };
-      });
+      }).filter(f => f !== null);
       redraw = true;
     });
   } else {
@@ -326,6 +400,9 @@ function doubleClicked() {
 
 // return scaled flower image information
 function calculateImageInfo(flower, bg) {
+  if (!flower || !flower.location || typeof flower.location.x !== 'number' || typeof flower.location.y !== 'number') {
+    return null;
+  }
   let now = new Date();
   let plantName = QR_map[flower.QR_id].name;
 
@@ -431,14 +508,16 @@ function drawEverything(saving = false) {
         if (plantFilter !== 'all' && f.propagationType !== plantFilter) {
           continue;
         }
-
-        // console.log("Processing flower:", f);
-
         // Skip invalid flowers - allow QR_id: 0 (Milkweed)
         if (f.QR_id === undefined || f.QR_id === null || !QR_map[f.QR_id] || !QR_map[f.QR_id].name) {
-          // console.warn("Skipping invalid flower - QR_id:", f.QR_id, "QR_map entry:", QR_map[f.QR_id]);
           continue;
         }
+        // Defensive: skip if location is invalid
+        if (!f.location || typeof f.location.x !== 'number' || typeof f.location.y !== 'number') {
+          continue;
+        }
+        let image_info = calculateImageInfo(f, bg);
+        if (!image_info) continue;
 
         // let plantName = QR_map[f.QR_id].name;
         // // console.log("Plant name:", plantName);
@@ -452,8 +531,6 @@ function drawEverything(saving = false) {
 
         // // debugging
         // idx = GLOB_IDX;
-
-        let image_info = calculateImageInfo(f, bg);
 
         let plantName = image_info.plantName;
         let idx = image_info.idx;
@@ -733,6 +810,11 @@ async function loadData() {
       // have a random update frame - mainly for piranha but may want to animate others?
       const update_frame = int(random(20, 50));
 
+      if (!f.location || typeof f.location.x !== 'number' || typeof f.location.y !== 'number') {
+        console.warn("Skipping flower with invalid location:", f);
+        return null;
+      }
+
       return {
         location: f.location,
         color: color(f.color || "white"),
@@ -743,7 +825,7 @@ async function loadData() {
         update_frame: update_frame,
         propagationType: f.propagationType || 'manual' // Set default propagationType for existing plants
       };
-    });
+    }).filter(f => f !== null);
 
     console.log("Processed flowers:", flowers);
     redraw = true;
@@ -778,6 +860,7 @@ function mousePressed() {
 
         for (let i = 0; i < flowers.length; i++) {
           const flower = flowers[i];
+          if (!flower || !flower.location) continue;
           const dx = flower.location.x / w_aspect - mouseX;
           const dy = flower.location.y / h_aspect - mouseY;
           const distance = Math.sqrt(dx * dx + dy * dy);
@@ -886,6 +969,7 @@ function mousePressed() {
           // Otherwise check for flowers within click radius
           for (let i = 0; i < flowers.length; i++) {
             const flower = flowers[i];
+            if (!flower || !flower.location) continue;
             const dx = flower.location.x / w_aspect - mouseX;
             const dy = flower.location.y / h_aspect - mouseY;
             const distance = Math.sqrt(dx * dx + dy * dy);
@@ -1068,8 +1152,9 @@ function updateHoveredFlower() {
   let closestFlower = null;
 
   for (let f of flowers) {
+    if (!f || !f.location || typeof f.location.x !== 'number' || typeof f.location.y !== 'number') continue;
     let image_info = calculateImageInfo(f, bg);
-
+    if (!image_info) continue;
     // offset by half width and full height - anchor is bottom middle
     let start_x = image_info.x - image_info.w / 2;
     let start_y = image_info.y - image_info.h;
@@ -1132,6 +1217,9 @@ function showPlantInfo(flower) {
   const ageDays = Math.floor((new Date() - placementDate) / (1000 * 60 * 60 * 24));
   const growthStageIndex = Math.min(4, Math.floor(ageDays / 5));
 
+  // Get static info for this plant type
+  const staticInfo = plantDetails[flower.QR_id];
+
   // Create overlay
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
@@ -1145,17 +1233,41 @@ function showPlantInfo(flower) {
   // Add content
   const content = document.createElement('div');
   content.className = 'plant-info-content';
-  content.innerHTML = `
-    <h2>${plantName}</h2>
+
+  // Static info HTML
+  let staticHtml = '';
+  if (staticInfo) {
+    staticHtml = `
+      <h2>${staticInfo.commonName} <span style="font-size:0.8em;font-weight:normal;">(${staticInfo.scientificName})</span></h2>
+      <div class="info-section">
+        <p><strong>Family:</strong> ${staticInfo.family}</p>
+        <p><strong>Height:</strong> ${staticInfo.height}</p>
+        <p><strong>Habitat:</strong> ${staticInfo.habitat}</p>
+        <p><strong>Bark:</strong> ${staticInfo.bark}</p>
+        <p><strong>Leaf:</strong> ${staticInfo.leaf}</p>
+        <p><strong>Flowers:</strong> ${staticInfo.flowers}</p>
+        <p><strong>Fruit:</strong> ${staticInfo.fruit}</p>
+        <p>${staticInfo.description}</p>
+      </div>
+      <hr>
+    `;
+  } else {
+    staticHtml = `<h2>${plantName}</h2>`;
+  }
+
+  // Dynamic info HTML
+  let dynamicHtml = `
     <div class="info-section">
       <h4>Plant Details</h4>
-      <p>Age: ${ageDays} days</p>
-      <p>Growth Stage: ${growthStageIndex + 1} of 5</p>
-      <p>Planted: ${placementDate.toLocaleDateString()} at ${placementDate.toLocaleTimeString()}</p>
-      <p>Type: ${flower.propagationType === 'manual' ? 'Manually Planted' : 'Naturally Propagated'}</p>
-      ${flower.propagationType === 'propagated' ? `<p>Parent Plant ID: ${flower.parentId}</p>` : ''}
+      <p><strong>Age:</strong> ${ageDays} days</p>
+      <p><strong>Growth Stage:</strong> ${growthStageIndex + 1} of 5</p>
+      <p><strong>Planted:</strong> ${placementDate.toLocaleDateString()} at ${placementDate.toLocaleTimeString()}</p>
+      <p><strong>Type:</strong> ${flower.propagationType === 'manual' ? 'Manually Planted' : 'Naturally Propagated'}</p>
+      ${flower.propagationType === 'propagated' ? `<p><strong>Parent Plant ID:</strong> ${flower.parentId}</p>` : ''}
     </div>
   `;
+
+  content.innerHTML = staticHtml + dynamicHtml;
   popup.appendChild(content);
 
   // Add close button
