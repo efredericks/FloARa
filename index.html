@@ -61,6 +61,90 @@
       <button id="placeFlower" class="place-btn">Place Flower</button>
     </div>
   </div>
+  <!-- Floating Help Button -->
+  <style>
+  #help-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 48px;
+    height: 48px;
+    background: rgba(45,123,229,0.08); /* transparent, subtle blue tint */
+    color: #2d7be5;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    font-size: 1.4em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1001;
+    transition: background 0.2s, color 0.2s;
+    border: 2px solid #2d7be5;
+  }
+  #help-btn:hover {
+    background: #2d7be5;
+    color: #fff;
+  }
+  #help-modal {
+    display: none;
+    position: fixed;
+    z-index: 1002;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.4);
+    align-items: center;
+    justify-content: center;
+  }
+  #help-modal.active {
+    display: flex;
+  }
+  #help-modal-content {
+    background: #fff;
+    border-radius: 12px;
+    padding: 32px 24px 24px 24px;
+    max-width: 400px;
+    width: 90vw;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+    position: relative;
+    font-size: 1.1em;
+    font-family: 'BenchNine', 'Quicksand', Arial, sans-serif !important;
+  }
+  #help-modal-content h2 {
+    margin-top: 0;
+  }
+  #help-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    color: #888;
+    cursor: pointer;
+  }
+  #help-modal-close:hover {
+    color: #2d7be5;
+  }
+  </style>
+  <div id="help-btn" title="How to use?">?</div>
+  <div id="help-modal">
+    <div id="help-modal-content">
+      <button id="help-modal-close" aria-label="Close help">&times;</button>
+      <h2>How to Use</h2>
+      <ul>
+        <li><b>Add a plant:</b> Press 1-9 then use the UI to select a plant, then click on the map to place it.</li>
+        <li><b>View details:</b> Click on any plant to see its information panel.</li>
+        <li><b>Remove a plant:</b> Right-click a plant and confirm removal.</li>
+        <li><b>Propagation:</b> Some plants will spread automatically over time!</li>
+        <li><b>Filter:</b> Use the filter to show only certain types of plants.</li>
+        <li><b>Save:</b> Use the save button to download your garden as an image.</li>
+      </ul>
+      <p style="font-size:0.95em;color:#888;">Need more help? Contact the project team.</p>
+    </div>
+  </div>
   <script src="temp-data.js"></script>
   <!-- <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
     <script src="./assets/js/qr-generator.js"></script> -->
@@ -199,6 +283,43 @@
   </script>
   <script src="./assets/js/data.js"></script>
   <script src="./assets/js/sketch.js"></script>
+  <script>
+  // Help button logic
+  const helpBtn = document.getElementById('help-btn');
+  const helpModal = document.getElementById('help-modal');
+  const helpClose = document.getElementById('help-modal-close');
+  helpBtn.onclick = () => {
+    helpModal.classList.add('active');
+    document.body.style.overflow = 'hidden'; // Prevent background scroll
+  };
+  helpClose.onclick = () => {
+    helpModal.classList.remove('active');
+    document.body.style.overflow = '';
+  };
+  // Remove overlay click-to-close:
+  // helpModal.onclick = (e) => { if (e.target === helpModal) helpModal.classList.remove('active'); };
+  // Prevent tabbing out of modal
+  helpModal.addEventListener('keydown', function(e) {
+    if (e.key === 'Tab') {
+      const focusable = helpModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    } else if (e.key === 'Escape') {
+      helpClose.click();
+    }
+  });
+  </script>
 </body>
 
 </html>

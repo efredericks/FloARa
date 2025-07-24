@@ -394,3 +394,44 @@ canvas {
 
 /* Style the container or add a wrapper if more complex styling needed */
 /* For a simple arrow, you might need to use a background image or a pseudo-element */
+
+/* Modal popup shared styles */
+.modal-popup {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px 24px 24px;
+  max-width: 420px;
+  width: 90vw;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  position: relative;
+  font-size: 1.1em;
+  font-family: 'BenchNine', 'Quicksand', Arial, sans-serif !important;
+  color: #222;
+}
+.modal-popup h2, .modal-popup h3 {
+  margin-top: 0;
+  font-weight: 700;
+  font-size: 1.5em;
+  letter-spacing: 0.01em;
+}
+.modal-popup ul, .modal-popup p, .modal-popup li {
+  font-size: 1em;
+  font-weight: 400;
+  color: #222;
+}
+.modal-popup ul {
+  padding-left: 1.2em;
+}
+.modal-popup .modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  color: #888;
+  cursor: pointer;
+}
+.modal-popup .modal-close:hover {
+  color: #2d7be5;
+}
