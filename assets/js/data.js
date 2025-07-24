@@ -3,7 +3,7 @@
 // unsure if hd_scale is necessary or if my math is just off
 // TBD: probably would be better to render as full-def and then scale to viewport
 let QR_map = {
-  0: { name: 'Milkweed', scale: 0.4, hd_scale: 0.7 },
+  0: { name: 'Milkweed', scale: 0.04, hd_scale: 0.07 },
   1: { name: 'Nymphaea', scale: 0.04, hd_scale: 0.07 },
   2: { name: 'Arrow-Arum-Peltandra-Virginica', scale: 0.2, hd_scale: 0.07 },
   3: { name: 'Paper-Birch', scale: 0.2, hd_scale: 0.07 },

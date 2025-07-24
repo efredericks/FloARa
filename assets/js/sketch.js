@@ -138,8 +138,12 @@ function preload() {
   };
 
   // Load Milkweed images - using same image for all stages for now
-  const milkweedImg = loadImage("assets/img/milkweed/Milkweed_5_outerglow.png");
-  for (let i = 0; i < 5; i++) {
+  // const milkweedImg = loadImage("assets/img/milkweed/Milkweed_5_outerglow.png");
+  // for (let i = 0; i < 5; i++) {
+  //   plant_images['Milkweed'].push(milkweedImg);
+  // }
+  for (let i = 1; i <= 5; i++) {
+    const milkweedImg = loadImage(`assets/img/milkweed/milkweed_0${i}-color.png`);
     plant_images['Milkweed'].push(milkweedImg);
   }
 
@@ -571,9 +575,9 @@ function drawEverything(saving = false) {
         }
 
         // Apply color tinting if the flower has a color
-        if (f.color) {
-          tint(f.color);
-        }
+        // if (f.color) {
+          // tint(f.color);
+        // }
 
         // Add visual indicator for propagated plants
         // if (f.propagationType === 'propagated') {
