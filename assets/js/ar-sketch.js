@@ -1,7 +1,8 @@
 // thoughts:
 //  - recommend turning off auto-rotate
+//  - left in a bunch of commented ios permissions code since it "seems" to work on the ipad but haven't checked on iphones 
 // 
-// 
+
 let bg, mask;
 
 let windowX, windowY;
@@ -136,50 +137,54 @@ function windowResized() {
 }
 
 function insertFlower(x, y) {
-    const newFlower = {
-        location: {
-            x: x,
-            y: y,
-        },
-        color: "#000000",
-        QR_id: currPlantID,
-        timestamp: new Date().toISOString(),
-        propagationType: 'manual'
-    };
+    if (pressTimer == 0) {
+        const newFlower = {
+            location: {
+                x: x,
+                y: y,
+            },
+            color: "#000000",
+            QR_id: currPlantID,
+            timestamp: new Date().toISOString(),
+            propagationType: 'manual'
+        };
 
 
-    // tbd - highlight suitable areas for planting?
-    const plantName = QR_map[currPlantID].name;
-    const suitableAreas = plantInfo[plantName].suitableAreas;
-    if (isValidPlantLocation(x, y, suitableAreas)) {
-        window.addFlower(newFlower).then(flowerId => {
-            if (flowerId) {
-                alert(`${plantName} successfully added`);
-                // // Create and show confirmation popup
-                // const popup = document.createElement('div');
-                // popup.className = 'confirmation-popup';
+        // tbd - highlight suitable areas for planting?
+        const plantName = QR_map[currPlantID].name;
+        const suitableAreas = plantInfo[plantName].suitableAreas;
+        if (isValidPlantLocation(x, y, suitableAreas)) {
+            window.addFlower(newFlower).then(flowerId => {
+                if (flowerId) {
+                    alert(`${plantName} successfully added`);
+                    // // Create and show confirmation popup
+                    // const popup = document.createElement('div');
+                    // popup.className = 'confirmation-popup';
 
-                // // Add success message
-                // const message = document.createElement('p');
-                // message.textContent = 'Flower successfully added!';
-                // popup.appendChild(message);
-                // modalActive = true;
+                    // // Add success message
+                    // const message = document.createElement('p');
+                    // message.textContent = 'Flower successfully added!';
+                    // popup.appendChild(message);
+                    // modalActive = true;
 
-                // // Add close button
-                // const closeBtn = document.createElement('button');
-                // closeBtn.textContent = 'OK';
-                // closeBtn.className = 'success-btn';
-                // closeBtn.onclick = () => {
-                //     document.body.removeChild(popup);
-                //     modalActive = false;
-                // };
-                // popup.appendChild(closeBtn);
+                    // // Add close button
+                    // const closeBtn = document.createElement('button');
+                    // closeBtn.textContent = 'OK';
+                    // closeBtn.className = 'success-btn';
+                    // closeBtn.onclick = () => {
+                    //     document.body.removeChild(popup);
+                    //     modalActive = false;
+                    // };
+                    // popup.appendChild(closeBtn);
 
-                // document.body.appendChild(popup);
-            }
-        });
+                    // document.body.appendChild(popup);
+                }
+            });
+        } else {
+            alert(`Invalid location for ${plantName}`);
+        }
     } else {
-        alert(`Invalid location for ${plantName}`);
+        alert("Wait a few before planting another");
     }
 }
 
@@ -187,6 +192,7 @@ function touchStarted() {
     let x = mouseX + windowX;
     let y = mouseY + windowY;
     insertFlower(x, y);
+    pressTimer = 50;
 }
 function mousePressed() {
     // if (accessAllowed && pressTimer == 0) {
@@ -194,6 +200,7 @@ function mousePressed() {
     let x = mouseX + windowX;
     let y = mouseY + windowY;
     insertFlower(x, y);
+    pressTimer = 50;
 
     // const newFlower = {
     //     location: {
