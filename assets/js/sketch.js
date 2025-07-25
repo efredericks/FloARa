@@ -160,6 +160,8 @@ const plantDetails = {
   }
 };
 
+let plant_images_orig;
+
 // load in background and flowers at full resolution
 function preload() {
   // keeping a hires version, but scaling to 50% immediately as mobile chrome can't handle it
@@ -181,62 +183,72 @@ function preload() {
     'Zizania-Aquatica': [],
     'PawPaw': [],
   };
+  plant_images_orig = {
+    'Milkweed': [],
+    'Nymphaea': [],
+    'Piranha': [],
+    'Arrow-Arum-Peltandra-Virginica': [],
+    'Paper-Birch': [],
+    'Populus-Deltoides': [],
+    'Zizania-Aquatica': [],
+    'PawPaw': [],
+  };
 
   // Load Milkweed images - using same image for all stages for now
   // const milkweedImg = loadImage("assets/img/milkweed/Milkweed_5_outerglow.png");
   // for (let i = 0; i < 5; i++) {
-  //   plant_images['Milkweed'].push(milkweedImg);
+  //   plant_images_orig['Milkweed'].push(milkweedImg);
   // }
   for (let i = 1; i <= 5; i++) {
     const milkweedImg = loadImage(`assets/img/milkweed/milkweed_0${i}-color.png`);
-    plant_images['Milkweed'].push(milkweedImg);
+    plant_images_orig['Milkweed'].push(milkweedImg);
   }
 
   // Load Nymphaea images
   for (let i = 1; i <= 5; i++) {
     const nymphaeaImg = loadImage(`assets/img/Nymphaea-Odorata-Ella-Kane/nymphaea_odorata_stage${i}.png`);
-    plant_images['Nymphaea'].push(nymphaeaImg);
+    plant_images_orig['Nymphaea'].push(nymphaeaImg);
   }
 
   // Load Peltandra-Virginica images
   for (let i = 1; i <= 5; i++) {
     const peltandraImg = loadImage(`assets/img/Arrow-Arum-Peltandra-Virginica/Colored/Arrow_Arum_Stage_${i}.png`);
-    plant_images['Arrow-Arum-Peltandra-Virginica'].push(peltandraImg);
+    plant_images_orig['Arrow-Arum-Peltandra-Virginica'].push(peltandraImg);
   }
 
   // Load Paper Birch images
   for (let i = 1; i <= 5; i++) {
     const birchImg = loadImage(`assets/img/Paper-Birch/Colored/Paper_Birch_Stage_${i}.png`);
-    plant_images['Paper-Birch'].push(birchImg);
+    plant_images_orig['Paper-Birch'].push(birchImg);
   }
 
   // Load PawPaw images
   for (let i = 1; i <= 4; i++) {
     const pawpawImg = loadImage(`assets/img/PawPaw/pawpaw${i}.png`);
-    plant_images['PawPaw'].push(pawpawImg);
+    plant_images_orig['PawPaw'].push(pawpawImg);
   }
   // double for the fifth for temporary fix
-  plant_images['PawPaw'].push(loadImage('assets/img/PawPaw/pawpaw4.png'));
+  plant_images_orig['PawPaw'].push(loadImage('assets/img/PawPaw/pawpaw4.png'));
 
   // Load Populus images
   for (let i = 1; i <= 5; i++) {
     const populusImg = loadImage(`assets/img/Populus-Deltoides/populus_deltoides_stage${i}.png`);
-    plant_images['Populus-Deltoides'].push(populusImg);
+    plant_images_orig['Populus-Deltoides'].push(populusImg);
   }
 
   // Load Zizania images
   for (let i = 1; i <= 5; i++) {
     const zizaniaImg = loadImage(`assets/img/Zizania-Aquatica/Zizania-Aquatica-${i}.png`);
-    plant_images['Zizania-Aquatica'].push(zizaniaImg);
+    plant_images_orig['Zizania-Aquatica'].push(zizaniaImg);
   }
 
   // Load Piranha images - using Milkweed image as placeholder
   // for (let i = 0; i < 5; i++) {
-  plant_images['Piranha'].push(loadImage("assets/img/Piranha/piranha-base-1.png"));
-  plant_images['Piranha'].push(loadImage("assets/img/Piranha/piranha-vine-1.png"));
-  plant_images['Piranha'].push(loadImage("assets/img/Piranha/piranha-vine-1.png"));
-  plant_images['Piranha'].push(loadImage("assets/img/Piranha/piranha-head-1.png"));
-  plant_images['Piranha'].push(loadImage("assets/img/Piranha/piranha-head-2.png"));
+  plant_images_orig['Piranha'].push(loadImage("assets/img/Piranha/piranha-base-1.png"));
+  plant_images_orig['Piranha'].push(loadImage("assets/img/Piranha/piranha-vine-1.png"));
+  plant_images_orig['Piranha'].push(loadImage("assets/img/Piranha/piranha-vine-1.png"));
+  plant_images_orig['Piranha'].push(loadImage("assets/img/Piranha/piranha-head-1.png"));
+  plant_images_orig['Piranha'].push(loadImage("assets/img/Piranha/piranha-head-2.png"));
   // }
 
   // font = loadFont("assets/fonts/Quicksand-Medium.ttf");
@@ -255,6 +267,23 @@ function setup() {
 
   textFont(font);
   textAlign(CENTER);
+
+  // resize flowers to avoid crunchy rescaling later
+  let w_aspect = bg.width / width;
+  let h = bg.height / w_aspect;
+  let h_aspect = bg.height / h;
+  for (const [QR_id, value] of Object.entries(QR_map)) {
+    for (let img of plant_images_orig[value.name]) {
+      let _w = (img.width * QR_map[QR_id].scale);
+      let _h = (img.height * QR_map[QR_id].scale);
+
+      let s_img = createImage(img.width, img.height);
+      s_img.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
+      s_img.resize(_w, _h);
+      plant_images[value.name].push(s_img);
+    }
+  }
+
 
   // Use real-time Firestore listener if available
   if (window.subscribeToFlowers) {
@@ -740,9 +769,12 @@ function drawEverything(saving = false) {
           }
 
           // incorporate hover scaling
-          let _x = x - (_w * glowScale) * .5;
-          let _y = y - (_h * glowScale);
-          image(_img, _x, _y, _w * glowScale, _h * glowScale, 0, 0, _img.width, _img.height);
+          let _x = x - (_img.width * glowScale) * .5;
+          let _y = y - (_img.height * glowScale);
+          // let _x = x - (_w * glowScale) * .5;
+          // let _y = y - (_h * glowScale);
+          // image(_img, _x, _y, _w * glowScale, _h * glowScale, 0, 0, _img.width, _img.height);
+          image(_img, _x, _y, _img.width * glowScale, _img.height * glowScale, 0, 0, _img.width, _img.height);
           pop();
         }
       }

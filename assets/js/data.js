@@ -5,7 +5,7 @@
 let QR_map = {
   0: { name: 'Milkweed', scale: 0.04, hd_scale: 0.07 },
   1: { name: 'Nymphaea', scale: 0.04, hd_scale: 0.07 },
-  2: { name: 'Arrow-Arum-Peltandra-Virginica', scale: 0.2, hd_scale: 0.07 },
+  2: { name: 'Arrow-Arum-Peltandra-Virginica', scale: 0.04, hd_scale: 0.07 },
   3: { name: 'Paper-Birch', scale: 0.2, hd_scale: 0.07 },
   4: { name: 'PawPaw', scale: 0.2, hd_scale: 0.07 },
   5: { name: 'Populus-Deltoides', scale: 0.08, hd_scale: 0.07 },
