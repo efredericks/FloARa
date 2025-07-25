@@ -102,6 +102,20 @@ const plantDetails = {
     description: "Paper birch is a medium-sized tree known for its distinctive white, peeling bark. It is important for wildlife and was used by Indigenous peoples for canoes and containers.",
     image: null
   },
+  4: {
+    commonName: "",
+    scientificName: "PawPaw",
+    family: "",
+    height: "",
+    age: "",
+    habitat: "",
+    bark: "",
+    leaf: "",
+    flowers: "",
+    fruit: "",
+    description: "",
+    image: null
+  },
   5: {
     commonName: "",
     scientificName: "Populus Deltoides",
@@ -165,6 +179,7 @@ function preload() {
     'Paper-Birch': [],
     'Populus-Deltoides': [],
     'Zizania-Aquatica': [],
+    'PawPaw': [],
   };
 
   // Load Milkweed images - using same image for all stages for now
@@ -194,6 +209,14 @@ function preload() {
     const birchImg = loadImage(`assets/img/Paper-Birch/Colored/Paper_Birch_Stage_${i}.png`);
     plant_images['Paper-Birch'].push(birchImg);
   }
+
+  // Load PawPaw images
+  for (let i = 1; i <= 4; i++) {
+    const pawpawImg = loadImage(`assets/img/PawPaw/pawpaw${i}.png`);
+    plant_images['PawPaw'].push(pawpawImg);
+  }
+  // double for the fifth for temporary fix
+  plant_images['PawPaw'].push(loadImage('assets/img/PawPaw/pawpaw4.png'));
 
   // Load Populus images
   for (let i = 1; i <= 5; i++) {
@@ -235,7 +258,7 @@ function setup() {
 
   // Use real-time Firestore listener if available
   if (window.subscribeToFlowers) {
-    window.subscribeToFlowers(function(rawData) {
+    window.subscribeToFlowers(function (rawData) {
       // Process data as in loadData()
       flowers = rawData.map(f => {
         // Try to find QR_id in different possible field names
@@ -618,7 +641,7 @@ function drawEverything(saving = false) {
 
         // Apply color tinting if the flower has a color
         // if (f.color) {
-          // tint(f.color);
+        // tint(f.color);
         // }
 
         // Add visual indicator for propagated plants
