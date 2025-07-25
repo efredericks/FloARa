@@ -589,18 +589,7 @@ function drawEverything(saving = false) {
         return;
       }
 
-      // debug
-      // if (debug) {
-      //   tint(255, 127);
-      //   image(mask, 0, 0, width, h, 0, 0, bg.width, bg.height);
-      //   noTint();
-      // }
-
       let i = 0;
-      // let now = new Date();
-      // console.log("Available plant images:", plant_images);
-      // console.log("QR_map:", QR_map);
-
       for (let f of flowers) {
         // Skip if plant doesn't match current filter
         if (plantFilter !== 'all' && f.propagationType !== plantFilter) {
@@ -633,12 +622,12 @@ function drawEverything(saving = false) {
         let plantName = image_info.plantName;
         let idx = image_info.idx;
 
-        let h_aspect = bg.height / h;
+        // let h_aspect = bg.height / h;
         let x = image_info.x;//(f.location.x / w_aspect);
         let y = image_info.y;//(f.location.y / h_aspect);
 
         // perspective for 'farther away'
-        let sc = map(y, height, height * 0.2, 1.0, 0.001);
+        // let sc = map(y, height, height * 0.2, 1.0, 0.001);
         let _w, _h, _img;
 
         // console.log("Stage index:", idx);
@@ -700,19 +689,19 @@ function drawEverything(saving = false) {
         // piranha
         if (f.QR_id == 99) {
           let glowScale = 1.0;
-          // if (hoveredFlower === f) {
-          //   glowScale = 1.1;
-          //   push();
-          //   stroke(0);
-          //   noFill();
-          //   rect(x - _w * .5, y - _h * .5 - _h * 0.5, _w, _h);
-          //   fill(color(255, 0, 255))
-          //   stroke(0);
-          //   pop();
-          // }
+          if (hoveredFlower === f) {
+            glowScale = 1.1;
+            //   push();
+            //   stroke(0);
+            //   noFill();
+            //   rect(x - _w * .5, y - _h * .5 - _h * 0.5, _w, _h);
+            //   fill(color(255, 0, 255))
+            //   stroke(0);
+            //   pop();
+          }
           // incorporate hover scaling
-          let _w2 = plant_images[plantName][0].width;
-          let _h2 = plant_images[plantName][0].height;
+          let _w2 = image_info.w;//plant_images[plantName][idx].width;
+          let _h2 = image_info.h;//plant_images[plantName][idx].height;
           let _x = x - (_w2 * glowScale) * .5;
           let _y = y - (_h2 * glowScale);
 
@@ -720,7 +709,7 @@ function drawEverything(saving = false) {
           for (let i = 0; i <= max_idx; i++) {
             let _img2 = plant_images[plantName][i];
             image(_img2, _x, _y, _w2 * glowScale, _h2 * glowScale, 0, 0, _img2.width, _img2.height);
-            _y -= _img2.height;
+            _y -= _h2;//img2.height;
           }
           if (idx >= 3) {
             let anim_idx = 3;
@@ -737,10 +726,14 @@ function drawEverything(saving = false) {
 
 
           if (debug) {
+            let _x = x - (_img.width) * .5;
+            let _y = y - (_img.height);
             push();
-            stroke(0);
+            if (hoveredFlower == f) stroke(color(255, 255, 0))
+            else
+              stroke(0);
             noFill();
-            rect(x - _w * .5, y - _h * .5 - _h * 0.5, _w, _h);
+            rect(_x, _y, _img.width, _img.height);
             fill(color(255, 0, 255))
             stroke(0);
             text(`${Math.floor(x - _w * .5)}:${Math.floor(y - _h * .5 - _h * .5)}`, x - _w * .5, y - _h * .5 - _h * 0.5);
@@ -758,23 +751,33 @@ function drawEverything(saving = false) {
             // image(_img, x - (_w * glowScale) * .5, y - (_h * glowScale) * .5,
             // _w * glowScale, _h * glowScale, 0, 0, _img.width, _img.height);
             // pop();
-            push();
-            stroke(0);
-            noFill();
-            rect(x - _w * .5, y - _h * .5 - _h * 0.5, _w, _h);
-            fill(color(255, 0, 255))
-            stroke(0);
-            text(`${Math.floor(x - _w * .5)}:${Math.floor(y - _h * .5 - _h * .5)}`, x - _w * .5, y - _h * .5 - _h * 0.5);
-            pop();
+            // push();
+            // stroke(0);
+            // noFill();
+            // rect(x - _w * .5, y - _h * .5 - _h * 0.5, _w, _h);
+            // fill(color(255, 0, 255))
+            // stroke(0);
+            // text(`${Math.floor(x - _w * .5)}:${Math.floor(y - _h * .5 - _h * .5)}`, x - _w * .5, y - _h * .5 - _h * 0.5);
+            // pop();
           }
 
           // incorporate hover scaling
-          let _x = x - (_img.width * glowScale) * .5;
-          let _y = y - (_img.height * glowScale);
+          let _w2 = image_info.w;//plant_images[plantName][idx].width;
+          let _h2 = image_info.h;//plant_images[plantName][idx].height;
+          let _x = x - (_w2 * glowScale) * .5;
+          let _y = y - (_h2 * glowScale);
+          image(_img, _x, _y, _w2 * glowScale, _h2 * glowScale, 0, 0, _img.width, _img.height);
+          // image(plant_images_orig[plantName][idx], _x, _y, _w2 * glowScale, _h2 * glowScale, 0, 0, plant_images_orig[plantName][idx].width, plant_images_orig[plantName][idx].height);
+
+
+
+
+          // let _x = x - (_img.width * glowScale) * .5;
+          // let _y = y - (_img.height * glowScale);
           // let _x = x - (_w * glowScale) * .5;
           // let _y = y - (_h * glowScale);
           // image(_img, _x, _y, _w * glowScale, _h * glowScale, 0, 0, _img.width, _img.height);
-          image(_img, _x, _y, _img.width * glowScale, _img.height * glowScale, 0, 0, _img.width, _img.height);
+          // image(_img, _x, _y, _img.width * glowScale, _img.height * glowScale, 0, 0, _img.width, _img.height);
           pop();
         }
       }
@@ -1247,6 +1250,13 @@ function saveImage() {
 // Add new function to update hoveredFlower
 function updateHoveredFlower() {
   if (width < height) return; // Skip in portrait mode
+
+  if (debug) {
+    push()
+    fill(color(0))
+    text(`${mouseX}:${mouseY}`, mouseX, mouseY)
+    pop()
+  }
 
   // point/rect collision and sorting based on y-depth
   let hovered_flowers = [];

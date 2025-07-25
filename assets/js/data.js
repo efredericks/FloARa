@@ -3,14 +3,14 @@
 // unsure if hd_scale is necessary or if my math is just off
 // TBD: probably would be better to render as full-def and then scale to viewport
 let QR_map = {
-  0: { name: 'Milkweed', scale: 0.04, hd_scale: 0.07 },
-  1: { name: 'Nymphaea', scale: 0.04, hd_scale: 0.07 },
-  2: { name: 'Arrow-Arum-Peltandra-Virginica', scale: 0.04, hd_scale: 0.07 },
-  3: { name: 'Paper-Birch', scale: 0.2, hd_scale: 0.07 },
-  4: { name: 'PawPaw', scale: 0.2, hd_scale: 0.07 },
-  5: { name: 'Populus-Deltoides', scale: 0.08, hd_scale: 0.07 },
-  6: { name: 'Zizania-Aquatica', scale: 0.04, hd_scale: 0.07 },
-  99: { name: 'Piranha', scale: 1.8, hd_scale: 1.0 },
+  0: { name: 'Milkweed', scale: 0.19, hd_scale: 0.07 },
+  1: { name: 'Nymphaea', scale: 0.19, hd_scale: 0.07 },
+  2: { name: 'Arrow-Arum-Peltandra-Virginica', scale: 0.25, hd_scale: 0.07 },
+  3: { name: 'Paper-Birch', scale: 0.4, hd_scale: 0.07 },
+  4: { name: 'PawPaw', scale: 0.4, hd_scale: 0.07 },
+  5: { name: 'Populus-Deltoides', scale: 0.30, hd_scale: 0.07 },
+  6: { name: 'Zizania-Aquatica', scale: 0.24, hd_scale: 0.07 },
+  99: { name: 'Piranha', scale: 1.2, hd_scale: 1.0 },
 }
 let plant_images = {};
 
@@ -31,7 +31,7 @@ let plantInfo = {
     propagationRate: 0.1,
     propagationRadius: 100,
     suitableAreas: ['grass'],
-    windDivider: 2400,
+    windDivider: 6400,
   },
   'Populus-Deltoides': {
     scientificName: "Placeholder",
@@ -81,7 +81,7 @@ let plantInfo = {
     ecology: "Placeholder",
     propagationRate: 0.1,
     propagationRadius: 100,
-    suitableAreas: ['grass'],
+    suitableAreas: ['water'],
     windDivider: 2400,
   },
   'Nymphaea': {
