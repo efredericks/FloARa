@@ -102,6 +102,20 @@ const plantDetails = {
     description: "Paper birch is a medium-sized tree known for its distinctive white, peeling bark. It is important for wildlife and was used by Indigenous peoples for canoes and containers.",
     image: null
   },
+  6: {
+    commonName: "",
+    scientificName: "Zizania Aquatica",
+    family: "",
+    height: "",
+    age: "",
+    habitat: "",
+    bark: "",
+    leaf: "",
+    flowers: "",
+    fruit: "",
+    description: "",
+    image: null
+  },
   99: {
     commonName: "Piranha Plant",
     scientificName: "Piranha fictus",
@@ -135,6 +149,7 @@ function preload() {
     'Piranha': [],
     'Arrow-Arum-Peltandra-Virginica': [],
     'Paper-Birch': [],
+    'Zizania-Aquatica': [],
   };
 
   // Load Milkweed images - using same image for all stages for now
@@ -163,6 +178,12 @@ function preload() {
   for (let i = 1; i <= 5; i++) {
     const birchImg = loadImage(`assets/img/Paper-Birch/Colored/Paper_Birch_Stage_${i}.png`);
     plant_images['Paper-Birch'].push(birchImg);
+  }
+
+  // Load Zizania images
+  for (let i = 1; i <= 5; i++) {
+    const zizaniaImg = loadImage(`assets/img/Zizania-Aquatica/Zizania-Aquatica-${i}.png`);
+    plant_images['Zizania-Aquatica'].push(zizaniaImg);
   }
 
   // Load Piranha images - using Milkweed image as placeholder
