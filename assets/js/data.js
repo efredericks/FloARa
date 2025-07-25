@@ -7,6 +7,7 @@ let QR_map = {
   1: { name: 'Nymphaea', scale: 0.04, hd_scale: 0.07 },
   2: { name: 'Arrow-Arum-Peltandra-Virginica', scale: 0.2, hd_scale: 0.07 },
   3: { name: 'Paper-Birch', scale: 0.2, hd_scale: 0.07 },
+  5: { name: 'Populus-Deltoides', scale: 0.08, hd_scale: 0.07 },
   6: { name: 'Zizania-Aquatica', scale: 0.04, hd_scale: 0.07 },
   99: { name: 'Piranha', scale: 1.8, hd_scale: 1.0 },
 }
@@ -30,6 +31,23 @@ let plantInfo = {
     propagationRadius: 100,
     suitableAreas: ['grass'],
     windDivider: 2400,
+  },
+  'Populus-Deltoides': {
+    scientificName: "Placeholder",
+    description: "A placeholder plant",
+    growthStages: [
+      "Stage 1",
+      "Stage 2",
+      "Stage 3",
+      "Stage 4",
+      "Stage 5"
+    ],
+    nativeRegion: "Placeholder",
+    ecology: "Placeholder",
+    propagationRate: 0.1,
+    propagationRadius: 100,
+    suitableAreas: ['grass'],
+    windDivider: 8400,
   },
   'Zizania-Aquatica': {
     scientificName: "Placeholder",

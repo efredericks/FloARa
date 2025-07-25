@@ -102,6 +102,20 @@ const plantDetails = {
     description: "Paper birch is a medium-sized tree known for its distinctive white, peeling bark. It is important for wildlife and was used by Indigenous peoples for canoes and containers.",
     image: null
   },
+  5: {
+    commonName: "",
+    scientificName: "Populus Deltoides",
+    family: "",
+    height: "",
+    age: "",
+    habitat: "",
+    bark: "",
+    leaf: "",
+    flowers: "",
+    fruit: "",
+    description: "",
+    image: null
+  },
   6: {
     commonName: "",
     scientificName: "Zizania Aquatica",
@@ -149,6 +163,7 @@ function preload() {
     'Piranha': [],
     'Arrow-Arum-Peltandra-Virginica': [],
     'Paper-Birch': [],
+    'Populus-Deltoides': [],
     'Zizania-Aquatica': [],
   };
 
@@ -178,6 +193,12 @@ function preload() {
   for (let i = 1; i <= 5; i++) {
     const birchImg = loadImage(`assets/img/Paper-Birch/Colored/Paper_Birch_Stage_${i}.png`);
     plant_images['Paper-Birch'].push(birchImg);
+  }
+
+  // Load Populus images
+  for (let i = 1; i <= 5; i++) {
+    const populusImg = loadImage(`assets/img/Populus-Deltoides/populus_deltoides_stage${i}.png`);
+    plant_images['Populus-Deltoides'].push(populusImg);
   }
 
   // Load Zizania images
