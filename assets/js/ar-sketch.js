@@ -18,12 +18,83 @@ let pressTimer = 0; // cooldown for permission button
 let browserDetails;
 let isIOS = false;
 
+// Interactive flower variables
+let flowers = []; // Add flowers array to store placed flowers
+let hoveredFlower = null;
+let selectedFlower = null;
+let contextMenu = null;
+let isInteractingWithFlower = false; // Flag to prevent placement when interacting
+
 function preload() {
     bg = loadImage("assets/img/BG-Retouch-Half.jpg");
     mask = loadImage("assets/img/BG-Retouch-mask-half.png");
     // bg = loadImage("assets/img/BG-Retouch.jpg");
     // mask = loadImage("assets/img/BG-Retouch-mask.png");
     font = loadFont("assets/fonts/BenchNine-Regular.ttf");
+    
+    // Initialize plant image arrays
+    plant_images = {
+        'Milkweed': [],
+        'Nymphaea': [],
+        'Piranha': [],
+        'Arrow-Arum-Peltandra-Virginica': [],
+        'Paper-Birch': [],
+        'PawPaw': [],
+        'Populus-Deltoides': [],
+        'Zizania-Aquatica': [],
+    };
+
+    // Load Milkweed images
+    for (let i = 1; i <= 5; i++) {
+        const milkweedImg = loadImage(`assets/img/milkweed/milkweed_0${i}-color.png`);
+        plant_images['Milkweed'].push(milkweedImg);
+    }
+
+    // Load Nymphaea images
+    for (let i = 1; i <= 5; i++) {
+        const nymphaeaImg = loadImage(`assets/img/Nymphaea-Odorata-Ella-Kane/nymphaea_odorata_stage${i}.png`);
+        plant_images['Nymphaea'].push(nymphaeaImg);
+    }
+
+    // Load Peltandra-Virginica images
+    for (let i = 1; i <= 5; i++) {
+        const peltandraImg = loadImage(`assets/img/Arrow-Arum-Peltandra-Virginica/Colored/Arrow_Arum_Stage_${i}.png`);
+        plant_images['Arrow-Arum-Peltandra-Virginica'].push(peltandraImg);
+    }
+
+    // Load Paper Birch images
+    for (let i = 1; i <= 5; i++) {
+        const birchImg = loadImage(`assets/img/Paper-Birch/Colored/Paper_Birch_Stage_${i}.png`);
+        plant_images['Paper-Birch'].push(birchImg);
+    }
+
+    // Load PawPaw images
+    for (let i = 1; i <= 4; i++) {
+        const pawpawImg = loadImage(`assets/img/PawPaw/pawpaw${i}.png`);
+        plant_images['PawPaw'].push(pawpawImg);
+    }
+    // Add the last stage again to make it 5 stages
+    const pawpawLastImg = loadImage("assets/img/PawPaw/pawpaw4.png");
+    plant_images['PawPaw'].push(pawpawLastImg);
+
+    // Load Populus-Deltoides images
+    for (let i = 1; i <= 5; i++) {
+        const populusImg = loadImage(`assets/img/Populus-Deltoides/populus_deltoides_stage${i}.png`);
+        plant_images['Populus-Deltoides'].push(populusImg);
+    }
+
+    // Load Zizania-Aquatica images
+    for (let i = 1; i <= 5; i++) {
+        const zizaniaImg = loadImage(`assets/img/Zizania-Aquatica/Zizania-Aquatica-${i}.png`);
+        plant_images['Zizania-Aquatica'].push(zizaniaImg);
+    }
+
+    // Load Piranha images
+    plant_images['Piranha'].push(loadImage("assets/img/Piranha/piranha-base-1.png"));
+    plant_images['Piranha'].push(loadImage("assets/img/Piranha/piranha-vine-1.png"));
+    plant_images['Piranha'].push(loadImage("assets/img/Piranha/piranha-vine-1.png"));
+    plant_images['Piranha'].push(loadImage("assets/img/Piranha/piranha-head-1.png"));
+    plant_images['Piranha'].push(loadImage("assets/img/Piranha/piranha-head-2.png"));
 }
 
 let overlay_gfx;
@@ -71,6 +142,15 @@ function setup() {
         }
     }
 
+    // Ensure currPlantID is valid
+    if (!QR_map[currPlantID]) {
+        console.warn("Invalid plant ID, defaulting to Milkweed (ID: 0)");
+        currPlantID = 0; // Default to Milkweed
+    }
+
+    console.log("Current plant ID:", currPlantID, "Plant name:", QR_map[currPlantID] ? QR_map[currPlantID].name : "INVALID");
+    console.log("Available QR_map keys:", Object.keys(QR_map));
+
     // give a helper visual for placement
     // overlay_gfx = createGraphics(bg.width, bg.height);
     // mask.loadPixels();
@@ -95,6 +175,22 @@ function setup() {
     //     }
     // }
 
+    // Load existing flowers from Firebase
+    if (window.getFlowerData) {
+        window.getFlowerData().then(data => {
+            flowers = data;
+            console.log("Loaded flowers:", flowers.length);
+        });
+    }
+
+    // Subscribe to real-time flower updates
+    if (window.subscribeToFlowers) {
+        window.subscribeToFlowers(function(data) {
+            flowers = data;
+            console.log("Updated flowers:", flowers.length);
+        });
+    }
+
     // startDeviceRotationDetect();
 }
 
@@ -103,6 +199,14 @@ function draw() {
     background(0);
     image(bg, 0, 0, width, height, windowX, windowY, width, height);
     // image(overlay_gfx, 0, 0, width, height, windowX, windowY, width, height);
+
+    // Render placed flowers
+    renderFlowers();
+
+    // Render context menu if active
+    if (contextMenu && contextMenu.flower) {
+        renderContextMenu();
+    }
 
     fill(color(0, 0, 0, 20));
     noStroke();
@@ -132,12 +236,312 @@ function draw() {
     }
 }
 
+// Add flower rendering function
+function renderFlowers() {
+    if (!flowers || flowers.length === 0) return;
+
+    for (let f of flowers) {
+        // Skip invalid flowers
+        if (f.QR_id === undefined || f.QR_id === null || !QR_map[f.QR_id] || !QR_map[f.QR_id].name) {
+            continue;
+        }
+        
+        // Skip if location is invalid
+        if (!f.location || typeof f.location.x !== 'number' || typeof f.location.y !== 'number') {
+            continue;
+        }
+
+        // Calculate position relative to current view
+        let x = f.location.x - windowX;
+        let y = f.location.y - windowY;
+
+        // Only render if flower is visible in current view
+        if (x < -100 || x > width + 100 || y < -100 || y > height + 100) {
+            continue;
+        }
+
+        let plantName = QR_map[f.QR_id].name;
+        
+        // Get the appropriate image for this plant
+        let imageIndex = 0; // Default to first stage
+        if (plant_images[plantName] && plant_images[plantName][imageIndex]) {
+            let img = plant_images[plantName][imageIndex];
+            
+            // Calculate scaling based on plant type and perspective
+            let scale = QR_map[f.QR_id].scale || 0.4;
+            let w = img.width * scale;
+            let h = img.height * scale;
+            
+            // Apply perspective scaling (plants farther away appear smaller)
+            let perspectiveScale = map(y, height, height * 0.2, 1.0, 0.3);
+            w *= perspectiveScale;
+            h *= perspectiveScale;
+            
+            push();
+            noStroke();
+            
+            // Check if this flower is being hovered
+            let isHovered = (hoveredFlower === f);
+            let isSelected = (selectedFlower === f);
+            
+            // Add hover effect
+            if (isHovered || isSelected) {
+                stroke(255, 255, 0);
+                strokeWeight(3);
+            }
+            
+            // Apply color tinting if the flower has a color
+            if (f.color && f.color !== "#000000") {
+                tint(f.color);
+            }
+            
+            // Draw the plant image
+            image(img, x - w/2, y - h/2, w, h);
+            
+            // Reset tint
+            noTint();
+            
+            // Add plant name label (optional - can be removed for cleaner look)
+            fill(0);
+            textSize(10);
+            textAlign(CENTER);
+            text(plantName, x, y + h/2 + 15);
+            
+            pop();
+        } else {
+            // Fallback to circle if image not loaded
+            push();
+            noStroke();
+            
+            // Check if this flower is being hovered
+            let isHovered = (hoveredFlower === f);
+            let isSelected = (selectedFlower === f);
+            
+            // Add hover effect
+            if (isHovered || isSelected) {
+                stroke(255, 255, 0);
+                strokeWeight(3);
+            }
+            
+            // Color based on plant type
+            if (plantName === 'Milkweed') {
+                fill(255, 192, 203); // Pink
+            } else if (plantName === 'Nymphaea') {
+                fill(255, 255, 255); // White
+            } else if (plantName === 'Paper-Birch') {
+                fill(245, 245, 245); // Light gray
+            } else if (plantName === 'Arrow-Arum-Peltandra-Virginica') {
+                fill(34, 139, 34); // Forest green
+            } else if (plantName === 'PawPaw') {
+                fill(255, 165, 0); // Orange
+            } else if (plantName === 'Populus-Deltoides') {
+                fill(139, 69, 19); // Brown
+            } else if (plantName === 'Zizania-Aquatica') {
+                fill(0, 128, 0); // Green
+            } else if (plantName === 'Piranha') {
+                fill(255, 0, 0); // Red
+            } else {
+                fill(0, 255, 0); // Default green
+            }
+
+            // Draw fallback circle
+            ellipse(x, y, 30, 30);
+            
+            // Add plant name label
+            fill(0);
+            textSize(12);
+            textAlign(CENTER);
+            text(plantName, x, y + 25);
+            
+            pop();
+        }
+    }
+}
+
+// Function to check if a point is within a flower
+function getFlowerAtPosition(x, y) {
+    for (let f of flowers) {
+        if (f.QR_id === undefined || f.QR_id === null || !QR_map[f.QR_id] || !QR_map[f.QR_id].name) {
+            continue;
+        }
+        
+        if (!f.location || typeof f.location.x !== 'number' || typeof f.location.y !== 'number') {
+            continue;
+        }
+
+        let flowerX = f.location.x - windowX;
+        let flowerY = f.location.y - windowY;
+        
+        // Check if click is within flower bounds
+        let distance = dist(x, y, flowerX, flowerY);
+        if (distance <= 15) { // 15 pixel radius
+            return f;
+        }
+    }
+    return null;
+}
+
+// Function to show flower details
+function showFlowerDetails(flower) {
+    let plantName = QR_map[flower.QR_id].name;
+    let plantData = plantInfo[plantName];
+    
+    let details = `Plant: ${plantName}\n`;
+    details += `Placed: ${new Date(flower.timestamp).toLocaleString()}\n`;
+    details += `Type: ${flower.propagationType || 'manual'}\n`;
+    if (plantData) {
+        details += `Scientific Name: ${plantData.scientificName}\n`;
+        details += `Description: ${plantData.description}\n`;
+        details += `Native Region: ${plantData.nativeRegion}\n`;
+        details += `Ecology: ${plantData.ecology}`;
+    }
+    
+    alert(details);
+}
+
+// Function to delete flower
+function deleteFlower(flower) {
+    if (confirm(`Are you sure you want to delete this ${QR_map[flower.QR_id].name}?`)) {
+        if (window.deleteFlower) {
+            window.deleteFlower(flower.id).then(success => {
+                if (success) {
+                    // Remove from local array
+                    let index = flowers.findIndex(f => f.id === flower.id);
+                    if (index !== -1) {
+                        flowers.splice(index, 1);
+                    }
+                    alert('Flower deleted successfully');
+                } else {
+                    alert('Failed to delete flower');
+                }
+            });
+        } else {
+            // Fallback: remove from local array only
+            let index = flowers.findIndex(f => f.id === flower.id);
+            if (index !== -1) {
+                flowers.splice(index, 1);
+            }
+            alert('Flower removed locally');
+        }
+    }
+}
+
+// Function to create context menu
+function createContextMenu(x, y, flower) {
+    // Ensure menu stays within canvas bounds
+    let menuWidth = 150;
+    let menuHeight = 80;
+    
+    // Adjust position if menu would go off screen
+    if (x + menuWidth > width) {
+        x = width - menuWidth - 10;
+    }
+    if (y + menuHeight > height) {
+        y = height - menuHeight - 10;
+    }
+    
+    contextMenu = {
+        x: x,
+        y: y,
+        flower: flower,
+        width: menuWidth,
+        height: menuHeight,
+        buttons: [
+            { text: "View Details", action: "details", y: y + 20 },
+            { text: "Delete", action: "delete", y: y + 50 }
+        ]
+    };
+}
+
+// Function to render context menu using p5.js
+function renderContextMenu() {
+    if (!contextMenu) return;
+    
+    // Draw background
+    push();
+    fill(255);
+    stroke(200);
+    strokeWeight(1);
+    rect(contextMenu.x, contextMenu.y, contextMenu.width, contextMenu.height, 5);
+    
+    // Draw buttons
+    for (let button of contextMenu.buttons) {
+        let buttonY = button.y;
+        let buttonHeight = 25;
+        
+        // Check if mouse is over this button
+        let isHovered = mouseX >= contextMenu.x && mouseX <= contextMenu.x + contextMenu.width &&
+                       mouseY >= buttonY && mouseY <= buttonY + buttonHeight;
+        
+        // Button background
+        if (button.action === "delete") {
+            fill(isHovered ? color(255, 100, 100) : color(255, 150, 150));
+        } else {
+            fill(isHovered ? color(200, 200, 255) : color(240, 240, 255));
+        }
+        
+        noStroke();
+        rect(contextMenu.x + 5, buttonY, contextMenu.width - 10, buttonHeight, 3);
+        
+        // Button text
+        fill(0);
+        textAlign(CENTER, CENTER);
+        textSize(12);
+        text(button.text, contextMenu.x + contextMenu.width/2, buttonY + buttonHeight/2);
+    }
+    pop();
+}
+
+// Function to check if context menu is clicked
+function checkContextMenuClick() {
+    if (!contextMenu) return false;
+    
+    for (let button of contextMenu.buttons) {
+        let buttonY = button.y;
+        let buttonHeight = 25;
+        
+        if (mouseX >= contextMenu.x && mouseX <= contextMenu.x + contextMenu.width &&
+            mouseY >= buttonY && mouseY <= buttonY + buttonHeight) {
+            
+            if (button.action === "details") {
+                showFlowerDetails(contextMenu.flower);
+            } else if (button.action === "delete") {
+                deleteFlower(contextMenu.flower);
+            }
+            
+            contextMenu = null;
+            return true;
+        }
+    }
+    
+    // Clicked outside menu, close it
+    if (mouseX < contextMenu.x || mouseX > contextMenu.x + contextMenu.width ||
+        mouseY < contextMenu.y || mouseY > contextMenu.y + contextMenu.height) {
+        contextMenu = null;
+        return true;
+    }
+    
+    return false;
+}
+
+// Handle mouse movement for hover effects
+function mouseMoved() {
+    hoveredFlower = getFlowerAtPosition(mouseX, mouseY);
+}
+
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
 }
 
 function insertFlower(x, y) {
     if (pressTimer == 0) {
+        // Check if currPlantID is valid
+        if (!QR_map[currPlantID]) {
+            console.error("Invalid plant ID:", currPlantID);
+            alert("Invalid plant type selected");
+            return;
+        }
+        
         const newFlower = {
             location: {
                 x: x,
@@ -149,35 +553,16 @@ function insertFlower(x, y) {
             propagationType: 'manual'
         };
 
-
         // tbd - highlight suitable areas for planting?
         const plantName = QR_map[currPlantID].name;
         const suitableAreas = plantInfo[plantName].suitableAreas;
         if (isValidPlantLocation(x, y, suitableAreas)) {
             window.addFlower(newFlower).then(flowerId => {
                 if (flowerId) {
+                    // Add the flower to local array immediately for instant visual feedback
+                    newFlower.id = flowerId;
+                    flowers.push(newFlower);
                     alert(`${plantName} successfully added`);
-                    // // Create and show confirmation popup
-                    // const popup = document.createElement('div');
-                    // popup.className = 'confirmation-popup';
-
-                    // // Add success message
-                    // const message = document.createElement('p');
-                    // message.textContent = 'Flower successfully added!';
-                    // popup.appendChild(message);
-                    // modalActive = true;
-
-                    // // Add close button
-                    // const closeBtn = document.createElement('button');
-                    // closeBtn.textContent = 'OK';
-                    // closeBtn.className = 'success-btn';
-                    // closeBtn.onclick = () => {
-                    //     document.body.removeChild(popup);
-                    //     modalActive = false;
-                    // };
-                    // popup.appendChild(closeBtn);
-
-                    // document.body.appendChild(popup);
                 }
             });
         } else {
@@ -189,65 +574,54 @@ function insertFlower(x, y) {
 }
 
 function touchStarted() {
+    // First check if clicking on context menu
+    if (checkContextMenuClick()) {
+        return false;
+    }
+    
+    // Check if clicking on a flower
+    let clickedFlower = getFlowerAtPosition(mouseX, mouseY);
+    
+    if (clickedFlower) {
+        createContextMenu(mouseX, mouseY, clickedFlower);
+        isInteractingWithFlower = true;
+        return false;
+    }
+    
+    // Reset interaction flag
+    isInteractingWithFlower = false;
+    
+    // If not clicking on a flower or UI, place a new one
     let x = mouseX + windowX;
     let y = mouseY + windowY;
     insertFlower(x, y);
     pressTimer = 50;
+    return false;
 }
+
 function mousePressed() {
-    // if (accessAllowed && pressTimer == 0) {
-    // get world coords
+    // First check if clicking on context menu
+    if (checkContextMenuClick()) {
+        return;
+    }
+    
+    // Check if clicking on a flower
+    let clickedFlower = getFlowerAtPosition(mouseX, mouseY);
+    
+    if (clickedFlower) {
+        createContextMenu(mouseX, mouseY, clickedFlower);
+        isInteractingWithFlower = true;
+        return;
+    }
+    
+    // Reset interaction flag
+    isInteractingWithFlower = false;
+    
+    // If not clicking on a flower or UI, place a new one
     let x = mouseX + windowX;
     let y = mouseY + windowY;
     insertFlower(x, y);
     pressTimer = 50;
-
-    // const newFlower = {
-    //     location: {
-    //         x: x,
-    //         y: y,
-    //     },
-    //     color: "#000000",
-    //     QR_id: currPlantID,
-    //     timestamp: new Date().toISOString(),
-    //     propagationType: 'manual'
-    // };
-
-
-    // // tbd - highlight suitable areas for planting?
-    // const plantName = QR_map[currPlantID].name;
-    // const suitableAreas = plantInfo[plantName].suitableAreas;
-    // if (isValidPlantLocation(x, y, suitableAreas)) {
-    //     window.addFlower(newFlower).then(flowerId => {
-    //         if (flowerId) {
-    //             alert(`${plantName} successfully added`);
-    //             // // Create and show confirmation popup
-    //             // const popup = document.createElement('div');
-    //             // popup.className = 'confirmation-popup';
-
-    //             // // Add success message
-    //             // const message = document.createElement('p');
-    //             // message.textContent = 'Flower successfully added!';
-    //             // popup.appendChild(message);
-    //             // modalActive = true;
-
-    //             // // Add close button
-    //             // const closeBtn = document.createElement('button');
-    //             // closeBtn.textContent = 'OK';
-    //             // closeBtn.className = 'success-btn';
-    //             // closeBtn.onclick = () => {
-    //             //     document.body.removeChild(popup);
-    //             //     modalActive = false;
-    //             // };
-    //             // popup.appendChild(closeBtn);
-
-    //             // document.body.appendChild(popup);
-    //         }
-    //     });
-    // } else {
-    //     alert(`Invalid location for ${plantName}`);
-    // }
-    // }
 }
 
 function updatePos(x, y) {
