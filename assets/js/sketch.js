@@ -166,9 +166,11 @@ let plant_images_orig;
 function preload() {
   // keeping a hires version, but scaling to 50% immediately as mobile chrome can't handle it
   hi_res_bg = loadImage("assets/img/BG-Retouch.jpg");
-  bg = loadImage("assets/img/BG-Retouch.jpg");
+  bg = loadImage("assets/img/BG-Retouch-Half.jpg");
+  // bg = loadImage("assets/img/BG-Retouch.jpg");
   hi_res_mask = loadImage("assets/img/BG-Retouch-mask.png");
-  mask = loadImage("assets/img/BG-Retouch-mask.png");
+  mask = loadImage("assets/img/BG-Retouch-mask-half.png");
+  // mask = loadImage("assets/img/BG-Retouch-mask.png");
 
   overlay = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.overlay.png");
 
@@ -262,8 +264,8 @@ function setup() {
   // pixelDensity(1);
   noSmooth();
 
-  bg.resize(bg.width * 0.5, 0);
-  mask.resize(mask.width * 0.5, 0);
+  // bg.resize(bg.width * 0.5, 0);
+  // mask.resize(mask.width * 0.5, 0);
 
   textFont(font);
   textAlign(CENTER);
