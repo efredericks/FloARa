@@ -202,7 +202,8 @@ function preload() {
   //   plant_images_orig['Milkweed'].push(milkweedImg);
   // }
   for (let i = 1; i <= 5; i++) {
-    const milkweedImg = loadImage(`assets/img/milkweed/milkweed_0${i}-color.png`);
+    // const milkweedImg = loadImage(`assets/img/milkweed/milkweed_0${i}-color.png`);
+    const milkweedImg = loadImage(`assets/img/milkweed/re-size_test.png`);
     plant_images['Milkweed'].push(milkweedImg);
   }
 
