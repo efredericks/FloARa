@@ -202,7 +202,8 @@ function preload() {
   //   plant_images_orig['Milkweed'].push(milkweedImg);
   // }
   for (let i = 1; i <= 5; i++) {
-    const milkweedImg = loadImage(`assets/img/milkweed/milkweed_0${i}-color.png`);
+    // const milkweedImg = loadImage(`assets/img/milkweed/milkweed_0${i}-color.png`);
+    const milkweedImg = loadImage(`assets/img/milkweed/re-size_test.png`);
     plant_images['Milkweed'].push(milkweedImg);
   }
 
@@ -634,8 +635,14 @@ function drawEverything(saving = false) {
         return;
       }
 
+      // Sort flowers by Y position for proper z-ordering (farther flowers drawn first)
+      let sortedFlowers = [...flowers].sort((a, b) => {
+        if (!a.location || !b.location) return 0;
+        return a.location.y - b.location.y;
+      });
+
       let i = 0;
-      for (let f of flowers) {
+      for (let f of sortedFlowers) {
         // Skip if plant doesn't match current filter
         if (plantFilter !== 'all' && f.propagationType !== plantFilter) {
           continue;
@@ -1323,9 +1330,9 @@ function updateHoveredFlower() {
   // dont sort if only 1
   if (hovered_flowers.length == 1) closestFlower = hovered_flowers[0];
   else if (hovered_flowers.length > 1) {
-    // otherwise sort
+    // otherwise sort by Y position (closer flowers first for hover detection)
     hovered_flowers = hovered_flowers.sort((x, y) => {
-      return x.location.y < y.location.y;
+      return x.location.y - y.location.y; // Lower Y values (closer) first
     });
     closestFlower = hovered_flowers[0];
   }
