@@ -512,7 +512,11 @@ function calculateImageInfo(flower, bg) {
   // handle piranha specially as final two images are its animated head
   // newly added not animating - handle better
   if (flower.QR_id == 99) {
-    idx = GLOB_IDX;
+    // Calculate base growth stage based on age
+    if ((date_diff / 5) > 4) idx = 4;
+    else idx = Math.floor(date_diff / 5);
+    
+    // For stages 3 and 4 (head stages), animate between them
     if (idx >= 3) {
       // animate every second between 'final' states
       if (frameCount % flower.update_frame == 0) {
@@ -521,14 +525,20 @@ function calculateImageInfo(flower, bg) {
         if (cframe > 2) cframe = -1;
         flower.current_frame = cframe;
       }
+      // Use the animated frame for the head
+      if (flower.current_frame >= 0) {
+        idx = 3 + flower.current_frame; // This will be 3 or 4 for the animated head
+      }
     }
   } else {
+    // Calculate growth stage based on plant age
     if ((date_diff / 5) > 4) idx = 4;
     else idx = Math.floor(date_diff / 5);
-    idx = GLOB_IDX;
+    // Remove the GLOB_IDX override to let plants progress naturally
+    // idx = GLOB_IDX;
   }
 
-  // debugging
+  // debugging - uncomment to force all plants to same stage
   // idx = GLOB_IDX;
 
   let w_aspect = bg.width / width;
@@ -537,19 +547,52 @@ function calculateImageInfo(flower, bg) {
   let x = (flower.location.x / w_aspect);
   let y = (flower.location.y / h_aspect);
 
-  // perspective for 'farther away'
-  let sc = map(y, height, height * 0.2, 1.0, 0.001);
-  let _w, _h, _img;
-
-
   // Check if plant images are loaded
   if (!plant_images[plantName] || !plant_images[plantName][idx]) {
     return null;
   }
 
-  _img = plant_images[plantName][idx];
-  _w = (_img.width * QR_map[flower.QR_id].scale) * sc;
-  _h = (_img.height * QR_map[flower.QR_id].scale) * sc;
+  let _img = plant_images[plantName][idx];
+  
+  // Calculate base scaling based on plant type
+  let scale = QR_map[flower.QR_id].scale || 0.4;
+  
+  // Calculate zoom factor based on background image scaling
+  let bgScale = width / bg.width;
+  let zoomFactor = map(bgScale, 0.5, 2.0, 1.0, 0.5); // Adjust plant size based on zoom
+  
+  // Use a more conservative perspective scaling to prevent oversized plants
+  let perspectiveScale = map(y, height, height * 0.2, 0.8, 0.4);
+  
+  // Calculate final dimensions with zoom-aware scaling
+  let _w = _img.width * scale * perspectiveScale * zoomFactor;
+  let _h = _img.height * scale * perspectiveScale * zoomFactor;
+  
+  // Limit maximum size to prevent oversized plants
+  let maxSize = 120; // Reduced for better proportions
+  if (_w > maxSize || _h > maxSize) {
+    let aspectRatio = _w / _h;
+    if (_w > _h) {
+      _w = maxSize;
+      _h = maxSize / aspectRatio;
+    } else {
+      _h = maxSize;
+      _w = maxSize * aspectRatio;
+    }
+  }
+  
+  // Ensure minimum size for visibility
+  let minSize = 20;
+  if (_w < minSize || _h < minSize) {
+    let aspectRatio = _w / _h;
+    if (_w < _h) {
+      _w = minSize;
+      _h = minSize / aspectRatio;
+    } else {
+      _h = minSize;
+      _w = minSize * aspectRatio;
+    }
+  }
 
   return { x: x, y: y, w: _w, h: _h, idx: idx, plantName: plantName };
 }

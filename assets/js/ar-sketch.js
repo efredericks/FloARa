@@ -264,18 +264,64 @@ function renderFlowers() {
         
         // Get the appropriate image for this plant
         let imageIndex = 0; // Default to first stage
+        
+        // Calculate growth stage based on plant age
+        let now = new Date();
+        let date_diff = Math.floor(dateDifference(now, new Date(f.timestamp)));
+        if ((date_diff / 5) > 4) imageIndex = 4;
+        else imageIndex = Math.floor(date_diff / 5);
+        
+        // Handle Piranha plant specially for animation
+        if (f.QR_id == 99) {
+          // For stages 3 and 4 (head stages), animate between them
+          if (imageIndex >= 3) {
+            // Simple animation - alternate between stages 3 and 4
+            imageIndex = 3 + (frameCount % 60 < 30 ? 0 : 1);
+          }
+        }
+        
         if (plant_images[plantName] && plant_images[plantName][imageIndex]) {
             let img = plant_images[plantName][imageIndex];
             
-            // Calculate scaling based on plant type and perspective
+            // Calculate base scaling based on plant type
             let scale = QR_map[f.QR_id].scale || 0.4;
-            let w = img.width * scale;
-            let h = img.height * scale;
             
-            // Apply perspective scaling (plants farther away appear smaller)
-            let perspectiveScale = map(y, height, height * 0.2, 1.0, 0.3);
-            w *= perspectiveScale;
-            h *= perspectiveScale;
+            // Calculate zoom factor based on background image scaling
+            let bgScale = width / bg.width;
+            let zoomFactor = map(bgScale, 0.5, 2.0, 1.0, 0.5); // Adjust plant size based on zoom
+            
+            // Use a more conservative perspective scaling to prevent oversized plants
+            let perspectiveScale = map(y, height, height * 0.2, 0.8, 0.4);
+            
+            // Calculate final dimensions with zoom-aware scaling
+            let w = img.width * scale * perspectiveScale * zoomFactor;
+            let h = img.height * scale * perspectiveScale * zoomFactor;
+            
+            // Limit maximum size to prevent oversized plants
+            let maxSize = 120; // Reduced from 150 for better proportions
+            if (w > maxSize || h > maxSize) {
+                let aspectRatio = w / h;
+                if (w > h) {
+                    w = maxSize;
+                    h = maxSize / aspectRatio;
+                } else {
+                    h = maxSize;
+                    w = maxSize * aspectRatio;
+                }
+            }
+            
+            // Ensure minimum size for visibility
+            let minSize = 20;
+            if (w < minSize || h < minSize) {
+                let aspectRatio = w / h;
+                if (w < h) {
+                    w = minSize;
+                    h = minSize / aspectRatio;
+                } else {
+                    h = minSize;
+                    w = minSize * aspectRatio;
+                }
+            }
             
             push();
             noStroke();
