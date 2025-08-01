@@ -504,7 +504,8 @@ function draw() {
 
 function doubleClicked() {
   // window.shaders_on = !window.shaders_on;
-  animateStart();
+  if (!modalActive)
+    animateStart();
 }
 
 // return scaled flower image information
@@ -524,7 +525,7 @@ function calculateImageInfo(flower, bg) {
     // Calculate base growth stage based on age
     if ((date_diff / 5) > 4) idx = 4;
     else idx = Math.floor(date_diff / 5);
-    
+
     // For stages 3 and 4 (head stages), animate between them
     if (idx >= 3) {
       // animate every second between 'final' states
@@ -562,21 +563,21 @@ function calculateImageInfo(flower, bg) {
   }
 
   let _img = plant_images[plantName][idx];
-  
+
   // Calculate base scaling based on plant type
   let scale = QR_map[flower.QR_id].scale || 0.4;
-  
+
   // Calculate zoom factor based on background image scaling
   let bgScale = width / bg.width;
   let zoomFactor = map(bgScale, 0.5, 2.0, 1.0, 0.5); // Adjust plant size based on zoom
-  
+
   // Use a more conservative perspective scaling to prevent oversized plants
   let perspectiveScale = map(y, height, height * 0.2, 0.8, 0.4);
-  
+
   // Calculate final dimensions with zoom-aware scaling
   let _w = _img.width * scale * perspectiveScale * zoomFactor;
   let _h = _img.height * scale * perspectiveScale * zoomFactor;
-  
+
   // Limit maximum size to prevent oversized plants
   let maxSize = 120; // Reduced for better proportions
   if (_w > maxSize || _h > maxSize) {
@@ -589,7 +590,7 @@ function calculateImageInfo(flower, bg) {
       _w = maxSize * aspectRatio;
     }
   }
-  
+
   // Ensure minimum size for visibility
   let minSize = 20;
   if (_w < minSize || _h < minSize) {
@@ -1223,6 +1224,8 @@ function mousePressed() {
       isPlacingFlower = false;
       pendingFlowerColor = null;
     }
+  } else { // modal is active - let's close it
+
   }
 }
 
