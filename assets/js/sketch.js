@@ -58,7 +58,7 @@ const plantDetails = {
     flowers: "Pink to purplish, fragrant, in large rounded clusters (umbels)",
     fruit: "Spindle-shaped pod (3-4\"), covered with soft hairs, splits to release silky seeds",
     description: "Milkweed is a native perennial herb vital for monarch butterflies. It produces fragrant pink flowers and milky sap. The plant is toxic to most animals but essential for many insects.",
-    artist: "Megan Daniels, colored by Sara Alsum-Wassenaar",
+    artist: "Megan Daniels, colored by Argo Mendoza-Jones",
     image: null
   },
   1: {
