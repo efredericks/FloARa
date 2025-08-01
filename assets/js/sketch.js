@@ -58,6 +58,7 @@ const plantDetails = {
     flowers: "Pink to purplish, fragrant, in large rounded clusters (umbels)",
     fruit: "Spindle-shaped pod (3-4\"), covered with soft hairs, splits to release silky seeds",
     description: "Milkweed is a native perennial herb vital for monarch butterflies. It produces fragrant pink flowers and milky sap. The plant is toxic to most animals but essential for many insects.",
+    artist: "Megan Daniels, colored by Sara Alsum-Wassenaar",
     image: null
   },
   1: {
@@ -72,6 +73,7 @@ const plantDetails = {
     flowers: "Large, white, fragrant, 20-30 petals, yellow center, floats on water",
     fruit: "Round, spongy berry, seeds dispersed in water",
     description: "Nymphaea, or American white water lily, is an aquatic plant with large floating leaves and showy white flowers. It provides habitat for aquatic wildlife.",
+    artist: "Ella Kane",
     image: null
   },
   2: {
@@ -86,6 +88,7 @@ const plantDetails = {
     flowers: "Greenish-white spadix, partially enclosed by a hood-like spathe",
     fruit: "Cluster of green berries turning black",
     description: "Arrow Arum is a wetland plant with striking arrow-shaped leaves. It thrives in shallow water and is important for wetland wildlife.",
+    artist: "Aimi Hettinger",
     image: null
   },
   3: {
@@ -100,6 +103,7 @@ const plantDetails = {
     flowers: "Catkins (male and female), wind-pollinated",
     fruit: "Small winged nutlets in drooping clusters",
     description: "Paper birch is a medium-sized tree known for its distinctive white, peeling bark. It is important for wildlife and was used by Indigenous peoples for canoes and containers.",
+    artist: "Aimi Hettinger",
     image: null
   },
   4: {
@@ -114,6 +118,7 @@ const plantDetails = {
     flowers: "",
     fruit: "",
     description: "",
+    artist: "Argo Mendoza-Jones",
     image: null
   },
   5: {
@@ -128,6 +133,7 @@ const plantDetails = {
     flowers: "",
     fruit: "",
     description: "",
+    artist: "Ella Kane",
     image: null
   },
   6: {
@@ -142,6 +148,7 @@ const plantDetails = {
     flowers: "",
     fruit: "",
     description: "",
+    artist: "Argo Mendoza-Jones",
     image: null
   },
   99: {
@@ -156,6 +163,7 @@ const plantDetails = {
     flowers: "Toothy mouth, sometimes spits fire",
     fruit: "None (dangerous to approach)",
     description: "The Piranha Plant is a fictional, carnivorous plant from the Mario universe. It lurks in pipes and snaps at passersby. Not recommended for gardens!",
+    artist: "https://www.spriters-resource.com/snes/smarioworld/sheet/143244/",
     image: null
   }
 };
@@ -1411,6 +1419,7 @@ function showPlantInfo(flower) {
         <p><strong>Flowers:</strong> ${staticInfo.flowers}</p>
         <p><strong>Fruit:</strong> ${staticInfo.fruit}</p>
         <p>${staticInfo.description}</p>
+        <p><strong>Artist:</strong> ${staticInfo.artist}</p>
       </div>
       <hr>
     `;
