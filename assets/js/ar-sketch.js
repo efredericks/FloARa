@@ -219,7 +219,11 @@ function draw() {
     rect(0, 0, width, 30);
     fill(color(20));
     textAlign(LEFT);
-    text(`Tap to place ${QR_map[currPlantID].name}`, 10, 22);
+    if (accessAllowed)
+        text(`Tap to place ${QR_map[currPlantID].name}`, 10, 22);
+    else
+        text(`Please allow permissions first before placing`, 10, 22);
+
     let t = "WADS / Accelerometer to move";
     textAlign(RIGHT);
     text(t, width - 10, 22);
