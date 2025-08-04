@@ -1227,6 +1227,15 @@ function mousePressed() {
   } else { // modal is active - let's close it
 
   }
+
+  // cancel animation
+  if (is_animating) cancelAnimation();
+}
+
+// handle ios
+function touchStarted() {
+  // cancel animation
+  if (is_animating) cancelAnimation();
 }
 
 let GLOB_IDX = 0;
@@ -1575,4 +1584,9 @@ function animateStart() {
   } else { // going again
     flowers = [];
   }
+}
+
+function cancelAnimation() {
+  is_animating = false;
+  flowers = animating_flowers;
 }
