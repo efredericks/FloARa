@@ -305,6 +305,119 @@ canvas {
   padding: 10px;
 }
 
+/* Plant Info Header with Image */
+.plant-info-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(139, 195, 74, 0.1));
+  border-radius: 8px;
+  border-left: 4px solid #4CAF50;
+}
+
+.plant-image-container {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+}
+
+.plant-image-container::before {
+  content: "Hover to see growth stages";
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(76, 175, 80, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.plant-image-container:hover::before {
+  opacity: 1;
+}
+
+.plant-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  animation: plantGrow 2s ease-out;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.plant-image:hover {
+  transform: scale(1.05);
+}
+
+/* Smooth transition for stage cycling */
+.plant-image.stage-transition {
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.plant-title {
+  flex: 1;
+}
+
+.plant-title h2 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+/* Plant growth animation */
+@keyframes plantGrow {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) rotate(-5deg);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.9) rotate(-2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 600px) {
+  .plant-info-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+  
+  .plant-image-container {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .plant-title h2 {
+    font-size: 20px;
+  }
+}
+
 .plant-info-popup h2 {
   margin: 0;
   color: #2c3e50;
