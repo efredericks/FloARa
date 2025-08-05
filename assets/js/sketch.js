@@ -1390,13 +1390,33 @@ function showPlantInfo(flower) {
   closeBtn.textContent = '×';
   closeBtn.className = 'plant-info-close';
   modalActive = true;
-  closeBtn.onclick = () => {
+  
+  // Function to close the modal
+  const closeModal = () => {
     document.body.removeChild(overlay);
     document.body.removeChild(popup);
     activePlantPopup = null; // Clear the active popup reference
     modalActive = false;
   };
+  
+  closeBtn.onclick = closeModal;
   popup.appendChild(closeBtn);
+
+  // Add click outside to close functionality
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      closeModal();
+    }
+  });
+
+  // Add escape key to close functionality
+  const handleEscape = (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
+      document.removeEventListener('keydown', handleEscape);
+    }
+  };
+  document.addEventListener('keydown', handleEscape);
 
   document.body.appendChild(popup);
 
