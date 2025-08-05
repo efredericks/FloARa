@@ -76,7 +76,7 @@ const plantDetails = {
     image: null
   },
   2: {
-    commonName: "Arrow-Arum-Peltandra-Virginica",
+    commonName: "Arrow Arum",
     scientificName: "Peltandra virginica",
     family: "Araceae (Arum family)",
     height: "2-3' (0.6-0.9 m)",
@@ -106,47 +106,47 @@ const plantDetails = {
     image: null
   },
   4: {
-    commonName: "",
-    scientificName: "PawPaw",
-    family: "",
-    height: "",
-    age: "",
-    habitat: "",
-    bark: "",
-    leaf: "",
-    flowers: "",
-    fruit: "",
-    description: "",
+    commonName: "PawPaw",
+    scientificName: "Asimina triloba",
+    family: "Annonaceae (Custard Apple family)",
+    height: "15-30' (4.5-9 m)",
+    age: "Up to 100 years",
+    habitat: "Rich, moist woods, riverbanks, understory",
+    bark: "Smooth, gray-brown, becoming rough with age",
+    leaf: "Large, simple, alternate, 6-12\" long, oblong to obovate, smooth margins",
+    flowers: "Maroon to purple, 1-1.5\" across, 3 sepals, 6 petals, unpleasant odor",
+    fruit: "Large, oblong, green to yellow, 3-6\" long, tropical flavor, largest native fruit in US",
+    description: "Pawpaw is a small deciduous tree native to eastern North America. It produces the largest edible fruit native to the United States, with a tropical flavor reminiscent of banana and mango. The tree thrives in rich, moist soils and is an important understory species.",
     artist: "Argo Mendoza-Jones",
     image: null
   },
   5: {
-    commonName: "",
-    scientificName: "Populus Deltoides",
-    family: "",
-    height: "",
-    age: "",
-    habitat: "",
-    bark: "",
-    leaf: "",
-    flowers: "",
-    fruit: "",
-    description: "",
+    commonName: "Eastern Cottonwood",
+    scientificName: "Populus deltoides",
+    family: "Salicaceae (Willow family)",
+    height: "80-100' (24-30 m)",
+    age: "Up to 100 years",
+    habitat: "Riverbanks, floodplains, moist areas",
+    bark: "Gray, deeply furrowed, becoming rough with age",
+    leaf: "Triangular to deltoid, 3-6\" long, coarsely toothed margins, petiole flattened",
+    flowers: "Catkins (male and female on separate trees), wind-pollinated",
+    fruit: "Small capsules with cottony seeds, dispersed by wind",
+    description: "Eastern cottonwood is a large, fast-growing deciduous tree native to North America. It's known for its triangular leaves and cotton-like seeds that disperse in the wind. An important riparian species that stabilizes riverbanks and provides habitat for wildlife.",
     artist: "Ella Kane",
     image: null
   },
   6: {
-    commonName: "",
-    scientificName: "Zizania Aquatica",
-    family: "",
-    height: "",
-    age: "",
-    habitat: "",
-    bark: "",
-    leaf: "",
-    flowers: "",
-    fruit: "",
-    description: "",
+    commonName: "Wild Rice",
+    scientificName: "Zizania aquatica",
+    family: "Poaceae (Grass family)",
+    height: "3-10' (0.9-3 m)",
+    age: "Annual",
+    habitat: "Shallow water, marshes, slow streams",
+    bark: "N/A (grass)",
+    leaf: "Long, narrow, grass-like, 1-2\" wide, up to 3' long",
+    flowers: "Small, wind-pollinated, in panicles at stem tips",
+    fruit: "Edible grains, 0.5-1\" long, dark brown to black",
+    description: "Wild rice is an annual aquatic grass native to North America. It grows in shallow water and produces edible grains that have been harvested by indigenous peoples for centuries. Important food source for waterfowl and other wildlife.",
     artist: "Argo Mendoza-Jones",
     image: null
   },
@@ -1315,7 +1315,8 @@ function showPlantInfo(flower) {
       plantImagePath = `./assets/img/Paper-Birch/Colored/Paper_Birch_Stage_${stageNumber}.png`;
       break;
     case 4: // PawPaw
-      plantImagePath = `./assets/img/PawPaw/pawpaw${stageNumber}.png`;
+      const pawpawStage = ((stageNumber - 1) % 4) + 1;
+      plantImagePath = `./assets/img/PawPaw/pawpaw${pawpawStage}.png`;
       break;
     case 5: // Populus Deltoides
       plantImagePath = `./assets/img/Populus-Deltoides/populus_deltoides_stage${stageNumber}.png`;
@@ -1418,8 +1419,9 @@ function showPlantInfo(flower) {
           return `./assets/img/Arrow-Arum-Peltandra-Virginica/Colored/Arrow_Arum_Stage_${stage}.png`;
         case 3: // Paper Birch
           return `./assets/img/Paper-Birch/Colored/Paper_Birch_Stage_${stage}.png`;
-        case 4: // PawPaw
-          return `./assets/img/PawPaw/pawpaw${stage}.png`;
+        case 4: // PawPaw - only has 4 images, so cycle 1-4
+          const pawpawStage = ((stage - 1) % 4) + 1;
+          return `./assets/img/PawPaw/pawpaw${pawpawStage}.png`;
         case 5: // Populus Deltoides
           return `./assets/img/Populus-Deltoides/populus_deltoides_stage${stage}.png`;
         case 6: // Zizania Aquatica
