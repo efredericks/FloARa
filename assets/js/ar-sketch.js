@@ -288,8 +288,9 @@ function renderFlowers() {
         if (f.QR_id == 99) {
             // For stages 3 and 4 (head stages), animate between them
             if (imageIndex >= 3) {
-                // Simple animation - alternate between stages 3 and 4
-                imageIndex = 3 + (frameCount % 60 < 30 ? 0 : 1);
+                // Use a consistent animation cycle - every 30 frames (about 0.5 seconds at 60fps)
+                let animationFrame = Math.floor(frameCount / 30) % 2;
+                imageIndex = 3 + animationFrame; // This will be 3 or 4 for the animated head
             }
         }
 

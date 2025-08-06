@@ -519,7 +519,6 @@ function calculateImageInfo(flower, bg) {
   let date_diff = Math.floor(dateDifference(now, new Date(flower.timestamp)));
 
   // handle piranha specially as final two images are its animated head
-  // newly added not animating - handle better
   if (flower.QR_id == 99) {
     // Calculate base growth stage based on age
     if ((date_diff / 5) > 4) idx = 4;
@@ -527,17 +526,9 @@ function calculateImageInfo(flower, bg) {
 
     // For stages 3 and 4 (head stages), animate between them
     if (idx >= 3) {
-      // animate every second between 'final' states
-      if (frameCount % flower.update_frame == 0) {
-        let cframe = flower.current_frame;
-        cframe++;
-        if (cframe > 2) cframe = -1;
-        flower.current_frame = cframe;
-      }
-      // Use the animated frame for the head
-      if (flower.current_frame >= 0) {
-        idx = 3 + flower.current_frame; // This will be 3 or 4 for the animated head
-      }
+      // Use a consistent animation cycle - every 30 frames (about 0.5 seconds at 60fps)
+      let animationFrame = Math.floor(frameCount / 30) % 2;
+      idx = 3 + animationFrame; // This will be 3 or 4 for the animated head
     }
   } else {
     // Calculate growth stage based on plant age
@@ -713,8 +704,9 @@ function drawEverything(saving = false) {
             _y -= _h2;
           }
           if (idx >= 3) {
-            let anim_idx = 3;
-            if (f.current_frame == 1) anim_idx = 4;
+            // Use the same animation logic as in calculateImageInfo
+            let animationFrame = Math.floor(frameCount / 30) % 2;
+            let anim_idx = 3 + animationFrame;
             let _img2 = plant_images[plantName][anim_idx];
             image(_img2, _x, _y, _w2 * glowScale, _h2 * glowScale, 0, 0, _img2.width, _img2.height);
           }
