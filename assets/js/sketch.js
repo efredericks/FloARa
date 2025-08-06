@@ -689,7 +689,7 @@ function drawEverything(saving = false) {
         // Apply wind animation only to plants
         if (window.animate_scene) {
           shader(wind_material);
-          wind_material.setUniform("offset", i);
+          wind_material.setUniform("offset", random(-0.05, 0.05));//i);
           wind_material.setUniform('time', millis() / plantInfo[plantName].windDivider);
           i++;
         }
