@@ -392,6 +392,7 @@ function setup() {
     isPlacingFlower = false;
     pendingFlowerColor = null;
     popup.classList.remove('active');
+    // Note: hoveredFlower will be restored by updateHoveredFlower() in the next draw cycle
   });
 
   placeBtn.addEventListener('click', () => {
@@ -399,6 +400,7 @@ function setup() {
       pendingFlowerColor = colorInput.value;
       popup.classList.remove('active');
     }
+    // Note: hoveredFlower will be restored by updateHoveredFlower() in the next draw cycle
   });
 
   colorInput.addEventListener('input', (e) => {
@@ -908,8 +910,9 @@ function windowResized() {
 //press 1-9 to place a flower
 
 function mousePressed() {
-  // disable all interactivity if a modal window is open
-  if (!modalActive) {
+  // disable all interactivity if a modal window is open, if flower placement popup is active, or if hamburger menu is open
+  const hamburgerMenuOpen = document.querySelector('.menu') && document.querySelector('.menu').classList.contains('showMenu');
+  if (!modalActive && !isPlacingFlower && !hamburgerMenuOpen) {
     const w_aspect = bg.width / width;
     const h_aspect = bg.height / (bg.height / w_aspect);
 
@@ -1147,6 +1150,7 @@ function keyPressed() {
     // Show popup for flower placement
     isPlacingFlower = true;
     pendingFlowerColor = null;
+    hoveredFlower = null; // Clear hover state when flower popup becomes active
     document.getElementById('flowerPopup').classList.add('active');
   } else if (key == "A") {
     animateStart();
@@ -1221,6 +1225,8 @@ function saveImage() {
 // Add new function to update hoveredFlower
 function updateHoveredFlower() {
   if (width < height) return; // Skip in portrait mode
+  const hamburgerMenuOpen = document.querySelector('.menu') && document.querySelector('.menu').classList.contains('showMenu');
+  if (modalActive || isPlacingFlower || hamburgerMenuOpen) return; // Skip if modal is active, flower placement popup is active, or hamburger menu is open
 
   if (debug) {
     push()
