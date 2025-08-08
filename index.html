@@ -104,46 +104,53 @@
   #help-modal.active {
     display: flex;
   }
-  #help-modal-content {
-    background: #fff;
-    border-radius: 12px;
-    padding: 32px 24px 24px 24px;
-    max-width: 400px;
-    width: 90vw;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.2);
-    position: relative;
-    font-size: 1.1em;
+  #help-modal .modal-popup {
     font-family: 'BenchNine', 'Quicksand', Arial, sans-serif !important;
   }
-  #help-modal-content h2 {
-    margin-top: 0;
+  #help-modal .modal-popup h2 {
+    font-size: 20px;
+    font-weight: normal;
+    color: #2c3e50;
+    margin-bottom: 15px;
   }
-  #help-modal-close {
-    position: absolute;
-    top: 12px;
-    right: 16px;
-    background: none;
-    border: none;
-    font-size: 1.5em;
-    color: #888;
-    cursor: pointer;
+  #help-modal .modal-popup ul, #help-modal .modal-popup p, #help-modal .modal-popup li {
+    font-size: 16px;
+    font-weight: normal;
+    color: #34495e;
+    line-height: 1.4;
   }
-  #help-modal-close:hover {
-    color: #2d7be5;
+  #help-modal .modal-popup ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  #help-modal .modal-popup b {
+    font-weight: bold;
+    font-size: 16px;
   }
   </style>
   <div id="help-btn" title="How to use?">?</div>
   <div id="help-modal">
-    <div id="help-modal-content">
-      <button id="help-modal-close" aria-label="Close help">&times;</button>
-      <h2>How to Use</h2>
+    <div class="modal-popup">
+      <button class="modal-close" aria-label="Close help">&times;</button>
+      <h2>Experience Menu</h2>
+      <ul>
+        <li><b>Start from the beginning:</b> Replays the garden's growth from the start</li>
+        <li><b>Turn off wind:</b> Stops the wind animation</li>
+        <li><b>Save image:</b> Downloads your garden as an image</li>
+        <li><b>Show all plants:</b> Displays all plants in the garden</li>
+        <li><b>Show manual plants:</b> Shows only plants you placed manually</li>
+        <li><b>Show propagated plants:</b> Shows only plants that grew naturally</li>
+      </ul>
+      
+      <hr style="margin: 20px 0; border: none; border-top: 1px solid #e0e0e0;">
+      
+      <h2>How to use:</h2>
       <ul>
         <li><b>Add a plant:</b> Press 1-9 then use the UI to select a plant, then click on the map to place it.</li>
         <li><b>View details:</b> Click on any plant to see its information panel.</li>
         <li><b>Remove a plant:</b> Right-click a plant and confirm removal.</li>
         <li><b>Propagation:</b> Some plants will spread automatically over time!</li>
-        <li><b>Filter:</b> Use the filter to show only certain types of plants.</li>
-        <li><b>Save:</b> Use the save button to download your garden as an image.</li>
+
       </ul>
       <p style="font-size:0.95em;color:#888;">Need more help? Contact the project team.</p>
     </div>
@@ -300,7 +307,7 @@
   // Help button logic
   const helpBtn = document.getElementById('help-btn');
   const helpModal = document.getElementById('help-modal');
-  const helpClose = document.getElementById('help-modal-close');
+  const helpClose = document.querySelector('.modal-close'); // Updated selector
   helpBtn.onclick = () => {
     helpModal.classList.add('active');
     document.body.style.overflow = 'hidden'; // Prevent background scroll
