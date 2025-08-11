@@ -303,7 +303,6 @@ function setup() {
   // Use real-time Firestore listener if available
   if (window.subscribeToFlowers) {
     window.subscribeToFlowers(function (rawData) {
-      console.log("wee")
       // Process data as in loadData()
       flowers = rawData.map(f => {
         // Try to find QR_id in different possible field names
@@ -917,7 +916,8 @@ function windowResized() {
 function handlePress() {
   // disable all interactivity if a modal window is open, if flower placement popup is active, or if hamburger menu is open
   const hamburgerMenuOpen = document.querySelector('.menu') && document.querySelector('.menu').classList.contains('showMenu');
-  if (!modalActive && !isPlacingFlower && !hamburgerMenuOpen) {
+  // if (!modalActive && !isPlacingFlower && !hamburgerMenuOpen) {
+  if (!modalActive && !hamburgerMenuOpen) {
     const w_aspect = bg.width / width;
     const h_aspect = bg.height / (bg.height / w_aspect);
 
