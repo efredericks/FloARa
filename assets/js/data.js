@@ -179,6 +179,10 @@ function isValidPlantLocation(x, y, suitableAreas) {
     return false;
   }
 
+
+
+  console.log("heyoo", x, y, maskX, maskY, areaType, maskPixel[0], maskPixel[1], maskPixel[2])
+
   // Check if the area type is suitable for the plant
   return suitableAreas.includes(areaType);
 }

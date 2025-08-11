@@ -4,6 +4,8 @@
 // 
 
 let bg, mask;
+let placement_mask;
+let drawSuitable = false;
 
 let windowX, windowY;
 let scrollSpeed = 5;
@@ -26,8 +28,16 @@ let contextMenu = null;
 let isInteractingWithFlower = false; // Flag to prevent placement when interacting
 
 function preload() {
-    bg = loadImage("assets/img/BG-Retouch-Half.jpg");
-    mask = loadImage("assets/img/BG-Retouch-mask-half.png");
+    bg = loadImage("assets/img/bg-final/finalBG-half.png");
+    mask = loadImage("assets/img/bg-final/finalBG-half-mask.png");
+
+    placement_mask = {};
+    placement_mask['water'] = loadImage("assets/img/bg-final/finalBG-half-mask-water.png");
+    placement_mask['grass'] = loadImage("assets/img/bg-final/finalBG-half-mask-grass.png");
+
+    // bg = loadImage("assets/img/BG-Retouch-Half.jpg");
+    // mask = loadImage("assets/img/BG-Retouch-mask-half.png");
+
     // bg = loadImage("assets/img/BG-Retouch.jpg");
     // mask = loadImage("assets/img/BG-Retouch-mask.png");
     font = loadFont("assets/fonts/BenchNine-Regular.ttf");
@@ -204,6 +214,17 @@ function draw() {
     // image(bg, 0, 0, width, height, windowX, windowY, width, height);
     image(static_bg, 0, 0, width, height, windowX, windowY, width, height);
     // image(overlay_gfx, 0, 0, width, height, windowX, windowY, width, height);
+
+    // draw a helper if misclicked
+    if (drawSuitable) {
+        const suitableAreas = plantInfo[QR_map[currPlantID].name].suitableAreas;
+        for (let suitable of suitableAreas) {
+            push();
+            tint(255, 90);
+            image(placement_mask[suitable], 0, 0, width, height, windowX, windowY, width, height);
+            pop();
+        }
+    }
 
     // Render placed flowers
     if (!rendered)
@@ -628,8 +649,10 @@ function insertFlower(x, y) {
                     alert(`${plantName} successfully added`);
                 }
             });
+            drawSuitable = false;
         } else {
             alert(`Invalid location for ${plantName}`);
+            drawSuitable = true;
         }
     } else {
         if (!permissionButton)

@@ -172,12 +172,17 @@ let plant_images_orig;
 // load in background and flowers at full resolution
 function preload() {
   // keeping a hires version, but scaling to 50% immediately as mobile chrome can't handle it
-  hi_res_bg = loadImage("assets/img/BG-Retouch.jpg");
-  bg = loadImage("assets/img/BG-Retouch-Half.jpg");
+  hi_res_bg = loadImage("assets/img/bg-final/finalBG.jpg");
+  // hi_res_bg = loadImage("assets/img/BG-Retouch.jpg");
+
+  // bg = loadImage("assets/img/BG-Retouch-Half.jpg");
   // bg = loadImage("assets/img/BG-Retouch.jpg");
-  hi_res_mask = loadImage("assets/img/BG-Retouch-mask.png");
-  mask = loadImage("assets/img/BG-Retouch-mask-half.png");
+  hi_res_mask = loadImage("assets/img/bg-final/finalBG-mask.png");
+  // mask = loadImage("assets/img/BG-Retouch-mask-half.png");
   // mask = loadImage("assets/img/BG-Retouch-mask.png");
+
+  bg = loadImage("assets/img/bg-final/finalBG-half.png");
+  mask = loadImage("assets/img/bg-final/finalBG-half-mask.png");
 
   overlay = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.overlay.png");
 
@@ -1298,8 +1303,8 @@ function showPlantInfo(flower) {
   // Get plant image path based on plant type and growth stage
   let plantImagePath = '';
   const stageNumber = growthStageIndex + 1;
-  
-  switch(flower.QR_id) {
+
+  switch (flower.QR_id) {
     case 0: // Milkweed
       plantImagePath = `./assets/img/milkweed/milkweed_0${stageNumber}-color.png`;
       break;
@@ -1388,7 +1393,7 @@ function showPlantInfo(flower) {
   closeBtn.textContent = '×';
   closeBtn.className = 'plant-info-close';
   modalActive = true;
-  
+
   // Function to close the modal
   const closeModal = () => {
     document.body.removeChild(overlay);
@@ -1396,7 +1401,7 @@ function showPlantInfo(flower) {
     activePlantPopup = null; // Clear the active popup reference
     modalActive = false;
   };
-  
+
   closeBtn.onclick = closeModal;
   popup.appendChild(closeBtn);
 
@@ -1428,7 +1433,7 @@ function showPlantInfo(flower) {
 
     // Function to get image path for a specific stage
     function getImagePathForStage(stage) {
-      switch(plantType) {
+      switch (plantType) {
         case 0: // Milkweed
           return `./assets/img/milkweed/milkweed_0${stage}-color.png`;
         case 1: // Nymphaea
@@ -1454,22 +1459,22 @@ function showPlantInfo(flower) {
     // Function to cycle through stages
     function cycleStages() {
       if (!isHovering) return;
-      
+
       currentStage++;
       if (currentStage > 5) {
         currentStage = 1; // Reset to first stage
       }
-      
+
       const newImagePath = getImagePathForStage(currentStage);
       if (newImagePath) {
         // Add transition class for smooth fade
         plantImage.classList.add('stage-transition');
-        
+
         // Change image after a brief fade
         setTimeout(() => {
           plantImage.src = newImagePath;
           plantImage.dataset.currentStage = currentStage;
-          
+
           // Remove transition class after image loads
           setTimeout(() => {
             plantImage.classList.remove('stage-transition');
@@ -1489,7 +1494,7 @@ function showPlantInfo(flower) {
     plantImage.addEventListener('mouseleave', () => {
       isHovering = false;
       clearInterval(animationInterval);
-      
+
       // Reset to original stage
       const originalStage = parseInt(plantImage.dataset.currentStage);
       const originalImagePath = getImagePathForStage(originalStage);
