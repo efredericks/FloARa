@@ -648,6 +648,7 @@ function insertFlower(x, y) {
                     // Add the flower to local array immediately for instant visual feedback
                     newFlower.id = flowerId;
                     flowers.push(newFlower);
+                    console.log(x, y);
                     alert(`${plantName} successfully added`);
                 }
             });
@@ -781,12 +782,12 @@ function startDeviceRotationDetect() {
         accessAllowed = true;
         pressTimer = 20;
 
-        if (permissionButton)
+        if (permissionButton !== null)
             permissionButton.remove();
     }
 }
 
-let permissionButton;
+let permissionButton = null;
 function handlePermissions() {
     DeviceMotionEvent.requestPermission();
     accessAllowed = true;

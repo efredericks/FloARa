@@ -303,6 +303,7 @@ function setup() {
   // Use real-time Firestore listener if available
   if (window.subscribeToFlowers) {
     window.subscribeToFlowers(function (rawData) {
+      console.log("wee")
       // Process data as in loadData()
       flowers = rawData.map(f => {
         // Try to find QR_id in different possible field names
