@@ -5,6 +5,7 @@
 
 let bg, mask;
 let placement_mask;
+let placement_fade = 0;
 let drawSuitable = false;
 
 let windowX, windowY;
@@ -220,10 +221,11 @@ function draw() {
         const suitableAreas = plantInfo[QR_map[currPlantID].name].suitableAreas;
         for (let suitable of suitableAreas) {
             push();
-            tint(255, 90);
+            tint(255, placement_fade);
             image(placement_mask[suitable], 0, 0, width, height, windowX, windowY, width, height);
             pop();
         }
+        if (placement_fade < 90) placement_fade++;
     }
 
     // Render placed flowers
@@ -653,6 +655,7 @@ function insertFlower(x, y) {
         } else {
             alert(`Invalid location for ${plantName}`);
             drawSuitable = true;
+            placement_fade = 0;
         }
     } else {
         if (!permissionButton)
@@ -777,7 +780,9 @@ function startDeviceRotationDetect() {
     } else {
         accessAllowed = true;
         pressTimer = 20;
-        permissionButton.remove();
+
+        if (permissionButton)
+            permissionButton.remove();
     }
 }
 
