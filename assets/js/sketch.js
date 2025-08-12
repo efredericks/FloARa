@@ -177,14 +177,14 @@ function preload() {
 
   // bg = loadImage("assets/img/BG-Retouch-Half.jpg");
   // bg = loadImage("assets/img/BG-Retouch.jpg");
-  hi_res_mask = loadImage("assets/img/bg-final/finalBG-mask.png");
+  // hi_res_mask = loadImage("assets/img/bg-final/finalBG-mask.png");
   // mask = loadImage("assets/img/BG-Retouch-mask-half.png");
   // mask = loadImage("assets/img/BG-Retouch-mask.png");
 
-    bg = loadImage("assets/img/bg-final/finalBG-half.png");
-    mask = loadImage("assets/img/bg-final/finalBG-half-mask.png");
+  bg = loadImage("assets/img/bg-final/finalBG-half.png");
+  mask = loadImage("assets/img/bg-final/finalBG-half-mask.png");
 
-  overlay = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.overlay.png");
+  // overlay = loadImage("assets/img/131028_Fall_Campus-6934_Pano-2.overlay.png");
 
   // Initialize plant image arrays
   plant_images = {
@@ -515,7 +515,7 @@ function doubleClicked() {
 }
 
 // return scaled flower image information
-function calculateImageInfo(flower, bg) {
+function calculateImageInfo(flower, bg, saving = false) {
   if (!flower || !flower.location || typeof flower.location.x !== 'number' || typeof flower.location.y !== 'number') {
     return null;
   }
@@ -546,11 +546,13 @@ function calculateImageInfo(flower, bg) {
   }
 
   // debugging - uncomment to force all plants to same stage
-  // idx = GLOB_IDX;
+  idx = GLOB_IDX;
 
   let w_aspect = bg.width / width;
+  if (saving) w_aspect = 1.0;
   let h = bg.height / w_aspect;
   let h_aspect = bg.height / h;
+  if (saving) h_aspect = 1.0;
   let x = (flower.location.x / w_aspect);
   let y = (flower.location.y / h_aspect);
 
@@ -559,21 +561,45 @@ function calculateImageInfo(flower, bg) {
     return null;
   }
 
+
   let _img = plant_images[plantName][idx];
 
   // Calculate base scaling based on plant type
   let scale = QR_map[flower.QR_id].scale || 0.4;
+  if (saving)
+    scale = QR_map[flower.QR_id].hd_scale;
 
   // Calculate zoom factor based on background image scaling
   let bgScale = width / bg.width;
+  if (saving) bgScale = 1.0;
   let zoomFactor = map(bgScale, 0.5, 2.0, 1.0, 0.5); // Adjust plant size based on zoom
 
   // Use a more conservative perspective scaling to prevent oversized plants
   let perspectiveScale = map(y, height, height * 0.2, 0.8, 0.4);
 
+  const scale_bands = [0.05, 0.15, 0.25, 0.45];
+  let band_scale = 1.0;
+  if (flower.location.y < bg.height * 0.3)
+    band_scale = scale_bands[0];
+  else if (flower.location.y < bg.height * 0.6)
+    band_scale = scale_bands[1];
+  else if (flower.location.y < bg.height * 0.8)
+    band_scale = scale_bands[2];
+  else
+    band_scale = scale_bands[3];
+
+
   // Calculate final dimensions with zoom-aware scaling
-  let _w = _img.width * scale * perspectiveScale * zoomFactor;
-  let _h = _img.height * scale * perspectiveScale * zoomFactor;
+  // let _w = _img.width * scale * perspectiveScale * zoomFactor * band_scale;
+  // let _h = _img.height * scale * perspectiveScale * zoomFactor * band_scale;
+  bgScale = constrain(bgScale, 0.0001, 1.0);
+
+  let _w = _img.width * scale * band_scale * bgScale;
+  let _h = _img.height * scale * band_scale * bgScale;
+
+
+
+  /*
 
   // Limit maximum size to prevent oversized plants
   let maxSize = 120; // Reduced for better proportions
@@ -600,8 +626,164 @@ function calculateImageInfo(flower, bg) {
       _w = minSize * aspectRatio;
     }
   }
+    */
 
   return { x: x, y: y, w: _w, h: _h, idx: idx, plantName: plantName };
+}
+
+function drawFlower(f, _bg, surf = null) {
+  // Skip if plant doesn't match current filter
+  if (plantFilter !== 'all' && f.propagationType !== plantFilter) {
+    return;
+  }
+  // Skip invalid flowers - allow QR_id: 0 (Milkweed)
+  if (f.QR_id === undefined || f.QR_id === null || !QR_map[f.QR_id] || !QR_map[f.QR_id].name) {
+    return;
+  }
+  // Defensive: skip if location is invalid
+  if (!f.location || typeof f.location.x !== 'number' || typeof f.location.y !== 'number') {
+    return;
+  }
+  let saving = false;
+  if (surf !== null) saving = true;
+  let image_info = calculateImageInfo(f, _bg, saving);
+  if (!image_info) return;
+
+  let plantName = image_info.plantName;
+  let idx = image_info.idx;
+
+  let x = image_info.x;
+  let y = image_info.y;
+
+  let _w, _h, _img;
+
+  // Check if plant images are loaded
+  if (!plant_images[plantName] || !plant_images[plantName][idx]) {
+    return;
+  }
+
+  _img = plant_images[plantName][idx];
+  _w = image_info.w;
+  _h = image_info.h;
+
+  // to canvas
+  if (surf === null) {
+    // magic numbers help with offset within image
+    push();
+
+    // Apply wind animation only to plants
+    if (window.animate_scene) {
+      shader(wind_material);
+      wind_material.setUniform("offset", random(-0.05, 0.05));//i);
+      wind_material.setUniform('time', millis() / plantInfo[plantName].windDivider);
+    }
+
+    // piranha
+    if (f.QR_id == 99) {
+      let glowScale = 1.0;
+      if (hoveredFlower === f) {
+        glowScale = 1.1;
+      }
+      // incorporate hover scaling
+      let _w2 = image_info.w;
+      let _h2 = image_info.h;
+      let _x = x - (_w2 * glowScale) * .5;
+      let _y = y - (_h2 * glowScale);
+
+      let max_idx = constrain(idx, 0, 2);
+      for (let i = 0; i <= max_idx; i++) {
+        let _img2 = plant_images[plantName][i];
+        image(_img2, _x, _y, _w2 * glowScale, _h2 * glowScale, 0, 0, _img2.width, _img2.height);
+        _y -= _h2;
+      }
+      if (idx >= 3) {
+        // Use the same animation logic as in calculateImageInfo
+        let animationFrame = Math.floor(frameCount / 30) % 2;
+        let anim_idx = 3 + animationFrame;
+        let _img2 = plant_images[plantName][anim_idx];
+        image(_img2, _x, _y, _w2 * glowScale, _h2 * glowScale, 0, 0, _img2.width, _img2.height);
+      }
+
+      pop();
+    } else {
+      if (debug) {
+        let _x = x - (_img.width) * .5;
+        let _y = y - (_img.height);
+        push();
+        if (hoveredFlower == f) stroke(color(255, 255, 0))
+        else
+          stroke(0);
+        noFill();
+        rect(_x, _y, _img.width, _img.height);
+        fill(color(255, 0, 255))
+        stroke(0);
+        text(`${Math.floor(x - _w * .5)}:${Math.floor(y - _h * .5 - _h * .5)}`, x - _w * .5, y - _h * .5 - _h * 0.5);
+        pop();
+      }
+
+      // Add highlight glow effect if this is the hovered flower
+      let glowScale = 1.0;
+      if (hoveredFlower === f) {
+        glowScale = 1.1;
+      }
+
+      // incorporate hover scaling
+      let _w2 = image_info.w;
+      let _h2 = image_info.h;
+      let _x = x - (_w2 * glowScale) * .5;
+      let _y = y - (_h2 * glowScale);
+      image(_img, _x, _y, _w2 * glowScale, _h2 * glowScale, 0, 0, _img.width, _img.height);
+
+      pop();
+    }
+  } else {
+    // to saved image surface
+
+    // piranha
+    if (f.QR_id == 99) {
+      let glowScale = 1.0;
+      // incorporate hover scaling
+      let _w2 = image_info.w;
+      let _h2 = image_info.h;
+      let _x = x - (_w2 * glowScale) * .5;
+      let _y = y - (_h2 * glowScale);
+
+      let max_idx = constrain(idx, 0, 2);
+      for (let i = 0; i <= max_idx; i++) {
+        let _img2 = plant_images[plantName][i];
+        surf.image(_img2, _x, _y, _w2 * glowScale, _h2 * glowScale, 0, 0, _img2.width, _img2.height);
+        _y -= _h2;
+      }
+      if (idx >= 3) {
+        // Use the same animation logic as in calculateImageInfo
+        let animationFrame = Math.floor(frameCount / 30) % 2;
+        let anim_idx = 3 + animationFrame;
+        let _img2 = plant_images[plantName][anim_idx];
+        surf.image(_img2, _x, _y, _w2 * glowScale, _h2 * glowScale, 0, 0, _img2.width, _img2.height);
+      }
+    } else {
+      // Add highlight glow effect if this is the hovered flower
+      let glowScale = 1.0;
+
+      // incorporate hover scaling
+      let xOff = hi_res_bg.width / bg.width;
+      let yOff = hi_res_bg.height / bg.height;
+
+      let _w2 = image_info.w;
+      let _h2 = image_info.h;
+      let _x = (x*xOff) - (_w2 * glowScale) * .5;
+      let _y = (y*yOff) - (_h2 * glowScale);
+
+
+      // _x *= xOff;
+      // _y *= yOff;
+
+
+
+
+      surf.image(_img, _x, _y, _w2 * glowScale, _h2 * glowScale, 0, 0, _img.width, _img.height);
+    }
+  }
 }
 
 // draw everything with respect to the canvas size
@@ -649,107 +831,7 @@ function drawEverything(saving = false) {
 
       let i = 0;
       for (let f of sortedFlowers) {
-        // Skip if plant doesn't match current filter
-        if (plantFilter !== 'all' && f.propagationType !== plantFilter) {
-          continue;
-        }
-        // Skip invalid flowers - allow QR_id: 0 (Milkweed)
-        if (f.QR_id === undefined || f.QR_id === null || !QR_map[f.QR_id] || !QR_map[f.QR_id].name) {
-          continue;
-        }
-        // Defensive: skip if location is invalid
-        if (!f.location || typeof f.location.x !== 'number' || typeof f.location.y !== 'number') {
-          continue;
-        }
-        let image_info = calculateImageInfo(f, bg);
-        if (!image_info) continue;
-
-        let plantName = image_info.plantName;
-        let idx = image_info.idx;
-
-        let x = image_info.x;
-        let y = image_info.y;
-
-        let _w, _h, _img;
-
-        // Check if plant images are loaded
-        if (!plant_images[plantName] || !plant_images[plantName][idx]) {
-          continue;
-        }
-
-        _img = plant_images[plantName][idx];
-        _w = image_info.w;
-        _h = image_info.h;
-
-        // magic numbers help with offset within image
-        push();
-
-        // Apply wind animation only to plants
-        if (window.animate_scene) {
-          shader(wind_material);
-          wind_material.setUniform("offset", random(-0.05, 0.05));//i);
-          wind_material.setUniform('time', millis() / plantInfo[plantName].windDivider);
-          i++;
-        }
-
-        // piranha
-        if (f.QR_id == 99) {
-          let glowScale = 1.0;
-          if (hoveredFlower === f) {
-            glowScale = 1.1;
-          }
-          // incorporate hover scaling
-          let _w2 = image_info.w;
-          let _h2 = image_info.h;
-          let _x = x - (_w2 * glowScale) * .5;
-          let _y = y - (_h2 * glowScale);
-
-          let max_idx = constrain(idx, 0, 2);
-          for (let i = 0; i <= max_idx; i++) {
-            let _img2 = plant_images[plantName][i];
-            image(_img2, _x, _y, _w2 * glowScale, _h2 * glowScale, 0, 0, _img2.width, _img2.height);
-            _y -= _h2;
-          }
-          if (idx >= 3) {
-            // Use the same animation logic as in calculateImageInfo
-            let animationFrame = Math.floor(frameCount / 30) % 2;
-            let anim_idx = 3 + animationFrame;
-            let _img2 = plant_images[plantName][anim_idx];
-            image(_img2, _x, _y, _w2 * glowScale, _h2 * glowScale, 0, 0, _img2.width, _img2.height);
-          }
-
-          pop();
-        } else {
-          if (debug) {
-            let _x = x - (_img.width) * .5;
-            let _y = y - (_img.height);
-            push();
-            if (hoveredFlower == f) stroke(color(255, 255, 0))
-            else
-              stroke(0);
-            noFill();
-            rect(_x, _y, _img.width, _img.height);
-            fill(color(255, 0, 255))
-            stroke(0);
-            text(`${Math.floor(x - _w * .5)}:${Math.floor(y - _h * .5 - _h * .5)}`, x - _w * .5, y - _h * .5 - _h * 0.5);
-            pop();
-          }
-
-          // Add highlight glow effect if this is the hovered flower
-          let glowScale = 1.0;
-          if (hoveredFlower === f) {
-            glowScale = 1.1;
-          }
-
-          // incorporate hover scaling
-          let _w2 = image_info.w;
-          let _h2 = image_info.h;
-          let _x = x - (_w2 * glowScale) * .5;
-          let _y = y - (_h2 * glowScale);
-          image(_img, _x, _y, _w2 * glowScale, _h2 * glowScale, 0, 0, _img.width, _img.height);
-
-          pop();
-        }
+        drawFlower(f, bg);
       }
     }
   } else { // generate HQ image for saving
@@ -1168,7 +1250,7 @@ function keyPressed() {
   } else if (key == "f") {
     GLOB_IDX++;
     if (GLOB_IDX > 4) GLOB_IDX = 0;
-  }
+  } else if (key == "S") saveImage();
 }
 
 // save triggered by menu
@@ -1178,20 +1260,33 @@ function saveImage() {
   console.log("Number of flowers:", flowers.length);
 
   // Create a new graphics buffer
-  let saveBuffer = createGraphics(bg.width, bg.height);
+  // let saveBuffer = createGraphics(bg.width, bg.height);
+  let saveBuffer = createGraphics(hi_res_bg.width, hi_res_bg.height);
+  saveBuffer.pixelDensity(1);
 
   // Draw background
   saveBuffer.background(0);
-  saveBuffer.image(bg, 0, 0);
+  saveBuffer.image(hi_res_bg, 0, 0);
+  saveBuffer.imageMode(CENTER);
 
-  // Draw all flowers
-  let now = new Date();
-  for (let f of flowers) {
-    if (!f.QR_id || !QR_map[f.QR_id] || !QR_map[f.QR_id].name) {
-      console.warn("Skipping invalid flower:", f);
-      continue;
-    }
+  // Sort flowers by Y position for proper z-ordering (farther flowers drawn first)
+  let sortedFlowers = [...flowers].sort((a, b) => {
+    if (!a.location || !b.location) return 0;
+    return a.location.y - b.location.y;
+  });
 
+  // for (let f of sortedFlowers) {
+  //   drawFlower(f);
+  // }
+  for (let f of sortedFlowers) {//flowers) {
+    // if (!f.QR_id || !QR_map[f.QR_id] || !QR_map[f.QR_id].name) {
+    //   console.warn("Skipping invalid flower:", f);
+    //   continue;
+    // }
+
+      drawFlower(f, hi_res_bg, saveBuffer);
+
+    /*
     let plantName = QR_map[f.QR_id].name;
     console.log("Processing plant for save:", plantName);
 
@@ -1226,6 +1321,7 @@ function saveImage() {
 
     // Draw plant
     saveBuffer.image(_img, x - _w * .5, y - _h * .5, _w, _h, 0, 0, _img.width, _img.height);
+    */
   }
 
   console.log("Saving image...");
@@ -1252,7 +1348,7 @@ function updateHoveredFlower() {
 
   for (let f of flowers) {
     if (!f || !f.location || typeof f.location.x !== 'number' || typeof f.location.y !== 'number') continue;
-    let image_info = calculateImageInfo(f, bg);
+    let image_info = calculateImageInfo(f, bg, saving = true);
     if (!image_info) continue;
     // offset by half width and full height - anchor is bottom middle
     let start_x = image_info.x - image_info.w / 2;
@@ -1309,8 +1405,8 @@ function showPlantInfo(flower) {
   // Get plant image path based on plant type and growth stage
   let plantImagePath = '';
   const stageNumber = growthStageIndex + 1;
-  
-  switch(flower.QR_id) {
+
+  switch (flower.QR_id) {
     case 0: // Milkweed
       plantImagePath = `./assets/img/milkweed/milkweed_0${stageNumber}-color.png`;
       break;
@@ -1399,7 +1495,7 @@ function showPlantInfo(flower) {
   closeBtn.textContent = '×';
   closeBtn.className = 'plant-info-close';
   modalActive = true;
-  
+
   // Function to close the modal
   const closeModal = () => {
     document.body.removeChild(overlay);
@@ -1407,7 +1503,7 @@ function showPlantInfo(flower) {
     activePlantPopup = null; // Clear the active popup reference
     modalActive = false;
   };
-  
+
   closeBtn.onclick = closeModal;
   popup.appendChild(closeBtn);
 
@@ -1439,7 +1535,7 @@ function showPlantInfo(flower) {
 
     // Function to get image path for a specific stage
     function getImagePathForStage(stage) {
-      switch(plantType) {
+      switch (plantType) {
         case 0: // Milkweed
           return `./assets/img/milkweed/milkweed_0${stage}-color.png`;
         case 1: // Nymphaea
@@ -1465,22 +1561,22 @@ function showPlantInfo(flower) {
     // Function to cycle through stages
     function cycleStages() {
       if (!isHovering) return;
-      
+
       currentStage++;
       if (currentStage > 5) {
         currentStage = 1; // Reset to first stage
       }
-      
+
       const newImagePath = getImagePathForStage(currentStage);
       if (newImagePath) {
         // Add transition class for smooth fade
         plantImage.classList.add('stage-transition');
-        
+
         // Change image after a brief fade
         setTimeout(() => {
           plantImage.src = newImagePath;
           plantImage.dataset.currentStage = currentStage;
-          
+
           // Remove transition class after image loads
           setTimeout(() => {
             plantImage.classList.remove('stage-transition');
@@ -1500,7 +1596,7 @@ function showPlantInfo(flower) {
     plantImage.addEventListener('mouseleave', () => {
       isHovering = false;
       clearInterval(animationInterval);
-      
+
       // Reset to original stage
       const originalStage = parseInt(plantImage.dataset.currentStage);
       const originalImagePath = getImagePathForStage(originalStage);
