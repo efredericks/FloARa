@@ -1348,7 +1348,7 @@ function updateHoveredFlower() {
 
   for (let f of flowers) {
     if (!f || !f.location || typeof f.location.x !== 'number' || typeof f.location.y !== 'number') continue;
-    let image_info = calculateImageInfo(f, bg, saving = true);
+    let image_info = calculateImageInfo(f, bg);//, saving = true);
     if (!image_info) continue;
     // offset by half width and full height - anchor is bottom middle
     let start_x = image_info.x - image_info.w / 2;
