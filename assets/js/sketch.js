@@ -577,7 +577,6 @@ function calculateImageInfo(flower, bg, saving = false) {
   // Use a more conservative perspective scaling to prevent oversized plants
   let perspectiveScale = map(y, height, height * 0.2, 0.8, 0.4);
 
-  const scale_bands = [0.05, 0.15, 0.25, 0.45];
   let band_scale = 1.0;
   if (flower.location.y < bg.height * 0.3)
     band_scale = scale_bands[0];

@@ -27,6 +27,7 @@ let hoveredFlower = null;
 let selectedFlower = null;
 let contextMenu = null;
 let isInteractingWithFlower = false; // Flag to prevent placement when interacting
+let canvas;
 
 function preload() {
     bg = loadImage("assets/img/bg-final/finalBG-half.png");
@@ -110,10 +111,13 @@ function preload() {
 
 let overlay_gfx;
 let static_bg;
+let button;
 function setup() {
     createCanvas(windowWidth, windowHeight, WEBGL);
     pixelDensity(1);
     noSmooth();
+
+    canvas = document.getElementById("defaultCanvas0");
 
     // bg.resize(bg.width * 0.5, 0);
     // mask.resize(mask.width * 0.5, 0);
@@ -132,19 +136,19 @@ function setup() {
     if (is_ios || is_safari) isIOS = true;
 
     // accelerometer Data
-    window.addEventListener("devicemotion", function (e) {
-        // get accelerometer values
-        x = parseInt(e.accelerationIncludingGravity.x);
-        y = parseInt(e.accelerationIncludingGravity.y);
-        // z = parseInt(e.accelerationIncludingGravity.z);
+    // window.addEventListener("devicemotion", function (e) {
+    //     // get accelerometer values
+    //     x = parseInt(e.accelerationIncludingGravity.x);
+    //     y = parseInt(e.accelerationIncludingGravity.y);
+    //     // z = parseInt(e.accelerationIncludingGravity.z);
 
-        if (isIOS) {
-            x *= -1.0;
-            y *= -1.0;
-        }
-        if (!isNaN(x) && !isNaN(y)) updatePos(-x * phoneSpeed, y * phoneSpeed);
-        // if (!isNaN(x) && !isNaN(y)) updatePos(-x * phoneSpeed, y * phoneSpeed);
-    });
+    //     if (isIOS) {
+    //         x *= -1.0;
+    //         y *= -1.0;
+    //     }
+    //     if (!isNaN(x) && !isNaN(y)) updatePos(-x * phoneSpeed, y * phoneSpeed);
+    //     // if (!isNaN(x) && !isNaN(y)) updatePos(-x * phoneSpeed, y * phoneSpeed);
+    // });
 
     currPlantID = 0;
     let params = getURLParams();
@@ -203,10 +207,23 @@ function setup() {
         });
     }
 
-    startDeviceRotationDetect();
+    // startDeviceRotationDetect();
 
     static_bg = createGraphics(bg.width, bg.height);
     static_bg.copy(bg, 0, 0, bg.width, bg.height, 0, 0, static_bg.width, static_bg.height);
+
+    if (typeof (DeviceOrientationEvent) !== 'undefined' && typeof (DeviceOrientationEvent.requestPermission) === 'function') {
+        button = createButton("click to allow access to sensors");
+        button.style("font-size", "24px");
+        button.style("position", "absolute");
+        button.style("top", "0px");
+        button.style("left", "0px");
+        // button.center();
+        button.mousePressed(requestAccess);
+
+    } else {
+        accessAllowed = true;
+    }
 }
 
 function draw() {
@@ -654,16 +671,22 @@ function insertFlower(x, y) {
             });
             drawSuitable = false;
         } else {
-            alert(`Invalid location for ${plantName}`);
-            drawSuitable = true;
-            placement_fade = 0;
+            if (y > 50) {
+                alert(`Invalid location for ${plantName}`);
+                drawSuitable = true;
+                placement_fade = 0;
+            }
         }
     } else {
-        if (!permissionButton)
+        if (!button)
             alert("Wait a few before planting another");
     }
 }
 
+// function touchStarted() {
+//     mousePressed();
+// }
+/*
 function touchStarted() {
     if (accessAllowed) {
 
@@ -691,7 +714,7 @@ function touchStarted() {
         pressTimer = 50;
     }
     return false;
-}
+}*/
 
 function mousePressed() {
     if (accessAllowed) {
@@ -793,4 +816,46 @@ function handlePermissions() {
     accessAllowed = true;
     pressTimer = 20;
     permissionButton.remove();
+}
+
+function handleMotion(e) {
+    accessAllowed = true;
+    // get accelerometer values
+    x = parseInt(e.accelerationIncludingGravity.x);
+    y = parseInt(e.accelerationIncludingGravity.y);
+    // z = parseInt(e.accelerationIncludingGravity.z);
+
+    if (isIOS) {
+        x *= -1.0;
+        y *= -1.0;
+    }
+    if (!isNaN(x) && !isNaN(y)) updatePos(-x * phoneSpeed, y * phoneSpeed);
+    // if (!isNaN(x) && !isNaN(y)) updatePos(-x * phoneSpeed, y * phoneSpeed);
+}
+
+function requestAccess() {
+    DeviceOrientationEvent.requestPermission()
+        .then(response => {
+            if (response == 'granted') {
+                canvas.addEventListener("touchstart", mousePressed);
+                accessAllowed = true;
+                pressTimer = 20;
+                button.remove();
+                window.addEventListener("devicemotion", function (e) {
+                    accessAllowed = true;
+                    // get accelerometer values
+                    x = parseInt(e.accelerationIncludingGravity.x);
+                    y = parseInt(e.accelerationIncludingGravity.y);
+                    // z = parseInt(e.accelerationIncludingGravity.z);
+
+                    if (isIOS) {
+                        x *= -1.0;
+                        y *= -1.0;
+                    }
+                    if (!isNaN(x) && !isNaN(y)) updatePos(-x * phoneSpeed, y * phoneSpeed);
+                    // if (!isNaN(x) && !isNaN(y)) updatePos(-x * phoneSpeed, y * phoneSpeed);
+                });
+            }
+        })
+        .catch(console.error);
 }
