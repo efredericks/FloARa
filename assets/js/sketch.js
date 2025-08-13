@@ -770,8 +770,8 @@ function drawFlower(f, _bg, surf = null) {
 
       let _w2 = image_info.w;
       let _h2 = image_info.h;
-      let _x = (x*xOff) - (_w2 * glowScale) * .5;
-      let _y = (y*yOff) - (_h2 * glowScale);
+      let _x = (x * xOff) - (_w2 * glowScale) * .5;
+      let _y = (y * yOff) - (_h2 * glowScale);
 
 
       // _x *= xOff;
@@ -1283,7 +1283,7 @@ function saveImage() {
     //   continue;
     // }
 
-      drawFlower(f, hi_res_bg, saveBuffer);
+    drawFlower(f, hi_res_bg, saveBuffer);
 
     /*
     let plantName = QR_map[f.QR_id].name;
@@ -1613,85 +1613,87 @@ function propagatePlants() {
   const MIN_PROPAGATION_DISTANCE = 50; // Minimum distance in px from any other plant
 
   for (const flower of flowers) {
-    const plantName = QR_map[flower.QR_id].name;
-    const plant = plantInfo[plantName];
+    if (flower.QR_id != 99) {
+      const plantName = QR_map[flower.QR_id].name;
+      const plant = plantInfo[plantName];
 
-    console.log(`Checking propagation for ${plantName}...`);
+      console.log(`Checking propagation for ${plantName}...`);
 
-    // Only propagate if random chance succeeds
-    if (Math.random() < plant.propagationRate) {
-      console.log(`Propagation chance succeeded for ${plantName}`);
+      // Only propagate if random chance succeeds
+      if (Math.random() < plant.propagationRate) {
+        console.log(`Propagation chance succeeded for ${plantName}`);
 
-      let foundValid = false;
-      let newX, newY;
-      for (let attempt = 0; attempt < 10; attempt++) {
-        // Try to find a suitable location within propagation radius
-        const angle = Math.random() * Math.PI * 2;
-        const distance = Math.random() * plant.propagationRadius;
-        newX = flower.location.x + Math.cos(angle) * distance;
-        newY = flower.location.y + Math.sin(angle) * distance;
+        let foundValid = false;
+        let newX, newY;
+        for (let attempt = 0; attempt < 10; attempt++) {
+          // Try to find a suitable location within propagation radius
+          const angle = Math.random() * Math.PI * 2;
+          const distance = Math.random() * plant.propagationRadius;
+          newX = flower.location.x + Math.cos(angle) * distance;
+          newY = flower.location.y + Math.sin(angle) * distance;
 
-        // Check if the new location is valid and not too close to any other plant
-        if (
-          isValidPlantLocation(newX, newY, plant.suitableAreas) &&
-          !flowers.some(f => {
-            if (!f.location) return false;
-            const dx = f.location.x - newX;
-            const dy = f.location.y - newY;
-            return Math.sqrt(dx * dx + dy * dy) < MIN_PROPAGATION_DISTANCE;
-          })
-        ) {
-          foundValid = true;
-          break;
+          // Check if the new location is valid and not too close to any other plant
+          if (
+            isValidPlantLocation(newX, newY, plant.suitableAreas) &&
+            !flowers.some(f => {
+              if (!f.location) return false;
+              const dx = f.location.x - newX;
+              const dy = f.location.y - newY;
+              return Math.sqrt(dx * dx + dy * dy) < MIN_PROPAGATION_DISTANCE;
+            })
+          ) {
+            foundValid = true;
+            break;
+          }
         }
-      }
-      if (!foundValid) {
-        console.log("Could not find a non-clustered propagation spot after 10 tries.");
-        continue;
-      }
+        if (!foundValid) {
+          console.log("Could not find a non-clustered propagation spot after 10 tries.");
+          continue;
+        }
 
-      console.log(`Attempting propagation at location: (${newX}, ${newY})`);
+        console.log(`Attempting propagation at location: (${newX}, ${newY})`);
 
-      // Create the new flower data
-      const newFlower = {
-        location: { x: newX, y: newY },
-        color: flower.color.toString(), // Convert p5 color to string
-        QR_id: flower.QR_id,
-        timestamp: new Date().toISOString(),
-        propagationType: 'propagated',
-        parentId: flower.id,
-        type: plantName // Add plant type for easier querying
-      };
+        // Create the new flower data
+        const newFlower = {
+          location: { x: newX, y: newY },
+          color: flower.color.toString(), // Convert p5 color to string
+          QR_id: flower.QR_id,
+          timestamp: new Date().toISOString(),
+          propagationType: 'propagated',
+          parentId: flower.id,
+          type: plantName // Add plant type for easier querying
+        };
 
-      console.log("Attempting to save to Firestore:", newFlower);
+        console.log("Attempting to save to Firestore:", newFlower);
 
-      // Add to Firestore first
-      if (window.addFlower) {
-        window.addFlower(newFlower)
-          .then(flowerId => {
-            if (flowerId) {
-              console.log(`Successfully saved to Firestore with ID: ${flowerId}`);
-              // Only add to local array after successful database save
-              newFlower.id = flowerId;
-              newFlower.current_frame = -1;
-              newFlower.update_frame = int(random(20, 50));
-              flowers.push({
-                ...newFlower,
-                color: color(newFlower.color) // Convert string color back to p5 color
-              });
-              redraw = true;
-            } else {
-              console.error("Firestore returned null ID for propagated plant");
-            }
-          })
-          .catch(error => {
-            console.error("Error saving propagated plant to Firestore:", error);
-          });
+        // Add to Firestore first
+        if (window.addFlower) {
+          window.addFlower(newFlower)
+            .then(flowerId => {
+              if (flowerId) {
+                console.log(`Successfully saved to Firestore with ID: ${flowerId}`);
+                // Only add to local array after successful database save
+                newFlower.id = flowerId;
+                newFlower.current_frame = -1;
+                newFlower.update_frame = int(random(20, 50));
+                flowers.push({
+                  ...newFlower,
+                  color: color(newFlower.color) // Convert string color back to p5 color
+                });
+                redraw = true;
+              } else {
+                console.error("Firestore returned null ID for propagated plant");
+              }
+            })
+            .catch(error => {
+              console.error("Error saving propagated plant to Firestore:", error);
+            });
+        } else {
+          console.error("window.addFlower is not defined - Firestore integration may be missing");
+        }
       } else {
-        console.error("window.addFlower is not defined - Firestore integration may be missing");
+        console.log(`Propagation chance failed for ${plantName}`);
       }
-    } else {
-      console.log(`Propagation chance failed for ${plantName}`);
     }
   }
 }
