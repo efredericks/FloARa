@@ -787,8 +787,8 @@ function drawFlower(f, _bg, surf = null) {
 
       let _w2 = image_info.w;
       let _h2 = image_info.h;
-      let _x = (x * xOff) - (_w2 * glowScale) * .5;
-      let _y = (y * yOff) - (_h2 * glowScale) + _h2;
+      let _x = (x * xOff) - (_w2 * glowScale) * .5 + _w2 * .5;
+      let _y = (y * yOff) - (_h2 * glowScale) + _h2 * .5;
 
       // let _w2 = image_info.w;
       // let _h2 = image_info.h;
@@ -822,8 +822,8 @@ function drawFlower(f, _bg, surf = null) {
 
       let _w2 = image_info.w;
       let _h2 = image_info.h;
-      let _x = (x * xOff) - (_w2 * glowScale) * .5;
-      let _y = (y * yOff) - (_h2 * glowScale) + _h2;
+      let _x = (x * xOff) - (_w2 * glowScale) * .5 + _w2 * .5;
+      let _y = (y * yOff) - (_h2 * glowScale) + _h2 * .5;
 
 
       // _x *= xOff;
