@@ -172,7 +172,7 @@ function isValidPlantLocation(x, y, suitableAreas) {
   // Determine the area type based on mask color
   let areaType;
   // if (maskPixel[0] === 0 && maskPixel[1] === 0 && maskPixel[2] === 0) {
-  if (maskPixel[0] <= d0 && maskPixel[1] === 0 && maskPixel[2] === 255) {
+  if (maskPixel[0] <= 20 && maskPixel[1] === 0 && maskPixel[2] === 255) {
     areaType = 'grass';
   } else if (maskPixel[0] >= 250 && maskPixel[1] <= 10 && maskPixel[2] <= 10) {
     // } else if (maskPixel[0] === 255 && maskPixel[1] === 255 && maskPixel[2] === 255) {
