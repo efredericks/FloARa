@@ -49,6 +49,10 @@ canvas {
   -moz-font-family: "BenchNine", "sans-serif";
 }
 
+.menuItemActive {
+  color: #fff;
+}
+
 .menuItem:hover {
   text-decoration: underline;
 }

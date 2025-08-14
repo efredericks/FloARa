@@ -18,13 +18,17 @@
     <li><a class="menuItem" id="playback" href="#">Start from the beginning</a></li>
     <li><a class="menuItem" id="toggle_anim" href="#">Turn off wind</a></li>
     <li><a class="menuItem" id="save" href="#">Save image</a></li>
-    <li>
+    <li><span class="menuHeader">Filter plants:</span></li>
+    <li><a class="menuItem menuItemActive" id="show-all" href="#">Show all plants</a></li>
+    <li><a class="menuItem" id="show-manual" href="#">Show manual plants</a></li>
+    <li><a class="menuItem" id="show-propagated" href="#">Show propagated plants</a></li>
+    <!-- <li>
       <select id="plantFilter" class="menuItem" onchange="filterPlants(this.value)">
         <option value="all">Show all plants</option>
         <option value="manual">Show manual plants</option>
         <option value="propagated">Show propagated plants</option>
       </select>
-    </li>
+    </li> -->
     <!-- <li><span class="menuHeader">--debugging--</span></li>
     <li><a class="menuItem" id="toggle_adding" href="#">toggle adding flowers</a></li>
     <li><a class="menuItem" id="toggle_glitch" href="#">toggle glitch shaders</a></li>
@@ -223,6 +227,35 @@
         else if (e.id == 'toggle_adding') window.adding_flowers = !window.adding_flowers;
         else if (e.id == 'save') saveImage();
         else if (e.id == 'playback') animateStart();
+
+        else if (e.id == "show-all") {
+          filterPlants("all");
+          
+          let sa1 = document.getElementById("show-manual");
+          let sa2 = document.getElementById("show-propagated");
+
+          if (sa1.classList.contains("menuItemActive")) sa1.classList.remove("menuItemActive");
+          if (sa2.classList.contains("menuItemActive")) sa2.classList.remove("menuItemActive");
+          if (!e.classList.contains("menuItemActive")) e.classList.add("menuItemActive");
+        } else if (e.id == "show-manual") {
+          filterPlants("manual");
+          
+          let sa1 = document.getElementById("show-all");
+          let sa2 = document.getElementById("show-propagated");
+
+          if (sa1.classList.contains("menuItemActive")) sa1.classList.remove("menuItemActive");
+          if (sa2.classList.contains("menuItemActive")) sa2.classList.remove("menuItemActive");
+          if (!e.classList.contains("menuItemActive")) e.classList.add("menuItemActive");
+        } else if (e.id == "show-propagated") {
+          filterPlants("propagated");
+          
+          let sa1 = document.getElementById("show-manual");
+          let sa2 = document.getElementById("show-all");
+
+          if (sa1.classList.contains("menuItemActive")) sa1.classList.remove("menuItemActive");
+          if (sa2.classList.contains("menuItemActive")) sa2.classList.remove("menuItemActive");
+          if (!e.classList.contains("menuItemActive")) e.classList.add("menuItemActive");
+        }
       }
     }
 
