@@ -213,6 +213,7 @@ function setup() {
     static_bg.copy(bg, 0, 0, bg.width, bg.height, 0, 0, static_bg.width, static_bg.height);
 
     if (typeof (DeviceOrientationEvent) !== 'undefined' && typeof (DeviceOrientationEvent.requestPermission) === 'function') {
+        accessAllowed = false;
         button = createButton("click to allow access to sensors");
         button.style("font-size", "24px");
         button.style("position", "absolute");
@@ -662,6 +663,7 @@ function insertFlower(x, y) {
         // tbd - highlight suitable areas for planting?
         const plantName = QR_map[currPlantID].name;
         const suitableAreas = plantInfo[plantName].suitableAreas;
+
         if (isValidPlantLocation(x, y, suitableAreas)) {
             window.addFlower(newFlower).then(flowerId => {
                 if (flowerId) {
@@ -674,11 +676,11 @@ function insertFlower(x, y) {
             });
             drawSuitable = false;
         } else {
-            if (y > 50) {
-                alert(`Invalid location for ${plantName}`);
-                drawSuitable = true;
-                placement_fade = 0;
-            }
+            // if (y > 50) {
+            alert(`Invalid location for ${plantName}`);
+            drawSuitable = true;
+            placement_fade = 0;
+            // }
         }
     } else {
         if (!button)
@@ -718,6 +720,16 @@ function touchStarted() {
     }
     return false;
 }*/
+
+// OK, I have no idea why this is happening, but the first mouseX/mouseY are completely
+// offset, but all further touches are fine.  Let's just discard the first click since
+// the button has to be pressed anyway.
+let first_click = false;
+function handleTouch() {
+    if (!first_click) {
+        first_click = true;
+    } else mousePressed();
+}
 
 function mousePressed() {
     if (accessAllowed) {
@@ -840,7 +852,7 @@ function requestAccess() {
     DeviceOrientationEvent.requestPermission()
         .then(response => {
             if (response == 'granted') {
-                canvas.addEventListener("touchstart", mousePressed);
+                canvas.addEventListener("touchstart", handleTouch);//mousePressed);
                 accessAllowed = true;
                 pressTimer = 20;
                 button.remove();

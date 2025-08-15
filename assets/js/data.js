@@ -164,6 +164,7 @@ function isValidPlantLocation(x, y, suitableAreas) {
   const maskY = Math.floor(y);
   const maskPixel = mask.get(maskX, maskY);
 
+
   // Check if the location is within bounds
   if (maskX < 0 || maskX >= mask.width || maskY < 0 || maskY >= mask.height) {
     return false;
@@ -180,10 +181,6 @@ function isValidPlantLocation(x, y, suitableAreas) {
   } else {
     return false;
   }
-
-
-
-  // console.log("heyoo", x, y, maskX, maskY, areaType, maskPixel[0], maskPixel[1], maskPixel[2])
 
   // Check if the area type is suitable for the plant
   return suitableAreas.includes(areaType);
