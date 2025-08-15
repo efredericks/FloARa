@@ -213,11 +213,14 @@ function setup() {
     static_bg.copy(bg, 0, 0, bg.width, bg.height, 0, 0, static_bg.width, static_bg.height);
 
     if (typeof (DeviceOrientationEvent) !== 'undefined' && typeof (DeviceOrientationEvent.requestPermission) === 'function') {
+        accessAllowed = false;
         button = createButton("click to allow access to sensors");
-        button.style("font-size", "24px");
+        button.style("font-size", "42px");
         button.style("position", "absolute");
-        button.style("top", "0px");
-        button.style("left", "0px");
+        button.style("top", "40px");
+        button.style("left", "20px");
+        button.style("padding", "20px");
+        button.style("z-index", "99");
         // button.center();
         button.mousePressed(requestAccess);
 
@@ -671,11 +674,11 @@ function insertFlower(x, y) {
             });
             drawSuitable = false;
         } else {
-            if (y > 50) {
+            // if (y > 100) {
                 alert(`Invalid location for ${plantName}`);
                 drawSuitable = true;
                 placement_fade = 0;
-            }
+            // }
         }
     } else {
         if (!button)
