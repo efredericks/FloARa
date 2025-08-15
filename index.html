@@ -41,15 +41,15 @@
   <main>
   </main>
   <div id="flowerPopup" class="flower-popup">
-    <h3>Place a Flower</h3>
-    <p>Click anywhere on the image to place your flower</p>
-    <div>
+    <h3 id="flowerPopupTitle">Place a Flower</h3>
+    <p id="flowerPopupText">Click anywhere on the image to place your flower</p>
+    <!-- <div>
       <label>Color:
         <input type="color" id="flowerColor" value="#ffffff">
         <span class="color-preview"></span>
       </label>
-    </div>
-    <div>
+    </div> -->
+    <!-- <div>
       <label>Flower Type:
         <select id="plantType">
           <option value="0">Milkweed</option>
@@ -62,7 +62,7 @@
           <option value="99">Piranha</option>
         </select>
       </label>
-    </div>
+    </div> -->
     <div class="button-group">
       <button id="cancelPlacement" class="cancel-btn">Cancel</button>
       <button id="placeFlower" class="place-btn">Place Flower</button>
@@ -161,7 +161,7 @@
 
       <h2>How to use:</h2>
       <ul>
-        <li><b>Add a plant:</b> Press 1-9 then use the UI to select a plant, then click on the map to place it.</li>
+        <li><b>Add a plant:</b> Press 1-8 then use the UI to select a plant, then click on the map to place it.</li>
         <li><b>View details:</b> Click on any plant to see its information panel.</li>
         <li><b>Remove a plant:</b> Right-click a plant and confirm removal.</li>
         <li><b>Propagation:</b> Some plants will spread automatically over time!</li>

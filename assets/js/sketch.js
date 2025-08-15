@@ -414,8 +414,8 @@ function setup() {
   const popup = document.getElementById('flowerPopup');
   const cancelBtn = document.getElementById('cancelPlacement');
   const placeBtn = document.getElementById('placeFlower');
-  const colorInput = document.getElementById('flowerColor');
-  const colorPreview = document.querySelector('.color-preview');
+  // const colorInput = document.getElementById('flowerColor');
+  // const colorPreview = document.querySelector('.color-preview');
 
   cancelBtn.addEventListener('click', () => {
     isPlacingFlower = false;
@@ -426,18 +426,18 @@ function setup() {
 
   placeBtn.addEventListener('click', () => {
     if (isPlacingFlower) {
-      pendingFlowerColor = colorInput.value;
+      pendingFlowerColor = "#ff00ff";//colorInput.value;
       popup.classList.remove('active');
     }
     // Note: hoveredFlower will be restored by updateHoveredFlower() in the next draw cycle
   });
 
-  colorInput.addEventListener('input', (e) => {
-    colorPreview.style.backgroundColor = e.target.value;
-  });
+  // colorInput.addEventListener('input', (e) => {
+  //   colorPreview.style.backgroundColor = e.target.value;
+  // });
 
   // Initialize color preview
-  colorPreview.style.backgroundColor = colorInput.value;
+  // colorPreview.style.backgroundColor = colorInput.value;
 
   wind_material = baseMaterialShader().modify({
     uniforms: {
@@ -1048,6 +1048,8 @@ function windowResized() {
 }
 
 
+let globPlantTypeSelect = 0;
+
 // handle mouse or touch
 function handlePress() {
   // disable all interactivity if a modal window is open, if flower placement popup is active, or if hamburger menu is open
@@ -1204,8 +1206,8 @@ function handlePress() {
       // const maskPixel = mask.get(maskX, maskY);
 
       // Get the selected plant type from the dropdown
-      const plantTypeSelect = document.getElementById('plantType');
-      const plantType = plantTypeSelect ? parseInt(plantTypeSelect.value) : 0;
+      const plantTypeSelect = 0;//document.getElementById('plantType');
+      const plantType = globPlantTypeSelect;//plantTypeSelect ? parseInt(plantTypeSelect.value) : 0;
 
       // If the mask pixel is black (0,0,0), it's a valid position (grass)
       // if (maskPixel[0] === 0 && maskPixel[1] === 0 && maskPixel[2] === 0) {
@@ -1291,14 +1293,54 @@ function touchStarted() {
 let GLOB_IDX = 0;
 function keyPressed() {
   // if (key === " ") {
-    // debug = !debug;
+  // debug = !debug;
   //   redraw = true;
   // } else 
-  if (key >= "1" && key <= "9") {
+  if (key >= "1" && key <= "8") {
     // Show popup for flower placement
     isPlacingFlower = true;
     pendingFlowerColor = null;
     hoveredFlower = null; // Clear hover state when flower popup becomes active
+
+    let popupName = "";
+    if (key == "1") {
+      popupName = "Milkweed";
+      globPlantTypeSelect = 0;
+      // pendingFlowerColor = "#000000";
+    } else if (key == "2") {
+      popupName = "Nymphaea";
+      globPlantTypeSelect = 1;
+      // pendingFlowerColor = "#000000";
+    } else if (key == "3") {
+      popupName = "Arrow Arum Peltandra Virginica";
+      globPlantTypeSelect = 2;
+      // pendingFlowerColor = "#000000";
+    } else if (key == "4") {
+      popupName = "Paper Birch";
+      globPlantTypeSelect = 3;
+      // pendingFlowerColor = "#000000";
+    } else if (key == "5") {
+      popupName = "PawPaw";
+      globPlantTypeSelect = 4;
+      // pendingFlowerColor = "#000000";
+    } else if (key == "6") {
+      globPlantTypeSelect = 5;
+      popupName = "Populus Deltoides";
+      // pendingFlowerColor = "#000000";
+    } else if (key == "7") {
+      globPlantTypeSelect = 6;
+      popupName = "Zizania Aquatica";
+      // pendingFlowerColor = "#000000";
+    } else if (key == "8") {
+      globPlantTypeSelect = 99;
+      popupName = "Piranha";
+      // pendingFlowerColor = "#000000";
+    }
+
+    let fh3 = document.getElementById("flowerPopupTitle");
+    let fp = document.getElementById("flowerPopupText");
+    fh3.innerText = `Placing ${popupName}`;
+    fp.innerText = `Click anywhere to place your ${popupName}`;
     document.getElementById('flowerPopup').classList.add('active');
   } else if (key == "A") {
     animateStart();
