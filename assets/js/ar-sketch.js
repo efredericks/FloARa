@@ -295,7 +295,9 @@ let rendered = false;
 function renderFlowers() {
     if (!flowers || flowers.length === 0) return;
 
-    if (!rendered) rendered = true;
+    if (!rendered) {
+        rendered = true;
+    }
 
     for (let f of flowers) {
         // Skip invalid flowers
@@ -672,6 +674,9 @@ function insertFlower(x, y) {
                     flowers.push(newFlower);
                     console.log(x, y);
                     alert(`${plantName} successfully added`);
+                    rendered = false;
+                    static_bg.clear();
+                    static_bg.copy(bg, 0, 0, bg.width, bg.height, 0, 0, static_bg.width, static_bg.height);
                 }
             });
             drawSuitable = false;
