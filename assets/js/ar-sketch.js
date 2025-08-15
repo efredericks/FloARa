@@ -213,19 +213,19 @@ function setup() {
     static_bg.copy(bg, 0, 0, bg.width, bg.height, 0, 0, static_bg.width, static_bg.height);
 
     if (typeof (DeviceOrientationEvent) !== 'undefined' && typeof (DeviceOrientationEvent.requestPermission) === 'function') {
-        accessAllowed = false;
         button = createButton("click to allow access to sensors");
-        button.style("font-size", "42px");
+        button.style("font-size", "24px");
         button.style("position", "absolute");
-        button.style("top", "40px");
-        button.style("left", "20px");
-        button.style("padding", "20px");
-        button.style("z-index", "99");
+        button.style("top", "0px");
+        button.style("left", "0px");
         // button.center();
         button.mousePressed(requestAccess);
 
     } else {
         accessAllowed = true;
+        window.addEventListener("devicemotion", function (e) {
+            handleMotion(e);
+        });
     }
 }
 
@@ -674,11 +674,11 @@ function insertFlower(x, y) {
             });
             drawSuitable = false;
         } else {
-            // if (y > 100) {
+            if (y > 50) {
                 alert(`Invalid location for ${plantName}`);
                 drawSuitable = true;
                 placement_fade = 0;
-            // }
+            }
         }
     } else {
         if (!button)
@@ -845,18 +845,19 @@ function requestAccess() {
                 pressTimer = 20;
                 button.remove();
                 window.addEventListener("devicemotion", function (e) {
-                    accessAllowed = true;
-                    // get accelerometer values
-                    x = parseInt(e.accelerationIncludingGravity.x);
-                    y = parseInt(e.accelerationIncludingGravity.y);
-                    // z = parseInt(e.accelerationIncludingGravity.z);
+                    handleMotion(e);
+                    // accessAllowed = true;
+                    // // get accelerometer values
+                    // x = parseInt(e.accelerationIncludingGravity.x);
+                    // y = parseInt(e.accelerationIncludingGravity.y);
+                    // // z = parseInt(e.accelerationIncludingGravity.z);
 
-                    if (isIOS) {
-                        x *= -1.0;
-                        y *= -1.0;
-                    }
-                    if (!isNaN(x) && !isNaN(y)) updatePos(-x * phoneSpeed, y * phoneSpeed);
+                    // if (isIOS) {
+                    //     x *= -1.0;
+                    //     y *= -1.0;
+                    // }
                     // if (!isNaN(x) && !isNaN(y)) updatePos(-x * phoneSpeed, y * phoneSpeed);
+                    // // if (!isNaN(x) && !isNaN(y)) updatePos(-x * phoneSpeed, y * phoneSpeed);
                 });
             }
         })
