@@ -864,7 +864,7 @@ function drawEverything(saving = false) {
       // EMPTY STATE HANDLING
       // Only count flowers that match the current filter
       let visibleFlowers = flowers.filter(f => plantFilter === 'all' || f.propagationType === plantFilter);
-      if (visibleFlowers.length === 0) {
+      if (visibleFlowers.length === 0 && frameCount > 20) { // allow to settle first
         push();
         fill(255, 200, 200);
         textSize(width * 0.04);
