@@ -549,11 +549,15 @@ function calculateImageInfo(flower, bg, saving = false) {
   let idx = 0;
   let date_diff = Math.floor(dateDifference(now, new Date(flower.timestamp)));
 
+  // console.log(flower.QR_id,date_diff)
+
   // handle piranha specially as final two images are its animated head
   if (flower.QR_id == 99) {
     // Calculate base growth stage based on age
-    if ((date_diff / 5) > 4) idx = 4;
-    else idx = Math.floor(date_diff / 5);
+    // if ((date_diff % 5) > 4) idx = 4;
+    // else idx = Math.floor(date_diff % 5);
+    idx = date_diff;
+    if (date_diff > 4) idx = 4;
 
     // For stages 3 and 4 (head stages), animate between them
     if (idx >= 3) {
@@ -562,9 +566,11 @@ function calculateImageInfo(flower, bg, saving = false) {
       idx = 3 + animationFrame; // This will be 3 or 4 for the animated head
     }
   } else {
+    idx = date_diff;
+    if (date_diff > 4) idx = 4;
     // Calculate growth stage based on plant age
-    if ((date_diff / 5) > 4) idx = 4;
-    else idx = Math.floor(date_diff / 5);
+    // if ((date_diff % 5) > 4) idx = 4;
+    // else idx = Math.floor(date_diff % 5);
     // Remove the GLOB_IDX override to let plants progress naturally
     // idx = GLOB_IDX;
   }
@@ -1479,8 +1485,9 @@ function showPlantInfo(flower) {
 
   const plantName = QR_map[flower.QR_id].name;
   const placementDate = new Date(flower.timestamp);
-  const ageDays = Math.floor((new Date() - placementDate) / (1000 * 60 * 60 * 24));
-  const growthStageIndex = Math.min(4, Math.floor(ageDays / 5));
+  let ageDays = Math.floor(dateDifference(new Date(), placementDate));
+  //Math.floor((new Date() - placementDate) / (1000 * 60 * 60 * 24));
+  const growthStageIndex = Math.min(4, ageDays);//Math.min(4, Math.floor(ageDays / 5));
 
   // Get static info for this plant type
   const staticInfo = plantDetails[flower.QR_id];
@@ -1576,7 +1583,7 @@ function showPlantInfo(flower) {
   let dynamicHtml = `
     <div class="info-section">
       <h4>Plant Details</h4>
-      <p><strong>Age:</strong> ${ageDays} days</p>
+      <p><strong>Age:</strong> ${ageDays+1} days</p>
       <p><strong>Growth Stage:</strong> ${growthStageIndex + 1} of 5</p>
       <p><strong>Planted:</strong> ${placementDate.toLocaleDateString()} at ${placementDate.toLocaleTimeString()}</p>
       <p><strong>Type:</strong> ${flower.propagationType === 'manual' ? 'Manually Planted' : 'Naturally Propagated'}</p>
