@@ -1508,6 +1508,7 @@ function showPlantInfo(flower) {
 
   // Get plant image path based on plant type and growth stage
   let plantImagePath = '';
+  let piranhaIdx = 1;
   const stageNumber = growthStageIndex + 1;
 
   switch (flower.QR_id) {
@@ -1535,7 +1536,7 @@ function showPlantInfo(flower) {
       break;
     case 99: // Piranha
       // Piranha doesn't have stage-based images, so we'll skip the image
-      plantImagePath = '';
+      plantImagePath = './assets/img/Piranha/piranha-head-1.png';
       break;
     default:
       plantImagePath = '';
@@ -1583,7 +1584,7 @@ function showPlantInfo(flower) {
   let dynamicHtml = `
     <div class="info-section">
       <h4>Plant Details</h4>
-      <p><strong>Age:</strong> ${ageDays+1} days</p>
+      <p><strong>Age:</strong> ${ageDays + 1} days</p>
       <p><strong>Growth Stage:</strong> ${growthStageIndex + 1} of 5</p>
       <p><strong>Planted:</strong> ${placementDate.toLocaleDateString()} at ${placementDate.toLocaleTimeString()}</p>
       <p><strong>Type:</strong> ${flower.propagationType === 'manual' ? 'Manually Planted' : 'Naturally Propagated'}</p>
@@ -1656,7 +1657,10 @@ function showPlantInfo(flower) {
         case 6: // Zizania Aquatica
           return `./assets/img/Zizania-Aquatica/Zizania-Aquatica-${stage}.png`;
         case 99: // Piranha
-          return '';
+          // return '';
+          if ((stage % 2) == 0) stage = 1;
+          else stage = 2;
+          return `./assets/img/Piranha/piranha-head-${stage}.png`;
         default:
           return '';
       }
