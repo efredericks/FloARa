@@ -618,9 +618,9 @@ function calculateImageInfo(flower, bg, saving = false) {
   let band_scale = 1.0;
   if (flower.location.y < bg.height * 0.3)
     band_scale = scale_bands[0];
-  else if (flower.location.y < bg.height * 0.6)
+  else if (flower.location.y < bg.height * 0.5)
     band_scale = scale_bands[1];
-  else if (flower.location.y < bg.height * 0.8)
+  else if (flower.location.y < bg.height * 0.7)
     band_scale = scale_bands[2];
   else
     band_scale = scale_bands[3];

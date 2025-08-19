@@ -2,16 +2,16 @@
 
 // unsure if hd_scale is necessary or if my math is just off
 // TBD: probably would be better to render as full-def and then scale to viewport
-const scale_bands = [0.30, 0.40, 0.50, 0.60];
+const scale_bands = [0.20, 0.30, 0.40, 0.60];
 let QR_map = {
-  0: { name: 'Milkweed', scale: 1.00, hd_scale: 1.0 },
-  1: { name: 'Nymphaea', scale: 1.00, hd_scale: 0.7 },
-  2: { name: 'Arrow-Arum-Peltandra-Virginica', scale: 1.0, hd_scale: 0.7 },
-  3: { name: 'Paper-Birch', scale: 1.0, hd_scale: 0.7 },
-  4: { name: 'PawPaw', scale: 1.0, hd_scale: 0.7 },
-  5: { name: 'Populus-Deltoides', scale: 0.60, hd_scale: 0.7 },
-  6: { name: 'Zizania-Aquatica', scale: 1.00, hd_scale: 0.7 },
-  99: { name: 'Piranha', scale: 5.0, hd_scale: 8.0 },
+  0: { name: 'Milkweed', scale: 0.75, hd_scale: 0.2 },
+  1: { name: 'Nymphaea', scale: 0.6, hd_scale: 0.2 },
+  2: { name: 'Arrow-Arum-Peltandra-Virginica', scale: 0.7, hd_scale: 0.5 },
+  3: { name: 'Paper-Birch', scale: 0.7, hd_scale: 1.4 },
+  4: { name: 'PawPaw', scale: 0.7, hd_scale: 1.4 },
+  5: { name: 'Populus-Deltoides', scale: 0.40, hd_scale: 1.5 },
+  6: { name: 'Zizania-Aquatica', scale: 0.7, hd_scale: 0.7 },
+  99: { name: 'Piranha', scale: 5.0, hd_scale: 14.0 },
 }
 let plant_images = {};
 
