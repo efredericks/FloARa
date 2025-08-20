@@ -576,7 +576,7 @@ function calculateImageInfo(flower, bg, saving = false) {
   }
 
   // debugging - uncomment to force all plants to same stage
-  idx = GLOB_IDX;
+  //idx = GLOB_IDX;
   // console.log(idx, date_diff)
 
   let w_aspect = bg.width / width;
