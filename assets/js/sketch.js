@@ -576,7 +576,7 @@ function calculateImageInfo(flower, bg, saving = false) {
   }
 
   // debugging - uncomment to force all plants to same stage
-  //idx = GLOB_IDX;
+  idx = GLOB_IDX;
   // console.log(idx, date_diff)
 
   let w_aspect = bg.width / width;
@@ -871,12 +871,12 @@ function drawEverything(saving = false) {
       // Only count flowers that match the current filter
       let visibleFlowers = flowers.filter(f => plantFilter === 'all' || f.propagationType === plantFilter);
       if (visibleFlowers.length === 0 && frameCount > 20) { // allow to settle first
-        push();
-        fill(255, 200, 200);
-        textSize(width * 0.04);
-        textAlign(CENTER, CENTER);
-        text("No flowers yet!", width / 2, height / 2);
-        pop();
+        // push();
+        // fill(255, 200, 200);
+        // textSize(width * 0.04);
+        // textAlign(CENTER, CENTER);
+        // text("No flowers yet!", width / 2, height / 2);
+        // pop();
         return;
       }
 
@@ -1818,7 +1818,7 @@ function filterPlants(filter) {
 // sort them by date, then add them back to the main flowers list based on frameCount
 function animateStart() {
   is_animating = true;
-  animating_index = -5;
+  animating_index = -10;
 
   window.shaders_on = true;
 
