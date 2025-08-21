@@ -195,7 +195,7 @@ function setup() {
     if (window.getFlowerData) {
         window.getFlowerData().then(data => {
             flowers = data;
-            console.log("Loaded flowers:", flowers.length);
+            console.log("Loaded flora:", flowers.length);
         });
     }
 
@@ -203,7 +203,7 @@ function setup() {
     if (window.subscribeToFlowers) {
         window.subscribeToFlowers(function (data) {
             flowers = data;
-            console.log("Updated flowers:", flowers.length);
+            console.log("Updated flora:", flowers.length);
         });
     }
 

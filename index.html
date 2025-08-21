@@ -41,8 +41,8 @@
   <main>
   </main>
   <div id="flowerPopup" class="flower-popup">
-    <h3 id="flowerPopupTitle">Place a Flower</h3>
-    <p id="flowerPopupText">Click anywhere on the image to place your flower</p>
+    <h3 id="flowerPopupTitle">Place Flora</h3>
+    <p id="flowerPopupText">Click anywhere on the image to place your flora</p>
     <!-- <div>
       <label>Color:
         <input type="color" id="flowerColor" value="#ffffff">
@@ -65,7 +65,7 @@
     </div> -->
     <div class="button-group">
       <button id="cancelPlacement" class="cancel-btn">Cancel</button>
-      <button id="placeFlower" class="place-btn">Place Flower</button>
+      <button id="placeFlower" class="place-btn">Place Flora</button>
     </div>
   </div>
   <!-- Floating Help Button -->
@@ -300,10 +300,10 @@
             ...doc.data(),
             id: doc.id
           }));
-          console.log("Flower data fetched:", data);
+          console.log("Flora data fetched:", data);
           return data;
         } catch (error) {
-          console.error("Error fetching flowers:", error);
+          console.error("Error fetching flora:", error);
           return [];
         }
       };
@@ -327,7 +327,7 @@
           const docRef = await addDoc(collection(db, "flowers"), flowerData);
           return docRef.id;
         } catch (error) {
-          console.error("Error adding flower:", error);
+          console.error("Error adding flora:", error);
           return null;
         }
       };
@@ -337,7 +337,7 @@
           await deleteDoc(doc(db, "flowers", flowerId));
           return true;
         } catch (error) {
-          console.error("Error deleting flower:", error);
+          console.error("Error deleting flora:", error);
           return false;
         }
       };

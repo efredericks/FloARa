@@ -959,7 +959,7 @@ async function loadData() {
 
   try {
     const rawData = await window.getFlowerData();
-    console.log("Raw flower data from Firebase:", rawData);
+    console.log("Raw flora data from Firebase:", rawData);
 
     flowers = rawData.map(f => {
       // Try to find QR_id in different possible field names
@@ -1025,7 +1025,7 @@ async function loadData() {
       const update_frame = int(random(20, 50));
 
       if (!f.location || typeof f.location.x !== 'number' || typeof f.location.y !== 'number') {
-        console.warn("Skipping flower with invalid location:", f);
+        console.warn("Skipping flora with invalid location:", f);
         return null;
       }
 
@@ -1041,10 +1041,10 @@ async function loadData() {
       };
     }).filter(f => f !== null);
 
-    console.log("Processed flowers:", flowers);
+    console.log("Processed flora:", flowers);
     redraw = true;
   } catch (err) {
-    console.error("Error loading flowers from Firestore:", err);
+    console.error("Error loading flora from Firestore:", err);
   }
 }
 
@@ -1302,7 +1302,7 @@ function keyPressed() {
   // debug = !debug;
   //   redraw = true;
   // } else 
-  if (key >= "1" && key <= "8") {
+  if (key >= "1" && key <= "7") {//"8") {
     // Show popup for flower placement
     isPlacingFlower = true;
     pendingFlowerColor = null;
@@ -1337,10 +1337,10 @@ function keyPressed() {
       globPlantTypeSelect = 6;
       popupName = "Zizania Aquatica";
       // pendingFlowerColor = "#000000";
-    } else if (key == "8") {
-      globPlantTypeSelect = 99;
-      popupName = "Piranha";
-      // pendingFlowerColor = "#000000";
+    // } else if (key == "8") {
+    //   globPlantTypeSelect = 99;
+    //   popupName = "Piranha";
+    //   // pendingFlowerColor = "#000000";
     }
 
     let fh3 = document.getElementById("flowerPopupTitle");
@@ -1360,7 +1360,7 @@ function keyPressed() {
 // need to tweak this to save the full res...
 function saveImage() {
   console.log("Starting save process...");
-  console.log("Number of flowers:", flowers.length);
+  console.log("Number of flora:", flowers.length);
 
   // Create a new graphics buffer
   // let saveBuffer = createGraphics(bg.width, bg.height);

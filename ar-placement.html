@@ -40,16 +40,16 @@
 
       window.getFlowerData = async function () {
         try {
-          console.log("Fetching flower data...");
+          console.log("Fetching flora data...");
           const snapshot = await getDocs(collection(db, "flowers"));
           const data = snapshot.docs.map(doc => ({
             ...doc.data(),
             id: doc.id
           }));
-          console.log("Flower data fetched:", data);
+          console.log("Flora data fetched:", data);
           return data;
         } catch (error) {
-          console.error("Error fetching flowers:", error);
+          console.error("Error fetching flora:", error);
           return [];
         }
       };
@@ -63,7 +63,7 @@
           }));
           callback(data);
         }, (error) => {
-          console.error("Error in real-time flower listener:", error);
+          console.error("Error in real-time flora listener:", error);
         });
         return unsubscribe; // Call this to stop listening
       };
@@ -73,7 +73,7 @@
           const docRef = await addDoc(collection(db, "flowers"), flowerData);
           return docRef.id;
         } catch (error) {
-          console.error("Error adding flower:", error);
+          console.error("Error adding flora:", error);
           return null;
         }
       };
@@ -83,7 +83,7 @@
           await deleteDoc(doc(db, "flowers", flowerId));
           return true;
         } catch (error) {
-          console.error("Error deleting flower:", error);
+          console.error("Error deleting flora:", error);
           return false;
         }
       };
