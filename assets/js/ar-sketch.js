@@ -519,9 +519,9 @@ function deleteFlower(flower) {
                     if (index !== -1) {
                         flowers.splice(index, 1);
                     }
-                    alert('Flower deleted successfully');
+                    alert('Flora deleted successfully');
                 } else {
-                    alert('Failed to delete flower');
+                    alert('Failed to delete flora');
                 }
             });
         } else {
@@ -530,7 +530,7 @@ function deleteFlower(flower) {
             if (index !== -1) {
                 flowers.splice(index, 1);
             }
-            alert('Flower removed locally');
+            alert('Flora removed locally');
         }
     }
 }

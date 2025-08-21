@@ -1146,7 +1146,7 @@ function handlePress() {
               successPopup.className = 'confirmation-popup';
 
               const successMessage = document.createElement('p');
-              successMessage.textContent = 'Flower removed successfully!';
+              successMessage.textContent = 'Flora removed successfully!';
               successPopup.appendChild(successMessage);
               modalActive = true;
 
