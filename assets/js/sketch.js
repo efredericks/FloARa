@@ -1351,7 +1351,7 @@ function keyPressed() {
     let fh3 = document.getElementById("flowerPopupTitle");
     let fp = document.getElementById("flowerPopupText");
     fh3.innerText = `Placing ${popupName}`;
-    fp.innerText = `Click anywhere to place your ${popupName}`;
+    fp.innerText = `Click anywhere to place the ${popupName}`;
     document.getElementById('flowerPopup').classList.add('active');
   } else if (key == "A") {
     animateStart();
