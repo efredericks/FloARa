@@ -48,7 +48,7 @@ let saveScale;
 const plantDetails = {
   0: {
     commonName: "Milkweed",
-    scientificName: "Asclepias syriaca",
+    scientificName: "Asclepias Syriaca",
     family: "Apocynaceae (Milkweed family)",
     height: "2-6' (0.6-1.8 m)",
     age: "Perennial",
@@ -63,7 +63,7 @@ const plantDetails = {
   },
   1: {
     commonName: "Nymphaea",
-    scientificName: "Nymphaea odorata",
+    scientificName: "Nymphaea Odorata",
     family: "Nymphaeaceae (Water Lily family)",
     height: "Floating leaves up to 10\" across",
     age: "Perennial",
@@ -78,7 +78,7 @@ const plantDetails = {
   },
   2: {
     commonName: "Arrow Arum",
-    scientificName: "Peltandra virginica",
+    scientificName: "Peltandra Virginica",
     family: "Araceae (Arum family)",
     height: "2-3' (0.6-0.9 m)",
     age: "Perennial",
@@ -93,7 +93,7 @@ const plantDetails = {
   },
   3: {
     commonName: "Paper Birch",
-    scientificName: "Betula papyrifera",
+    scientificName: "Betula Papyrifera",
     family: "Betulaceae (Birch family)",
     height: "50-70' (15-21 m)",
     age: "Up to 100 years",
@@ -108,7 +108,7 @@ const plantDetails = {
   },
   4: {
     commonName: "PawPaw",
-    scientificName: "Asimina triloba",
+    scientificName: "Asimina Triloba",
     family: "Annonaceae (Custard Apple family)",
     height: "15-30' (4.5-9 m)",
     age: "Up to 100 years",
@@ -123,7 +123,7 @@ const plantDetails = {
   },
   5: {
     commonName: "Eastern Cottonwood",
-    scientificName: "Populus deltoides",
+    scientificName: "Populus Deltoides",
     family: "Salicaceae (Willow family)",
     height: "80-100' (24-30 m)",
     age: "Up to 100 years",
@@ -138,7 +138,7 @@ const plantDetails = {
   },
   6: {
     commonName: "Wild Rice",
-    scientificName: "Zizania aquatica",
+    scientificName: "Zizania Aquatica",
     family: "Poaceae (Grass family)",
     height: "3-10' (0.9-3 m)",
     age: "Annual",
@@ -153,7 +153,7 @@ const plantDetails = {
   },
   99: {
     commonName: "Piranha Plant",
-    scientificName: "Piranha fictus",
+    scientificName: "Piranha Fictus",
     family: "Fictionaceae",
     height: "Varies (often depicted 2-4')",
     age: "Eternal (video game logic)",
@@ -1252,7 +1252,7 @@ function handlePress() {
 
             // Add success message
             const message = document.createElement('p');
-            message.textContent = 'Flower successfully added!';
+            message.textContent = 'Flora successfully added!';
             popup.appendChild(message);
             modalActive = true;
 
@@ -1342,6 +1342,11 @@ function keyPressed() {
     //   popupName = "Piranha";
     //   // pendingFlowerColor = "#000000";
     }
+
+    let qr_name = QR_map[globPlantTypeSelect].name;
+    let common_name = plantInfo[qr_name].commonName;
+    let scientific_name = plantInfo[qr_name].scientificName;
+    popupName = `${common_name} (${scientific_name})`;
 
     let fh3 = document.getElementById("flowerPopupTitle");
     let fp = document.getElementById("flowerPopupText");

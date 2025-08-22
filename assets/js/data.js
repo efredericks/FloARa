@@ -18,7 +18,8 @@ let plant_images = {};
 // windDivider --> larger means less wind (millis() / windDivider)
 let plantInfo = {
   'Milkweed': {
-    scientificName: "Asclepias syriaca",
+    commonName: "Milkweed",
+    scientificName: "Asclepias Syriaca",
     description: "Common milkweed is a perennial wildflower native to North America. It's the primary host plant for monarch butterfly caterpillars and produces distinctive pink to purple flower clusters.",
     growthStages: [
       "Seedling - Small rosette of leaves",
@@ -35,7 +36,8 @@ let plantInfo = {
     windDivider: 6400,
   },
   'Populus-Deltoides': {
-    scientificName: "Populus deltoides",
+    commonName: "Eastern Cottonwood",
+    scientificName: "Populus Deltoides",
     description: "Eastern cottonwood is a large, fast-growing deciduous tree native to North America. It's known for its triangular leaves and cotton-like seeds that disperse in the wind.",
     growthStages: [
       "Seedling - Small tree with simple leaves",
@@ -52,7 +54,8 @@ let plantInfo = {
     windDivider: 10400,
   },
   'PawPaw': {
-    scientificName: "Asimina triloba",
+    commonName: "Pawpaw",
+    scientificName: "Asimina Triloba",
     description: "Pawpaw is a small deciduous tree native to eastern North America. It produces the largest edible fruit native to the United States, with a tropical flavor.",
     growthStages: [
       "Seedling - Small tree with simple leaves",
@@ -69,7 +72,8 @@ let plantInfo = {
     windDivider: 2400,
   },
   'Zizania-Aquatica': {
-    scientificName: "Zizania aquatica",
+    commonName: "Wild Rice",
+    scientificName: "Zizania Aquatica",
     description: "Wild rice is an annual aquatic grass native to North America. It grows in shallow water and produces edible grains that have been harvested by indigenous peoples for centuries.",
     growthStages: [
       "Seedling - Floating leaves in water",
@@ -86,7 +90,8 @@ let plantInfo = {
     windDivider: 2400,
   },
   'Nymphaea': {
-    scientificName: "Nymphaea odorata",
+    commonName: "Water Lily",
+    scientificName: "Nymphaea Odorata",
     description: "American white water lily is a perennial aquatic plant with floating leaves and fragrant white flowers. It creates beautiful lily pads on the water's surface.",
     growthStages: [
       "Seedling - Small floating leaves",
@@ -103,7 +108,8 @@ let plantInfo = {
     windDivider: 3400,
   },
   'Paper-Birch': {
-    scientificName: "Betula papyrifera",
+    commonName: "Paper Birch",
+    scientificName: "Betula Papyrifera",
     description: "Paper birch is a medium-sized deciduous tree known for its distinctive white, papery bark that peels in thin layers. It's a pioneer species that colonizes disturbed areas.",
     growthStages: [
       "Seedling - Small tree with smooth bark",
@@ -120,7 +126,8 @@ let plantInfo = {
     windDivider: 9400,
   },
   'Arrow-Arum-Peltandra-Virginica': {
-    scientificName: "Peltandra virginica",
+    commonName: "Arrow Arum",
+    scientificName: "Peltandra Virginica",
     description: "Arrow arum is a perennial aquatic plant with distinctive arrow-shaped leaves. It grows in wetlands and produces greenish-white flowers on a spadix.",
     growthStages: [
       "Seedling - Small arrow-shaped leaves",
@@ -137,7 +144,8 @@ let plantInfo = {
     windDivider: 2400,
   },
   'Piranha': {
-    scientificName: "Piranha plantus specialis",
+    commonName: "Piranha Plant",
+    scientificName: "Piranha Plantus Specialis",
     description: "A special carnivorous plant with unique properties. This plant has adapted to thrive in various environments and displays unusual growth patterns.",
     growthStages: [
       "Seedling - Small carnivorous leaves",
