@@ -218,7 +218,7 @@ function setup() {
         button = createButton(btn_text);//"click to allow access to sensors");
         button.style("font-size", "2em");//24px");
         button.style("position", "absolute");
-        button.style("background", "#cccccc99")
+        button.style("background", "#cccccccc")
         button.style("top", "0px");
         button.style("left", "0px");
         button.style("padding", "10px");
