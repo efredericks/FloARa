@@ -214,11 +214,18 @@ function setup() {
 
     if (typeof (DeviceOrientationEvent) !== 'undefined' && typeof (DeviceOrientationEvent.requestPermission) === 'function') {
         accessAllowed = false;
-        button = createButton("click to allow access to sensors");
-        button.style("font-size", "24px");
+        let btn_text = "<strong>Welcome to FloARa: digitally reimagining landscapes</strong><hr size='1' /><br />To navigate through the image tilt your device side to side and back to front<br /><strong>Click here</strong> to allow access to these sensors.";
+        button = createButton(btn_text);//"click to allow access to sensors");
+        button.style("font-size", "2em");//24px");
         button.style("position", "absolute");
+        button.style("background", "#cccccc99")
         button.style("top", "0px");
         button.style("left", "0px");
+        button.style("padding", "10px");
+        button.style("margin-left", "auto");
+        button.style("margin-rightt", "auto");
+        button.style("width", "calc(100%)");
+        button.style("height", "calc(100%)");
         // button.center();
         button.mousePressed(requestAccess);
 
