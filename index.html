@@ -145,8 +145,17 @@
   </style>
   <div id="help-btn" title="How to use?">?</div>
   <div id="help-modal">
-    <div class="modal-popup">
+    <div id="help-modal-popup" class="modal-popup">
       <button class="modal-close" aria-label="Close help">&times;</button>
+      <h2>Overview:</h2>
+      <p>FloARa creates a speculative future in which GVSU's campus is reinhabited with native plants. Participants grow plants in this scene by scanning QR codes placed on wooden silhouettes of native flora across campus. By blending technology, art, and ecology, FloARa immerses the campus community in a practice that highlights possibilities in this landscape. The multi-user participatory format encourages us to embody the activity and mindset of planting native species and all the complexities of this practice. You will find 10 plant silhouettes scattered across campus. When you scan the QR code a plant of that variety will be placed on this screen. As the plants grow larger over time and eventually disappear, and hopefully new ones will crop up in their place if you tend to this landscape.</p>
+
+      <hr style="margin: 20px 0; border: none; border-top: 1px solid #e0e0e0;">
+
+      <h2>Possible Futures:</h2>
+      <p>As native species such as Pawpaw, Paper Birch, and Black Ash decline, and culturally significant plants like Manoomin (wild rice) were eradicated long ago, FloARa envisions a way forward. The project encourages practices like removing invasive landscaping plants while increasing native species with deep root systems that facilitate source point drainage and groundwater retention. By making deep ecology a collective and creative act, FloARa aims to spark an ongoing dialogue about environmental stewardship, cultural memory, and regenerative possibilities for the campus community and connect more deeply with parallel efforts on campus like GVSU's Arboretum AR project.
+
+      <hr style="margin: 20px 0; border: none; border-top: 1px solid #e0e0e0;">
       <h2>Experience Menu</h2>
       <ul>
         <li><b>Start from the beginning:</b> Watch the plants populate the scene from the beginning</li>
@@ -230,7 +239,7 @@
 
         else if (e.id == "show-all") {
           filterPlants("all");
-          
+
           let sa1 = document.getElementById("show-manual");
           let sa2 = document.getElementById("show-propagated");
 
@@ -239,7 +248,7 @@
           if (!e.classList.contains("menuItemActive")) e.classList.add("menuItemActive");
         } else if (e.id == "show-manual") {
           filterPlants("manual");
-          
+
           let sa1 = document.getElementById("show-all");
           let sa2 = document.getElementById("show-propagated");
 
@@ -248,7 +257,7 @@
           if (!e.classList.contains("menuItemActive")) e.classList.add("menuItemActive");
         } else if (e.id == "show-propagated") {
           filterPlants("propagated");
-          
+
           let sa1 = document.getElementById("show-manual");
           let sa2 = document.getElementById("show-all");
 

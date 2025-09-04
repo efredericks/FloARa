@@ -552,3 +552,7 @@ canvas {
 .modal-popup .modal-close:hover {
   color: #2d7be5;
 }
+#help-modal-popup {
+   max-height: 70vh; 
+   overflow-y:auto;
+}
