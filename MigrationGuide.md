@@ -9,6 +9,10 @@ This guide is intended to be a reference for reusing FloARa in different locatio
   * Background
   * Plant growth stages
 
+## First:
+
+Either fork or clone this repository.  If using GitHub please fork so you can track changes in your own repo.  If hosting on a webhost just clone it, make your changes, and copy the directory to wherever you plan to host it.
+
 ## Code walkthrough
 
 * `index.html`
