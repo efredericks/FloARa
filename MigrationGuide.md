@@ -16,6 +16,13 @@ Either fork or clone this repository.  If using GitHub please fork so you can tr
 ## Code walkthrough
 
 * `index.html`
+
+`help-modal-popup` includes the info on the project itself (shown in the help popup).
+
+The `firebaseConfig` needs to be updated for your specific firebase instance.  It *should* be copy-pastable code provided after setting it up.  We named our default collection `flowers` in case you don't want to hunt around for that name.
+
+Everything else in here *should* be fine - it includes the code for adding flowers to the database and continuously monitoring it for changes.
+
 * `js/sketch.js`
 * `js/data.js`
 
